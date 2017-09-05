@@ -229,7 +229,9 @@ class FioWringer(BaseWringer):
         super(FioWringer, self).__init__(*args, **kwargs)
         self.num_thread = kwargs.get('numjobs')
         self.mixed_ratio = kwargs['ratio']
-        self.volume_flavor_id = kwargs['volume_flavor_id']
+        self.volume_flavor_id = kwargs['volume_flavor_id'] or None
+        self.volume_manager_id = kwargs['volume_manager_id'] or None
+        self.network_storage_id = kwargs['network_storage_id'] or None
 
     def _get_readwrite(self, rw):
         trans = {
@@ -251,12 +253,13 @@ class FioWringer(BaseWringer):
         fio_result['num_thread'] = self.num_thread or len(fio_data['jobs'])
         fio_result['mixed_ratio'] = self.mixed_ratio
         fio_result['volume_flavor'] = self.volume_flavor_id
+        fio_result['volume_manager'] = self.volume_manager_id
+        fio_result['network_storage'] = self.network_storage_id
 	
         fio_result['block_size'] = fio_data['global options']['bs'] if 'bs' in fio_data['global options'] else fio_data['jobs'][0]['job options']['bs']
         fio_result['readwrite'] = self._get_readwrite(fio_data['global options']['rw'])
         fio_result['mode'] = 'rand' if 'rand' in fio_data['global options']['rw'] else 'seq'
         fio_result['runtime'] = int(fio_data['global options']['runtime'] if 'runtime' in fio_data['global options'] else fio_data['jobs'][0]['job options']['runtime'])/1000
-        #get iodepth value which is greater than zero from dictionary - fio_data['jobs'][0]['iodepth_level']
         fio_result['io_depth'] = fio_data['global options']['iodepth']
 
         fio_result['read_io'] = int(fio_data['jobs'][0]['read']['io_bytes'])/1048576

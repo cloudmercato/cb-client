@@ -29,7 +29,9 @@ subparser = parser.add_subparsers(help='Parsers for each bench mark test', dest=
 FioArgumentParser = subparser.add_parser('fio', help='fio help')
 FioArgumentParser.add_argument('-n', '--numjobs', help='FIO number of threads', type=int)
 FioArgumentParser.add_argument('-r', '--ratio', help='FIO mixed ratio', default='100:0')
-FioArgumentParser.add_argument('-vf', '--volume-flavor-id', help='id of Volume Flavor from Volume Flavor table', type=int, required=True)
+FioArgumentParser.add_argument('-vf', '--volume-flavor-id', type=int, required=False)
+FioArgumentParser.add_argument('-vm', '--volume-manager-id', type=int, required=False)
+FioArgumentParser.add_argument('-ns', '--network-storage-id', type=int, required=False)
 
 # SysBench RAM parser
 SysbenchCpuArgumentParser = subparser.add_parser('sysbench_cpu')
