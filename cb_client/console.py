@@ -68,6 +68,11 @@ WordcountArgumentParser.add_argument('-si', '--size', help='Hibench test size')
 WordcountArgumentParser.add_argument('-r', '--report-dir', help='Report base directory')
 WordcountArgumentParser.add_argument('-ar', '--architecture', help='')
 
+TeraSortArgumentParser = subparser.add_parser('terasort', help='terasort help')
+TeraSortArgumentParser.add_argument('-si', '--size', help='Hibench test size')
+TeraSortArgumentParser.add_argument('-r', '--report-dir', help='Report base directory')
+TeraSortArgumentParser.add_argument('-ar', '--architecture', help='')
+
 
 def main():
     parsed_args = parser.parse_args()

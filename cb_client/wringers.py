@@ -574,8 +574,8 @@ HIBENCH_ATTRS = (
   ('reduce_time_in_slot', 'time spent by all reduces in occupied slots', 1),
   ('reduce_vcore_time', 'vcore-milliseconds taken by all reduce tasks', 1),
   ('reduce_mb_ms', 'megabyte-milliseconds taken by all reduce tasks', 1024),
-  ('map_input_records', 'Map input records', 1000),
-  ('map_output_records', 'Map output records', 1000),
+  ('map_input_records', 'Map input records', 10**6),
+  ('map_output_records', 'Map output records', 10**6),
   ('map_output_bytes', 'Map output bytes', 1024),
   ('map_output_mat_bytes', 'Map output materialized bytes', 1024),
   ('input_split_bytes', 'Input split bytes', 1024),
@@ -583,14 +583,14 @@ HIBENCH_ATTRS = (
   ('combine_output_records', 'Combine output records', 10**6),
   ('reduce_input_groups', 'Reduce input groups', 1),
   ('reduce_shuffle_bytes', 'Reduce shuffle bytes', 1024),
-  ('reduce_input_records', 'Reduce input records', 1),
-  ('reduce_output_records', 'Reduce output records', 1),
-  ('spilled_records', 'Spilled Records', 1),
+  ('reduce_input_records', 'Reduce input records', 10**6),
+  ('reduce_output_records', 'Reduce output records', 10**6),
+  ('spilled_records', 'Spilled Records', 10**6),
   ('shuffled_maps', 'Shuffled Maps', 1),
   ('failed_shuffle', 'Failed Shuffles', 1),
   ('merged_map_outputs', 'Merged Map outputs', 1),
-  ('gc_time', 'GC time elapsed', 1),
-  ('cpu_time', 'CPU time spent', 1),
+  ('gc_time', 'GC time elapsed', 1000),
+  ('cpu_time', 'CPU time spent', 1000),
   ('physical_memory', 'Physical memory (bytes)', 2**20),
   ('virtual_memory', 'Virtual memory (bytes)', 2**20),
   ('total_commited_heap_usage', 'Total committed heap usage (bytes)', 2**20),
@@ -639,6 +639,11 @@ class WordcountWringer(BaseHiBenchWringer):
     framework = 'hadoop'
     bench_name = 'wordcount'
 
+
+class TeraSortWringer(BaseHiBenchWringer):
+    framework = 'hadoop'
+    bench_name = 'terasort'
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -649,6 +654,7 @@ WRINGERS = {
     'mdtest': MdtestWringer,
     'bonnie': BonnieWringer,
     'wordcount': WordcountWringer,
+    'terasort': TeraSortWringer,
 }
 
 def get_wringer(name):
