@@ -1,5 +1,6 @@
-import re
+import os
 import sys
+import re
 import json
 from datetime import datetime
 
@@ -548,6 +549,96 @@ class BonnieWringer(BaseWringer):
         bonnie_result.update(self.bonnie_config)
         return bonnie_result
 
+HIBENCH_ATTRS = (
+  # Filesystem
+  ('file_read', 'FILE: Number of bytes read=', 1024),
+  ('file_read_operations', 'FILE: Number of read operations', 1),
+  ('file_large_read_operations', 'FILE: Number of large read operations', 1),
+  ('file_write', 'FILE: Number of bytes written', 1024),
+  ('file_write_operations', 'FILE: Number of write operations', 1),
+  ('hdfs_read', 'HDFS: Number of bytes read=', 1024),
+  ('hdfs_read_operations', 'HDFS: Number of read operations', 1),
+  ('hdfs_large_read_operations', 'HDFS: Number of large read operations', 1),
+  ('hdfs_write', 'HDFS: Number of bytes written', 1024),
+  ('hdfs_write_operations', 'HDFS: Number of write operations', 1),
+  # Job
+  ('killed_reduce', 'Killed reduce tasks', 1),
+  ('map_tasks', 'Launched map tasks', 1),
+  ('reduce_tasks', 'Launched reduce tasks', 1),
+  ('rack_local_map_tasks', 'Rack-local map tasks', 1),
+  ('map_time', 'time spent by all map tasks (ms)', 1),
+  ('map_time_in_slot', 'time spent by all maps in occupied slots', 1),
+  ('map_vcore_time', 'vcore-milliseconds taken by all map', 1),
+  ('map_mb_ms', 'megabyte-milliseconds taken by all map', 1024),
+  ('reduce_time', 'time spent by all reduce tasks (ms)', 1),
+  ('reduce_time_in_slot', 'time spent by all reduces in occupied slots', 1),
+  ('reduce_vcore_time', 'vcore-milliseconds taken by all reduce tasks', 1),
+  ('reduce_mb_ms', 'megabyte-milliseconds taken by all reduce tasks', 1024),
+  ('map_input_records', 'Map input records', 1000),
+  ('map_output_records', 'Map output records', 1000),
+  ('map_output_bytes', 'Map output bytes', 1024),
+  ('map_output_mat_bytes', 'Map output materialized bytes', 1024),
+  ('input_split_bytes', 'Input split bytes', 1024),
+  ('combine_input_records', 'Combine input records', 10**6),
+  ('combine_output_records', 'Combine output records', 10**6),
+  ('reduce_input_groups', 'Reduce input groups', 1),
+  ('reduce_shuffle_bytes', 'Reduce shuffle bytes', 1024),
+  ('reduce_input_records', 'Reduce input records', 1),
+  ('reduce_output_records', 'Reduce output records', 1),
+  ('spilled_records', 'Spilled Records', 1),
+  ('shuffled_maps', 'Shuffled Maps', 1),
+  ('failed_shuffle', 'Failed Shuffles', 1),
+  ('merged_map_outputs', 'Merged Map outputs', 1),
+  ('gc_time', 'GC time elapsed', 1),
+  ('cpu_time', 'CPU time spent', 1),
+  ('physical_memory', 'Physical memory (bytes)', 2**20),
+  ('virtual_memory', 'Virtual memory (bytes)', 2**20),
+  ('total_commited_heap_usage', 'Total committed heap usage (bytes)', 2**20),
+  # Suffle errors
+  ('bad_id', 'BAD_ID', 1),
+  ('connection', 'CONNECTION', 1),
+  ('io_error', 'IO_ERROR', 1),
+  ('wrong_length', 'WRONG_LENGTH', 1),
+  ('wrong_map', 'WRONG_MAP', 1),
+  ('wrong_reduce', 'WRONG_REDUCE', 1),
+  # File format counter
+  ('file_format_bytes_read', 'Bytes Read', 1024),
+  ('file_format_bytes_write', 'Bytes Written', 1024),
+)
+class BaseHiBenchWringer(BaseWringer):
+    def __init__(self, architecture, report_dir, size, *args, **kwargs):
+        super(BaseHiBenchWringer, self).__init__(*args, **kwargs)
+        self.report_dir = report_dir
+        self.size = size
+        self.architecture = architecture
+
+    @property
+    def report_filename(self):
+        return os.path.join(self.report_dir, self.bench_name, self.framework, 'bench.log')
+
+    def _get_data(self):
+        bench_data = {
+          'framework': self.framework,
+          'size': self.size,
+          'arch': self.architecture,
+        }
+        report_file = open(self.report_filename)
+        is_report = False
+        for line in report_file:
+            if not is_report:
+               is_report = 'File System Counters' in line
+               continue
+            attr = [(i, j, k) for i, j, k in HIBENCH_ATTRS if j in line]
+            if attr:
+                _, value = line.split('=')
+                bench_data[attr[0][0]] = int(value.strip()) / attr[0][2]
+        return bench_data
+
+
+class WordcountWringer(BaseHiBenchWringer):
+    framework = 'hadoop'
+    bench_name = 'wordcount'
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -557,6 +648,7 @@ WRINGERS = {
     'vdbench': VdbenchWringer,
     'mdtest': MdtestWringer,
     'bonnie': BonnieWringer,
+    'wordcount': WordcountWringer,
 }
 
 def get_wringer(name):

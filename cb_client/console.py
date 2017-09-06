@@ -62,11 +62,17 @@ SysbenchMySqlArgumentParser.add_argument('-ocd', '--oltp-connect-delay', help='T
 SysbenchMySqlArgumentParser.add_argument('-oudm', '--oltp-user-delay-max', help='Maximum time in microseconds to sleep after each request', type=int, default=0 , required=False)
 SysbenchMySqlArgumentParser.add_argument('-oor', '--oltp-order-ranges', help='Number of ORDER range queries in a single transaction', type=int, default=1 , required=False)
 
+# Hibench
+WordcountArgumentParser = subparser.add_parser('wordcount', help='wordcount help')
+WordcountArgumentParser.add_argument('-si', '--size', help='Hibench test size')
+WordcountArgumentParser.add_argument('-r', '--report-dir', help='Report base directory')
+WordcountArgumentParser.add_argument('-ar', '--architecture', help='')
+
 
 def main():
-    args = parser.parse_args()
-    Wringer = wringers.WRINGERS.get(args.bench_name)
-    wringer = Wringer(**vars(args))
+    parsed_args = parser.parse_args()
+    Wringer = wringers.WRINGERS.get(parsed_args.bench_name)
+    wringer = Wringer(**vars(parsed_args))
     wringer.run()
 
 if __name__ == '__main__':
