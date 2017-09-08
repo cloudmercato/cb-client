@@ -100,7 +100,6 @@ class BaseWringer(object):
                 bench_name=self.bench_name,
                 data=self._get_data(),
                 metadata=self._get_metadata())
-            # self.logger.info('Response: %s' % response.content)
             if response.status_code >= 300:
                 raise exceptions.ServerError(response.content + str(self._get_data()))
             return response
@@ -567,12 +566,12 @@ HIBENCH_ATTRS = (
   ('reduce_tasks', 'Launched reduce tasks', 1),
   ('rack_local_map_tasks', 'Rack-local map tasks', 1),
   ('map_time', 'time spent by all map tasks (ms)', 1),
-  ('map_time_in_slot', 'time spent by all maps in occupied slots', 1),
-  ('map_vcore_time', 'vcore-milliseconds taken by all map', 1),
+  ('map_time_in_slot', 'time spent by all maps in occupied slots', 1000),
+  ('map_vcore_time', 'vcore-milliseconds taken by all map', 1000),
   ('map_mb_ms', 'megabyte-milliseconds taken by all map', 1024),
-  ('reduce_time', 'time spent by all reduce tasks (ms)', 1),
-  ('reduce_time_in_slot', 'time spent by all reduces in occupied slots', 1),
-  ('reduce_vcore_time', 'vcore-milliseconds taken by all reduce tasks', 1),
+  ('reduce_time', 'time spent by all reduce tasks (ms)', 1000),
+  ('reduce_time_in_slot', 'time spent by all reduces in occupied slots', 1000),
+  ('reduce_vcore_time', 'vcore-milliseconds taken by all reduce tasks', 1000),
   ('reduce_mb_ms', 'megabyte-milliseconds taken by all reduce tasks', 1024),
   ('map_input_records', 'Map input records', 10**6),
   ('map_output_records', 'Map output records', 10**6),
@@ -644,6 +643,53 @@ class TeraSortWringer(BaseHiBenchWringer):
     framework = 'hadoop'
     bench_name = 'terasort'
 
+
+DFSIO_ATTRS = (
+  ('throughtput', 'Throughput mb/sec'),
+  ('io_avg', 'Average IO rate mb/sec'),
+  ('io_rate', 'IO rate std deviation'),
+  ('exec_time', 'Test exec time sec'),
+  ('aggr_throughtput', 'Average of Aggregated Throughput'),
+  ('aggr_throughtput_stddev', 'Standard Deviation'),
+)
+class DfsioWringer(BaseWringer):
+    framework = 'hadoop'
+    bench_name = 'dfsio'
+
+    def __init__(self, architecture, report_dir, size, *args, **kwargs):
+        super(DfsioWringer, self).__init__(*args, **kwargs)
+        self.report_dir = report_dir
+        self.size = size
+        self.architecture = architecture
+
+    @property
+    def report_filename(self):
+        bench_name = 'dfsioe'
+        filename = 'result_%s.txt' % self.mode
+        return os.path.join(self.report_dir, bench_name, self.framework, filename)
+
+    def run(self):
+        self.mode = 'read'
+        super(DfsioWringer, self).run()
+        self.mode = 'write'
+        super(DfsioWringer, self).run()
+
+    def _get_data(self):
+        bench_data = {
+          'framework': self.framework,
+          'size': self.size,
+          'arch': self.architecture,
+          'mode': self.mode,
+        }
+        report_file = open(self.report_filename)
+        for line in report_file:
+            attr = [(i, j) for i, j in DFSIO_ATTRS if j in line]
+            if attr:
+                _, value = line.split(':')
+                bench_data[attr[0][0]] = int(value.strip()) / attr[0][2]
+        return bench_data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -655,6 +701,7 @@ WRINGERS = {
     'bonnie': BonnieWringer,
     'wordcount': WordcountWringer,
     'terasort': TeraSortWringer,
+    'dfsio': DfsioWringer,
 }
 
 def get_wringer(name):

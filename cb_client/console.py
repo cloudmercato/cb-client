@@ -73,6 +73,11 @@ TeraSortArgumentParser.add_argument('-si', '--size', help='Hibench test size')
 TeraSortArgumentParser.add_argument('-r', '--report-dir', help='Report base directory')
 TeraSortArgumentParser.add_argument('-ar', '--architecture', help='')
 
+DfsioArgumentParser = subparser.add_parser('dfsio', help='dfsio help')
+DfsioArgumentParser.add_argument('-si', '--size', help='Hibench test size')
+DfsioArgumentParser.add_argument('-r', '--report-dir', help='Report base directory')
+DfsioArgumentParser.add_argument('-ar', '--architecture', help='')
+
 
 def main():
     parsed_args = parser.parse_args()
