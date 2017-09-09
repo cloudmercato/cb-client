@@ -16,6 +16,8 @@ TIME_SCALE = {
   'us': 10**-6,
   'ns': 10**-9
 }
+TRACEPATH_RESULT_REG = re.compile(r'\s*Resume:\s*pmtu\s*(\d*)\s*hops\s*(\d*)\s*back\s*(\d*)')
+TRACEPATH_TIME_REG = re.compile(r'.*\s([0-9\.]*)ms.*')
 
 def convert_second(value, src=None, dst='ms'):
     if isinstance(value, six.string_types):
@@ -565,7 +567,7 @@ HIBENCH_ATTRS = (
   ('map_tasks', 'Launched map tasks', 1),
   ('reduce_tasks', 'Launched reduce tasks', 1),
   ('rack_local_map_tasks', 'Rack-local map tasks', 1),
-  ('map_time', 'time spent by all map tasks (ms)', 1),
+  ('map_time', 'time spent by all map tasks (ms)', 1000),
   ('map_time_in_slot', 'time spent by all maps in occupied slots', 1000),
   ('map_vcore_time', 'vcore-milliseconds taken by all map', 1000),
   ('map_mb_ms', 'megabyte-milliseconds taken by all map', 1024),
@@ -690,6 +692,38 @@ class DfsioWringer(BaseWringer):
         return bench_data
 
 
+class BaseNetworkWringer(BaseWringer):
+    def __init__(self, destination_id, destination_type, *args, **kwargs):
+        super(BaseNetworkWringer, self).__init__(*args, **kwargs)
+        self.destination_id = destination_id
+        self.destination_type = destination_type
+
+
+class TracepathWringer(BaseNetworkWringer):
+    bench_name = 'tracepath'
+
+    def _get_data(self):
+        for line in self.input_:
+            match_time = TRACEPATH_TIME_REG.match(line)
+            if match_time is not None:
+                time_ = match_time.groups()[0]
+                continue
+            match = TRACEPATH_RESULT_REG.match(line)
+            if match is not None:
+                mtu, hops, back = match.groups()
+                break
+        else:
+            raise exceptions.ParseError()
+        dest_key = 'dest_%s' % self.destination_type
+        return {
+          'time': time_,
+          'mtu': mtu,
+          'hops': hops,
+          'back': back,
+          dest_key: self.destination_id,
+        }
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -702,6 +736,7 @@ WRINGERS = {
     'wordcount': WordcountWringer,
     'terasort': TeraSortWringer,
     'dfsio': DfsioWringer,
+    'tracepath': TracepathWringer,
 }
 
 def get_wringer(name):

@@ -8,3 +8,7 @@ class WringerNotFound(CbClientError):
 
 class ServerError(CbClientError):
     pass
+
+
+class ParseError(CbClientError):
+    pass

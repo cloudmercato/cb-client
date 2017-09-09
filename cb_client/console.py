@@ -62,6 +62,11 @@ SysbenchMySqlArgumentParser.add_argument('-ocd', '--oltp-connect-delay', help='T
 SysbenchMySqlArgumentParser.add_argument('-oudm', '--oltp-user-delay-max', help='Maximum time in microseconds to sleep after each request', type=int, default=0 , required=False)
 SysbenchMySqlArgumentParser.add_argument('-oor', '--oltp-order-ranges', help='Number of ORDER range queries in a single transaction', type=int, default=1 , required=False)
 
+# Network
+TracepathArgumentParser = subparser.add_parser('tracepath', help='tracepath help')
+TracepathArgumentParser.add_argument('-de', '--destination-id', help='')
+TracepathArgumentParser.add_argument('-De', '--destination-type', help='')
+
 # Hibench
 WordcountArgumentParser = subparser.add_parser('wordcount', help='wordcount help')
 WordcountArgumentParser.add_argument('-si', '--size', help='Hibench test size')
