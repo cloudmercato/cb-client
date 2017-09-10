@@ -67,6 +67,9 @@ TracepathArgumentParser = subparser.add_parser('tracepath', help='tracepath help
 TracepathArgumentParser.add_argument('-de', '--destination-id', help='')
 TracepathArgumentParser.add_argument('-De', '--destination-type', help='')
 
+IperfArgumentParser = subparser.add_parser('iperf', help='iperf help')
+IperfArgumentParser.add_argument('-de', '--dest-instance_type', help='')
+
 # Hibench
 WordcountArgumentParser = subparser.add_parser('wordcount', help='wordcount help')
 WordcountArgumentParser.add_argument('-si', '--size', help='Hibench test size')

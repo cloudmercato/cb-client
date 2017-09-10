@@ -724,6 +724,32 @@ class TracepathWringer(BaseNetworkWringer):
         }
 
 
+class IperfWringer(BaseNetworkWringer):
+    bench_name = 'iperf'
+
+    def __init__(self, dest_instance_type, *args, **kwargs):
+        kwargs['destination_id'] = dest_instance_type
+        kwargs['destination_type'] = 'instance_type'
+        super(IperfWringer, self).__init__(*args, **kwargs)
+        self.dest_instance_type = dest_instance_type
+
+    def _get_data(self):
+        result = json.load(self.input_)
+        mode = 'download' if result['start']['test_start']['reverse'] else 'upload'
+        transport = result['start']['test_start']['protocol'].lower()
+        return {
+          'time': result['start']['test_start']['duration'],
+          'num_thread': result['start']['test_start']['num_streams'],
+          'transport': transport,
+          'mode': mode,
+          'client_bytes': result['end']['sum_sent']['bytes'] / 2**20,
+          'client_bandwidth': result['end']['sum_sent']['bits_per_second'] / 2**20,
+          'server_bytes': result['end']['sum_received']['bytes'] / 2**20,
+          'server_bandwidth': result['end']['sum_received']['bits_per_second'] / 2**20,
+          'dest_instance_type': self.dest_instance_type,
+        }
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -737,6 +763,7 @@ WRINGERS = {
     'terasort': TeraSortWringer,
     'dfsio': DfsioWringer,
     'tracepath': TracepathWringer,
+    'iperf': IperfWringer,
 }
 
 def get_wringer(name):
