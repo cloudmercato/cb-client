@@ -43,6 +43,9 @@ AbArgumentParser = subparser.add_parser('ab', help='ab help')
 # Bonnie
 BonnieArgumentParser = subparser.add_parser('bonnie')
 
+# Bonnie
+Geekbench4ArgumentParser = subparser.add_parser('geekbench4')
+
 # SysBench parser
 SysbenchMySqlArgumentParser = subparser.add_parser('sysbench_mysql', help='sysbench help')
 SysbenchMySqlArgumentParser.add_argument('-vf', '--volume-flavor-id', help='id of Volume Flavor from Volume Flavor table', type=int, required=True)

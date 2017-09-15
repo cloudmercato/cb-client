@@ -750,6 +750,50 @@ class IperfWringer(BaseNetworkWringer):
         }
 
 
+GEEKBENCH4_FIELDS = {
+  'AES': ('aes', 2**30),
+  'LZMA': ('lzma', 2**20),
+  'JPEG': ('jpeg', 10**6),
+  'Canny': ('canny', 10**6),
+  'Lua': ('lua', 2**20),
+  'Dijkstra': ('dijkstra', 10**6),
+  'SQLite': ('sqlite', 10**3),
+  'HTML5 Parse': ('html5_parse', 2**20),
+  'HTML5 DOM': ('html5_dom', 10**6),
+  'Histogram Equalization': ('histogram', 10**6),
+  'PDF Rendering': ('pdf', 10**6),
+  'LLVM': ('llvm', 1),
+  'Camera': ('camera', 1),
+  'SGEMM': ('sgemm', 10**9),
+  'SFFT': ('sfft', 10**9),
+  'N-Body Physics': ('nbody', 10**6),
+  'Ray Tracing': ('ray', 10**3),
+  'Rigid Body Physics': ('rigid', 1),
+  'HDR': ('hdr', 10**6),
+  'Gaussian Blur': ('gaussian', 10**6),
+  'Speech Recognition': ('speech', 1),
+  'Face Detection': ('face', 10**3),
+  'Memory Copy': ('memory_copy', 2**30),
+  'Memory Latency': ('memory_latency', 10**12),
+  'Memory Bandwidth': ('memory_bandwidth', 2**30),
+}
+class Geekbench4Wringer(BaseWringer):
+    bench_name = 'geekbench4'
+
+    def _get_data(self):
+        raw_results = json.load(self.input_)
+        data = {}
+        for section in raw_results['sections']:
+            mode = 'single' if section['name'] == "Single-Core" else 'multi'
+            for raw_result in section['workloads']:
+                key, format_ = GEEKBENCH4_FIELDS[raw_result['name']]
+                fieldname = '%s_%s' % (mode, key)
+                data[fieldname] = raw_result['workload_rate'] / format_
+                if raw_result['name'] == 'Memory Latency':
+                    data[fieldname] = data[fieldname] / raw_result['work']
+                data[fieldname+'_score'] = raw_result['score']
+        return data
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -764,6 +808,7 @@ WRINGERS = {
     'dfsio': DfsioWringer,
     'tracepath': TracepathWringer,
     'iperf': IperfWringer,
+    'geekbench4': Geekbench4Wringer,
 }
 
 def get_wringer(name):
