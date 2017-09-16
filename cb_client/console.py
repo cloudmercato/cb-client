@@ -43,8 +43,9 @@ AbArgumentParser = subparser.add_parser('ab', help='ab help')
 # Bonnie
 BonnieArgumentParser = subparser.add_parser('bonnie')
 
-# Bonnie
+# Geekbench
 Geekbench4ArgumentParser = subparser.add_parser('geekbench4')
+Geekbench3ArgumentParser = subparser.add_parser('geekbench3')
 
 # SysBench parser
 SysbenchMySqlArgumentParser = subparser.add_parser('sysbench_mysql', help='sysbench help')

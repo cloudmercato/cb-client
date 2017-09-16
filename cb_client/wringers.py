@@ -751,6 +751,32 @@ class IperfWringer(BaseNetworkWringer):
 
 
 GEEKBENCH4_FIELDS = {
+  # V3
+  'Twofish': ('twofish', 2**20),
+  'SHA1': ('sha1', 2**20),
+  'SHA2': ('sha2', 2**20),
+  'BZip2 Compress': ('bzip_compress', 2**20),
+  'BZip2 Decompress': ('bzip_decompress', 2**20),
+  'JPEG Compress': ('jpeg_compress', 10**6),
+  'JPEG Decompress': ('jpeg_decompress', 10**6),
+  'PNG Compress': ('png_compress', 10**6),
+  'PNG Decompress': ('png_decompress', 10**6),
+  'Sobel': ('sobel', 10**6),
+  'BlackScholes': ('blackscholes', 10**6),
+  'Mandelbrot': ('mandelbrot', 10**9),
+  'Sharpen Filter': ('sharpen', 10**9),
+  'Blur Filter': ('blur', 10**9),
+  'SGEMM': ('sgemm', 10**9),
+  'DGEMM': ('dgemm', 10**9),
+  'SFFT': ('sfft', 10**9),
+  'DFFT': ('dfft', 10**9),
+  'N-Body': ('nbody', 10**6),
+  'Stream Copy': ('stream_copy', 2**30),
+  'Stream Scale': ('stream_scale', 2**30),
+  'Stream Add': ('stream_add', 2**30),
+  'Stream Triad': ('stream_triad', 2**30),
+  'Ray Trace': ('ray', 10**6),
+  # V4
   'AES': ('aes', 2**30),
   'LZMA': ('lzma', 2**20),
   'JPEG': ('jpeg', 10**6),
@@ -794,6 +820,39 @@ class Geekbench4Wringer(BaseWringer):
                 data[fieldname+'_score'] = raw_result['score']
         return data
 
+
+GEEKBENCH3_SECTIONS = {
+  'Integer': 'integer',
+  'Floating Point': 'float',
+  'Memory': 'memory',
+}
+class Geekbench3Wringer(BaseWringer):
+    bench_name = 'geekbench3'
+
+    def _get_data(self):
+        raw_results = json.load(self.input_)
+        data = {}
+        for section in raw_results['sections']:
+            section_key = GEEKBENCH3_SECTIONS[section['name']]
+            section_single_score_key = 'single_%s_score' % section_key
+            section_multi_score_key = 'multi_%s_score' % section_key
+            data.update({
+              section_single_score_key: section['score'],
+              section_multi_score_key: section['multicore_score'],
+            })
+            for workload in section['workloads']:
+                key, format_ = GEEKBENCH4_FIELDS[workload['name']]
+                single_result, multi_result = workload['results']
+                single_fieldname = 'single_%s' % key
+                multi_fieldname = 'multi_%s' % key
+                data.update({
+                  single_fieldname: single_result['workload_rate'] / format_,
+                  single_fieldname+'_score': single_result['score'],
+                  multi_fieldname: multi_result['workload_rate'] / format_,
+                  multi_fieldname+'_score': multi_result['score'],
+                })
+        return data
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -809,6 +868,7 @@ WRINGERS = {
     'tracepath': TracepathWringer,
     'iperf': IperfWringer,
     'geekbench4': Geekbench4Wringer,
+    'geekbench3': Geekbench3Wringer,
 }
 
 def get_wringer(name):
