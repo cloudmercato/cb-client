@@ -20,6 +20,8 @@ class ClientArgumentParser(argparse.ArgumentParser):
                           help='Test date in ISO8601 format')
         self.add_argument('-s', '--storage-id', required=False,
                           help='Benched storage id')
+        self.add_argument('-T', '--tag', required=False,
+                          help='Tag to add to result')
 
 
 parser = ClientArgumentParser()

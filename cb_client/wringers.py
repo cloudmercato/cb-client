@@ -33,7 +33,8 @@ def convert_second(value, src=None, dst='ms'):
 
 class BaseWringer(object):
     def __init__(self, input_=None, master_url=None, token=None,
-                 flavor_id=None, image_id=None, date=None, **kwargs):
+                 flavor_id=None, image_id=None, date=None, tag=None,
+                 **kwargs):
         """
         :param input_: Output of benchmark command, default is stdin
         :type input_: file
@@ -70,6 +71,8 @@ class BaseWringer(object):
 
         self.client = client.Client(self.master_url, self.token)
 
+        self.tag = tag
+
     def _get_data(self):
         """
         Return benchmark result as dict. You must override this method.
@@ -91,6 +94,7 @@ class BaseWringer(object):
             'provider': self.provider_id,
             'datacenter': self.datacenter_id,
             'instance_type': self.instance_type_id,
+            'tag': self.tag,
         }
 
     def run(self):
