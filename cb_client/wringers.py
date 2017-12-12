@@ -1,6 +1,7 @@
 import os
 import sys
 import re
+import csv
 import json
 from datetime import datetime
 
@@ -24,7 +25,7 @@ def convert_second(value, src=None, dst='ms'):
         value = value.strip()
         if value.isalnum():
             value, src_ = re.match('(\d*)(\w*)', value).groups()
-	    src = src_ if src is None else src
+            src = src_ if src is None else src
     value = float(value)
     in_sec = value * TIME_SCALE.get(src, 1)
     in_dst_fmt = in_sec / TIME_SCALE[dst]
@@ -390,7 +391,7 @@ class VdbenchWringer(BaseWringer):
                 continue
             if is_rd and 'avg_2' in line:
                 break
-	date, i, ops, lat, cpu_total, cpu_sys, read_pct, read_iops, read_lat, write_iops, write_lat, read_bw, write_bw, bw, bs, mkdir_ops, mkdir_lat, rmdir_ops, rmdir_lat, create_ops, create_lat, open_ops, open_lat, close_ops, close_lat, delete_ops, delete_lat = line.split()
+        date, i, ops, lat, cpu_total, cpu_sys, read_pct, read_iops, read_lat, write_iops, write_lat, read_bw, write_bw, bw, bs, mkdir_ops, mkdir_lat, rmdir_ops, rmdir_lat, create_ops, create_lat, open_ops, open_lat, close_ops, close_lat, delete_ops, delete_lat = line.split()
         vdbench_result = {
           'ops': ops,
           'lat': lat,
@@ -857,6 +858,60 @@ class Geekbench3Wringer(BaseWringer):
                 })
         return data
 
+
+class SpecCpu2006Wringer(BaseWringer):
+    bench_name = 'spec_cpu2006'
+
+    def run(self):
+        """
+        Public runner to parse and publish result.
+        """
+        raw_results = csv.reader(self.input_)
+        data = {}
+        error = None
+        for line in raw_results:
+            if not line:
+                continue
+            if line[0] == 'Benchmark':
+                mode = 'rate' if line[1] == 'Base # Copies' else 'speed'
+            if len(line) == 12 and line[0] != 'Benchmark':
+                if not line[2]:
+                    continue
+                data = self._get_data(line, mode)
+                try:
+                    response = self.client.post_result(
+                        bench_name=self.bench_name,
+                        data=data,
+                        metadata=self._get_metadata())
+                    if response.status_code >= 300:
+                        error = exceptions.ServerError(response.content + str(data))
+                    return response
+                except KeyboardInterrupt:
+                    raise SystemExit(1)
+            if line[0] == 'Selected Results Table':
+                break
+        if error is not None:
+            raise error
+
+    def _get_data(self, line, mode):
+        if mode == 'rate':
+            return {
+                'test': line[0],
+                'mode': mode,
+                'copies': line[1],
+                'base_run_time': line[2],
+                'base_rate': line[3],
+            }
+        else:
+            return {
+                'test': line[0],
+                'mode': mode,
+                'copies': 1,
+                'base_ref_time': line[1],
+                'base_run_time': line[2],
+                'base_ratio': line[3],
+            }
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -873,6 +928,7 @@ WRINGERS = {
     'iperf': IperfWringer,
     'geekbench4': Geekbench4Wringer,
     'geekbench3': Geekbench3Wringer,
+    'spec_cpu2006': SpecCpu2006Wringer,
 }
 
 def get_wringer(name):
