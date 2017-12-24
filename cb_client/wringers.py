@@ -912,6 +912,59 @@ class SpecCpu2006Wringer(BaseWringer):
                 'base_ratio': line[3],
             }
 
+
+class SpecCpu2017Wringer(BaseWringer):
+    bench_name = 'spec_cpu2017'
+
+    def run(self):
+        """
+        Public runner to parse and publish result.
+        """
+        raw_results = csv.reader(self.input_)
+        data = {}
+        error = None
+        for line in raw_results:
+            if not line:
+                continue
+            if line[0].startswith('SPEC CPU2017 '):
+                mode = 'rate' if line[0].endswith(' Rate Result') else 'speed'
+            if len(line) == 12 and line[0] != 'Benchmark':
+                if not line[2]:
+                    continue
+                data = self._get_data(line, mode)
+                try:
+                    response = self.client.post_result(
+                        bench_name=self.bench_name,
+                        data=data,
+                        metadata=self._get_metadata())
+                    if response.status_code >= 300:
+                        error = exceptions.ServerError(response.content + str(data))
+                    return response
+                except KeyboardInterrupt:
+                    raise SystemExit(1)
+            if line[0] == 'Selected Results Table':
+                break
+        if error is not None:
+            raise error
+
+    def _get_data(self, line, mode):
+        if mode == 'rate':
+            return {
+                'test': line[0],
+                'mode': mode,
+                'copies': line[1],
+                'base_run_time': line[2],
+                'base_rate': line[3],
+            }
+        else:
+            return {
+                'test': line[0],
+                'mode': mode,
+                'copies': line[1],
+                'base_run_time': line[2],
+                'base_ratio': line[3],
+            }
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -929,6 +982,7 @@ WRINGERS = {
     'geekbench4': Geekbench4Wringer,
     'geekbench3': Geekbench3Wringer,
     'spec_cpu2006': SpecCpu2006Wringer,
+    'spec_cpu2017': SpecCpu2017Wringer,
 }
 
 def get_wringer(name):

@@ -49,8 +49,9 @@ BonnieArgumentParser = subparser.add_parser('bonnie')
 Geekbench4ArgumentParser = subparser.add_parser('geekbench4')
 Geekbench3ArgumentParser = subparser.add_parser('geekbench3')
 
-# SPEC CPU 2006
+# SPEC CPU
 SpecCpu2006ArgumentParser = subparser.add_parser('spec_cpu2006')
+SpecCpu2017ArgumentParser = subparser.add_parser('spec_cpu2017')
 
 # SysBench parser
 SysbenchMySqlArgumentParser = subparser.add_parser('sysbench_mysql', help='sysbench help')
