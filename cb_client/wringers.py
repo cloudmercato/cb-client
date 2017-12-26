@@ -20,6 +20,8 @@ TIME_SCALE = {
 TRACEPATH_RESULT_REG = re.compile(r'\s*Resume:\s*pmtu\s*(\d*)\s*hops\s*(\d*)\s*back\s*(\d*)')
 TRACEPATH_TIME_REG = re.compile(r'.*\s([0-9\.]*)ms.*')
 
+REG_FINANCEBENCH = re.compile(r'^Processing time on (G|C)PU ?\(?(\w*)?\)?: ([\d\.]*) \(ms\)\s*$')
+
 def convert_second(value, src=None, dst='ms'):
     if isinstance(value, six.string_types):
         value = value.strip()
@@ -965,6 +967,30 @@ class SpecCpu2017Wringer(BaseWringer):
                 'base_ratio': line[3],
             }
 
+
+class FinanceBenchWringer(BaseWringer):
+    bench_name = 'financebench'
+
+    def __init__(self, *args, **kwargs):
+        super(FinanceBenchWringer, self).__init__(*args, **kwargs)
+        self.app = kwargs.get('app')
+        self.mode = kwargs.get('mode')
+
+    def _get_data(self):
+        data = {'mode': self.mode, 'app': self.app}
+        for line in self.input_:
+            match = REG_FINANCEBENCH.match(line)
+            if match is None:
+                continue
+            pu_type, mode, p_time = match.groups()
+            if self.mode == 'CPU' and pu_type == 'C':
+                data['time'] = float(p_time) 
+                break
+            elif self.mode != 'CPU' and pu_type != 'C':
+                data['time'] = float(p_time) 
+                break
+        return data
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -983,6 +1009,7 @@ WRINGERS = {
     'geekbench3': Geekbench3Wringer,
     'spec_cpu2006': SpecCpu2006Wringer,
     'spec_cpu2017': SpecCpu2017Wringer,
+    'financebench': FinanceBenchWringer,
 }
 
 def get_wringer(name):

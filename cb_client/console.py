@@ -53,6 +53,11 @@ Geekbench3ArgumentParser = subparser.add_parser('geekbench3')
 SpecCpu2006ArgumentParser = subparser.add_parser('spec_cpu2006')
 SpecCpu2017ArgumentParser = subparser.add_parser('spec_cpu2017')
 
+# FinanceBench
+FinanceBenchArgumentParser = subparser.add_parser('financebench')
+FinanceBenchArgumentParser.add_argument('-app', '--app', type=str)
+FinanceBenchArgumentParser.add_argument('-mode', '--mode', type=str)
+
 # SysBench parser
 SysbenchMySqlArgumentParser = subparser.add_parser('sysbench_mysql', help='sysbench help')
 SysbenchMySqlArgumentParser.add_argument('-vf', '--volume-flavor-id', help='id of Volume Flavor from Volume Flavor table', type=int, required=True)
