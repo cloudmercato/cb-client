@@ -21,6 +21,8 @@ TRACEPATH_RESULT_REG = re.compile(r'\s*Resume:\s*pmtu\s*(\d*)\s*hops\s*(\d*)\s*b
 TRACEPATH_TIME_REG = re.compile(r'.*\s([0-9\.]*)ms.*')
 
 REG_FINANCEBENCH = re.compile(r'^Processing time on (G|C)PU ?\(?(\w*)?\)?: ([\d\.]*) \(ms\)\s*$')
+REG_LAMMPS_PERF = re.compile('Performance:\s*([\d\.]*)\s*([\d\w/]*),\s*([\d\.]*)\s*([\d\w/]*),\s*([\d\.]*)\s*([\d\w/]*)')
+REG_LAMMPS_ROW = re.compile(r'^(\w*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*$')
 
 def convert_second(value, src=None, dst='ms'):
     if isinstance(value, six.string_types):
@@ -991,6 +993,57 @@ class FinanceBenchWringer(BaseWringer):
                 break
         return data
 
+
+LAMMPS_SECTIONS = {
+    'Pair': 'pair',
+    'Neigh': 'neigh',
+    'Comm': 'comm',
+    'Output': 'output',
+    'Modify': 'modify',
+    'Other': 'other',
+    'Kspace': 'kspace',
+    'Reduce': 'reduce',
+}
+class LammpsWringer(BaseWringer):
+    bench_name = 'lammps'
+
+    def __init__(self, test, num_process, *args, **kwargs):
+        super(LammpsWringer, self).__init__(*args, **kwargs)
+        self.test = test
+        self.num_process = num_process
+
+    def _parse_row(self, row, data):
+        match = REG_LAMMPS_ROW.match(row)
+        if match is None:
+            return data
+        section, min_, avg, max_, varavg, total = match.groups()
+        if section in LAMMPS_SECTIONS:
+            key_prefix = LAMMPS_SECTIONS[section]
+            data.update({
+                '%s_min' % key_prefix: min_,
+                '%s_avg' % key_prefix: avg,
+                '%s_max' % key_prefix: max_,
+                '%s_varavg' % key_prefix: varavg,
+                '%s_total' % key_prefix: total,
+            })
+        return data
+
+    def _get_data(self):
+        data = {
+            'test': self.test,
+            'num_process': self.num_process,
+        }
+        parsing_table = False
+        for line in self.input_:
+            if not line.strip():
+                continue
+            if line.startswith('-----'):
+                parsing_table = True
+            if parsing_table:
+                data = self._parse_row(line, data)
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -1010,6 +1063,7 @@ WRINGERS = {
     'spec_cpu2006': SpecCpu2006Wringer,
     'spec_cpu2017': SpecCpu2017Wringer,
     'financebench': FinanceBenchWringer,
+    'lammps': LammpsWringer,
 }
 
 def get_wringer(name):

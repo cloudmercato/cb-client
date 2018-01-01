@@ -58,6 +58,11 @@ FinanceBenchArgumentParser = subparser.add_parser('financebench')
 FinanceBenchArgumentParser.add_argument('-app', '--app', type=str)
 FinanceBenchArgumentParser.add_argument('-mode', '--mode', type=str)
 
+# LAMMPS
+LammpsArgumentParser = subparser.add_parser('lammps')
+LammpsArgumentParser.add_argument('--test', type=str)
+LammpsArgumentParser.add_argument('--num-process', type=int)
+
 # SysBench parser
 SysbenchMySqlArgumentParser = subparser.add_parser('sysbench_mysql', help='sysbench help')
 SysbenchMySqlArgumentParser.add_argument('-vf', '--volume-flavor-id', help='id of Volume Flavor from Volume Flavor table', type=int, required=True)
