@@ -1,7 +1,7 @@
 try:
     from urlparse import urljoin
 except ImportError:
-    from urllib import urljoin
+    from urllib.parse import urljoin
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -15,13 +15,14 @@ class Client(object):
         self.master_url = master_url or self.config.get('master_url')
         self.token = token or self.config.get('token')
         self.session = requests.Session()
+        self.session.headers.update({'Authorization': 'Token ' + self.token})
         self.session.mount('https://', HTTPAdapter(max_retries=1000))
         self.session.mount('http://', HTTPAdapter(max_retries=1000))
 
-    def post(self, url, data):
-        headers = {'Authorization': 'Token ' + self.token}
-        response = self.session.post(url, data, headers=headers, verify=False)
+    def post(self, *args, **kwargs):
+        response = self.session.post(verify=False, *args, **kwargs)
         # TODO: Define exceptions form response
+        print(kwargs)
         if response.status_code != 201:
             raise Exception(response.content)
         return response
@@ -41,6 +42,10 @@ class Client(object):
         if response.status_code != 200:
             raise Exception(response.content)
         return response
+
+    def make_url(self, path):
+        url = urljoin(self.master_url, path)
+        return url
 
     def post_result(self, bench_name, data, metadata):
         result_data = {}

@@ -38,8 +38,8 @@ def convert_second(value, src=None, dst='ms'):
 
 class BaseWringer(object):
     def __init__(self, input_=None, master_url=None, token=None,
-                 flavor_id=None, image_id=None, date=None, tag=None,
-                 **kwargs):
+                 instance_id=None, flavor_id=None, image_id=None,
+                 date=None, tag=None, **kwargs):
         """
         :param input_: Output of benchmark command, default is stdin
         :type input_: file
@@ -67,6 +67,7 @@ class BaseWringer(object):
         self.config = get_config()
         self.master_url = master_url or self.config.get('master_url')
         self.token = token or self.config.get('token')
+        self.instance_id = instance_id or self.config.get('id')
         self.flavor_id = flavor_id or self.config.get('flavor')
         self.image_id = image_id or self.config.get('image')
         self.provider_id = self.config.get('provider')
@@ -116,6 +117,108 @@ class BaseWringer(object):
             return response
         except KeyboardInterrupt:
             raise SystemExit(1)
+
+
+class MetricWringer(BaseWringer):
+    bench_name = 'metric'
+
+    def run(self):
+        """
+        Public runner to parse and publish result.
+        """
+        data = []
+        for line in self.input_:
+            if not line.strip():
+                continue
+            line = line.split()
+            if not hasattr(self, 'parse_%s' % line[0]):
+                continue
+            group, timestamp = line[:3:2]
+            parser = getattr(self, 'parse_%s' % group)
+            data.extend(parser(line))
+        try:
+            url = self.client.make_url('/rest/metric/')
+            response = self.client.post(
+                url=url,
+                json=data)
+            if response.status_code >= 300:
+                error = exceptions.ServerError(response.content + str(data))
+            return response
+        except KeyboardInterrupt:
+            raise SystemExit(1)
+
+    def parse_CPU(self, line):
+        """CPU zuluvm 1514345405 2017/12/27 03:30:05 3237908 100 2 4363430 10933017 0 628530138 485206 0 884945 0 0 4608 100"""
+        timestamp, _, _, _, _, _, stime, utime, ntime, itime, wtime, Itime, Stime, steal, guest, _, _, = line[2:]
+        data = {
+            'stime': stime,
+            'utime': utime,
+        }
+        metrics = []
+        for name, value in data.items():
+            metrics.append({
+                'group': 'CPU',
+                'value': value,
+                'name': name,
+                'date': datetime.fromtimestamp(int(timestamp)).isoformat(),
+                'instance': self.instance_id,
+            })
+        return metrics
+
+    def parse_cpu(self, line):
+        """cpu zuluvm 1514345405 2017/12/27 03:30:05 3237908 100 0 4363430 10933017 0 628530138 485206 0 884945 0 0 4608 100"""
+        timestamp, _, _, _, _, cpu_index, stime, utime, ntime, itime, wtime, Itime, Stime, steal, guest, _, _, = line[2:]
+        data = {
+            'stime': stime,
+            'utime': utime,
+        }
+        metrics = []
+        for name, value in data.items():
+            metrics.append({
+                'group': 'CPU',
+                'value': value,
+                'name': 'CPU#%d %s' % (int(cpu_index), name),
+                'date': datetime.fromtimestamp(int(timestamp)).isoformat(),
+                'instance': self.instance_id,
+            })
+        return metrics
+
+    def parse_CPL(self, line):
+        """CPL zuluvm 1514345405 2017/12/27 03:30:05 3237908 2 0.08 0.03 0.00 1192304404 738790591"""
+        timestamp, _, _, _, _, c1, c5, c15, context_switch, interrupts = line[2:]
+        data = {
+            'c1': (c1, 'Load 1'),
+            'c5': (c5, 'Load 5'),
+            'c15': (c15, 'Load 15'),
+        }
+        metrics = []
+        for name, (value, name) in data.items():
+            metrics.append({
+                'group': 'CPL',
+                'value': value,
+                'name': name,
+                'date': datetime.fromtimestamp(int(timestamp)).isoformat(),
+                'instance': self.instance_id,
+            })
+        return metrics
+
+    def parse_MEM(self, line):
+        """MEM zuluvm 1514345405 2017/12/27 03:30:05 3237908 4096 231469 45087 18739 9304 14255 5"""
+        timestamp, _, _, _, _, page_size, physical, free, cache, buffer_, slab = line[2:]
+        data = {
+            'physical': (physical, 'Physical pages'),
+            'free': (free, 'Free pages'),
+            'cache': (cache, 'Cache pages'),
+        }
+        metrics = []
+        for name, (value, name) in data.items():
+            metrics.append({
+                'group': 'MEM',
+                'value': value,
+                'name': name,
+                'date': datetime.fromtimestamp(int(timestamp)).isoformat()
+            })
+        return metrics
 
 
 class SysbenchCpuWringer(BaseWringer):
@@ -626,6 +729,10 @@ class BaseHiBenchWringer(BaseWringer):
     def report_filename(self):
         return os.path.join(self.report_dir, self.bench_name, self.framework, 'bench.log')
 
+    @property
+    def time_filename(self):
+        return os.path.join(self.report_dir, self.bench_name, self.framework, 'time.txt')
+
     def _get_data(self):
         bench_data = {
           'framework': self.framework,
@@ -633,6 +740,11 @@ class BaseHiBenchWringer(BaseWringer):
           'arch': self.architecture,
         }
         report_file = open(self.report_filename)
+        try:
+            with open(self.time_filename) as fd:
+                bench_data['exec_time'] = fd.read()
+        except IOError:
+            pass
         is_report = False
         for line in report_file:
             if not is_report:
@@ -679,6 +791,11 @@ class DfsioWringer(BaseWringer):
         filename = 'result_%s.txt' % self.mode
         return os.path.join(self.report_dir, bench_name, self.framework, filename)
 
+    @property
+    def time_filename(self):
+        bench_name = 'dfsioe'
+        return os.path.join(self.report_dir, bench_name, self.framework, 'time.txt')
+
     def run(self):
         self.mode = 'read'
         super(DfsioWringer, self).run()
@@ -693,6 +810,11 @@ class DfsioWringer(BaseWringer):
           'mode': self.mode,
         }
         report_file = open(self.report_filename)
+        try:
+            with open(self.time_filename) as fd:
+                bench_data['exec_time'] = fd.read()
+        except IOError:
+            pass
         for line in report_file:
             attr = [(i, j) for i, j in DFSIO_ATTRS if j in line]
             if attr:
@@ -1064,6 +1186,7 @@ WRINGERS = {
     'spec_cpu2017': SpecCpu2017Wringer,
     'financebench': FinanceBenchWringer,
     'lammps': LammpsWringer,
+    'metric': MetricWringer,
 }
 
 def get_wringer(name):

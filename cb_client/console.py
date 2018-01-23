@@ -27,6 +27,9 @@ class ClientArgumentParser(argparse.ArgumentParser):
 parser = ClientArgumentParser()
 subparser = parser.add_subparsers(help='Parsers for each bench mark test', dest='bench_name')
 
+# Monitoring
+MetricArgumentParser = subparser.add_parser('metric', help='help')
+
 # FIO
 FioArgumentParser = subparser.add_parser('fio', help='fio help')
 FioArgumentParser.add_argument('-n', '--numjobs', help='FIO number of threads', type=int)
