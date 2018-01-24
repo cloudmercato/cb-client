@@ -819,7 +819,7 @@ class DfsioWringer(BaseWringer):
             attr = [(i, j) for i, j in DFSIO_ATTRS if j in line]
             if attr:
                 _, value = line.split(':')
-                bench_data[attr[0][0]] = int(value.strip()) / attr[0][2]
+                bench_data[attr[0][0]] = float(value.strip().split()[0])
         return bench_data
 
 
