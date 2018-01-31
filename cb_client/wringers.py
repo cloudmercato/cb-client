@@ -216,7 +216,8 @@ class MetricWringer(BaseWringer):
                 'group': 'MEM',
                 'value': value,
                 'name': name,
-                'date': datetime.fromtimestamp(int(timestamp)).isoformat()
+                'date': datetime.fromtimestamp(int(timestamp)).isoformat(),
+                'instance': self.instance_id,
             })
         return metrics
 
