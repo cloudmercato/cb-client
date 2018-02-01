@@ -148,11 +148,14 @@ class MetricWringer(BaseWringer):
             raise SystemExit(1)
 
     def parse_CPU(self, line):
-        """CPU zuluvm 1514345405 2017/12/27 03:30:05 3237908 100 2 4363430 10933017 0 628530138 485206 0 884945 0 0 4608 100"""
-        timestamp, _, _, _, _, _, stime, utime, ntime, itime, wtime, Itime, Stime, steal, guest, _, _, = line[2:]
+        """
+        CPU zuluvm 1514345405 2017/12/27 03:30:05 3237908 100 2 4363430 10933017 0 628530138 485206 0 884945 0 0 4608 100
+        """
+        timestamp, _, _, _, total, cpu_count, stime, utime, ntime, itime, wtime, Itime, Stime, steal, guest, _, _, = line[2:]
         data = {
             'stime': stime,
             'utime': utime,
+            'itime': itime,
         }
         metrics = []
         for name, value in data.items():
@@ -166,11 +169,17 @@ class MetricWringer(BaseWringer):
         return metrics
 
     def parse_cpu(self, line):
-        """cpu zuluvm 1514345405 2017/12/27 03:30:05 3237908 100 0 4363430 10933017 0 628530138 485206 0 884945 0 0 4608 100"""
-        timestamp, _, _, _, _, cpu_index, stime, utime, ntime, itime, wtime, Itime, Stime, steal, guest, _, _, = line[2:]
+        """
+        cpu zuluvm 1514345405 2017/12/27 03:30:05 3237908 100 0 4363430 10933017 0 628530138 485206 0 884945 0 0 4608 100
+        
+        cpu victim 1517408534 2018/01/31 14:22:14 1022853 100 0 63709 515511 0 101620702 11852 0 2612 0 0 2304 100
+        cpu victim 1517408534 2018/01/31 14:22:14 1022853 100 1 64801 515500 0 101566068 60189 0 3948 0 0 2304 100
+        """
+        timestamp, _, _, _, total, cpu_index, stime, utime, ntime, itime, wtime, Itime, Stime, steal, guest, _, _ = line[2:]
         data = {
             'stime': stime,
             'utime': utime,
+            'itime': itime,
         }
         metrics = []
         for name, value in data.items():
@@ -220,6 +229,39 @@ class MetricWringer(BaseWringer):
                 'instance': self.instance_id,
             })
         return metrics
+
+    def parse_disk(self, line, disk_type):
+        """
+        DSK victim 1517445950 2018/02/01 00:45:50 1041531 sda 825240 300319 14518802 305838 147045480
+        """
+        timestamp, _, _, _, device, time, read, sread, write, swrite = line[2:]
+        data = {
+            'time': (time, 'I/O time'),
+            'read': (read, 'read'),
+            'sread': (sread, 'read sectors'),
+            'write': (write, 'write'),
+            'swrite': (swrite, 'write sectors'),
+        }
+        metrics = []
+        for name, (value, vname) in data.items():
+            name = '%s %s' % (vname, device)
+            metrics.append({
+                'group': disk_type,
+                'value': value,
+                'name': name,
+                'date': datetime.fromtimestamp(int(timestamp)).isoformat(),
+                'instance': self.instance_id,
+            })
+        return metrics
+
+    def parse_DSK(self, line):
+        return self.parse_disk(line, 'DSK')
+
+    def parse_MDD(self, line):
+        return self.parse_disk(line, 'MDD')
+
+    def parse_LVM(self, line):
+        return self.parse_disk(line, 'LVM')
 
 
 class SysbenchCpuWringer(BaseWringer):

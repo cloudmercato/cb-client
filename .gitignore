@@ -1,2 +1,3 @@
 *.sw[pon]
 *.py[co]
+cb_client.egg-info
