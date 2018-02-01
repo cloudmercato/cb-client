@@ -255,6 +255,29 @@ class MetricWringer(BaseWringer):
             })
         return metrics
 
+    def parse_NET(self, line):
+        """
+        NET victim 1517448991 2018/02/01 01:36:31 1044572 enp0s5 2117101 2864807572 1118790 106303965 0 0
+        """
+        timestamp, _, _, _, interface, rpackets, rbytes, spackets, sbytes, swrite, intspeed, duplex = line[2:]
+        data = {
+            'rpackets': (rpackets, 'received packets'),
+            'rbytes': (rbytes, 'received bytes'),
+            'spackets': (rpackets, 'sent packets'),
+            'sbytes': (rbytes, 'sent bytes'),
+        }
+        metrics = []
+        for name, (value, vname) in data.items():
+            name = '%s %s' % (vname, interface)
+            metrics.append({
+                'group': 'NET',
+                'value': value,
+                'name': name,
+                'date': datetime.fromtimestamp(int(timestamp)).isoformat(),
+                'instance': self.instance_id,
+            })
+        return metrics
+
     def parse_DSK(self, line):
         return self.parse_disk(line, 'DSK')
 
