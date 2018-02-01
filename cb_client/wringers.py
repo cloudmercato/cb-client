@@ -138,11 +138,12 @@ class MetricWringer(BaseWringer):
             data.extend(parser(line))
         try:
             url = self.client.make_url('/rest/metric/')
-            response = self.client.post(
-                url=url,
-                json=data)
-            if response.status_code >= 300:
-                error = exceptions.ServerError(response.content + str(data))
+            for start in range(0, len(data), 100):
+                response = self.client.post(
+                    url=url,
+                    json=data[start:start+100])
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
             return response
         except KeyboardInterrupt:
             raise SystemExit(1)
