@@ -138,10 +138,10 @@ class MetricWringer(BaseWringer):
             data.extend(parser(line))
         try:
             url = self.client.make_url('/rest/metric/')
-            for start in range(0, len(data), 100):
+            for start in range(0, len(data), 250):
                 response = self.client.post(
                     url=url,
-                    json=data[start:start+100])
+                    json=data[start:start+250])
                 if response.status_code >= 300:
                     error = exceptions.ServerError(response.content + str(data))
             return response
@@ -257,15 +257,27 @@ class MetricWringer(BaseWringer):
 
     def parse_NET(self, line):
         """
+        NET victim 1517448991 2018/02/01 01:36:31 1044572 upper 2068124 1107308 12253 10852 2085705 1112233 2084476 0
         NET victim 1517448991 2018/02/01 01:36:31 1044572 enp0s5 2117101 2864807572 1118790 106303965 0 0
         """
-        timestamp, _, _, _, interface, rpackets, rbytes, spackets, sbytes, swrite, intspeed, duplex = line[2:]
-        data = {
-            'rpackets': (rpackets, 'received packets'),
-            'rbytes': (rbytes, 'received bytes'),
-            'spackets': (rpackets, 'sent packets'),
-            'sbytes': (rbytes, 'sent bytes'),
-        }
+        if line[6] == 'upper':
+            timestamp, _, _, _, interface, tcp_rpackets, tcp_spackets, udp_rpackets, udp_spackets, ip_rpackets, ip_spackets, app_packets, forward_packets = line[2:]
+            data = {
+                'tcp_rpackets': (tcp_rpackets, 'TCP received packets'),
+                'tcp_spackets': (tcp_spackets, 'TCP sent packets'),
+                'udp_rpackets': (udp_rpackets, 'UDP received packets'),
+                'udp_spackets': (udp_spackets, 'UDP sent packets'),
+                'ip_rpackets': (ip_rpackets, 'IP received packets'),
+                'ip_spackets': (ip_spackets, 'IP sent packets'),
+            }
+        else:
+            timestamp, _, _, _, interface, rpackets, rbytes, spackets, sbytes, intspeed, duplex = line[2:]
+            data = {
+                'rpackets': (rpackets, 'received packets'),
+                'rbytes': (rbytes, 'received bytes'),
+                'spackets': (spackets, 'sent packets'),
+                'sbytes': (sbytes, 'sent bytes'),
+            }
         metrics = []
         for name, (value, vname) in data.items():
             name = '%s %s' % (vname, interface)
