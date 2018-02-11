@@ -148,6 +148,13 @@ class MetricWringer(BaseWringer):
         except KeyboardInterrupt:
             raise SystemExit(1)
 
+    def _get_cpu_usage(self, stime, utime, ntime, itime, wtime, Itime, Stime, steal):
+        use_time = int(stime) + int(utime) + int(ntime) + int(Itime) + int(Stime)
+        wait_time = int(itime) + int(wtime) + int(steal)
+        total_time = use_time + wait_time
+        percent = use_time / total_time * 100
+        return percent
+
     def parse_CPU(self, line):
         """
         CPU zuluvm 1514345405 2017/12/27 03:30:05 3237908 100 2 4363430 10933017 0 628530138 485206 0 884945 0 0 4608 100
@@ -157,8 +164,15 @@ class MetricWringer(BaseWringer):
             'stime': stime,
             'utime': utime,
             'itime': itime,
+            'steal': steal,
         }
-        metrics = []
+        metrics = [{
+            'group': 'CPU',
+            'value': self._get_cpu_usage(stime, utime, ntime, itime, wtime, Itime, Stime, steal),
+            'name': 'CPU usage',
+            'date': datetime.fromtimestamp(int(timestamp)).isoformat(),
+            'instance': self.instance_id,
+        }]
         for name, value in data.items():
             metrics.append({
                 'group': 'CPU',
@@ -180,9 +194,15 @@ class MetricWringer(BaseWringer):
         data = {
             'stime': stime,
             'utime': utime,
-            'itime': itime,
+            'steal': steal,
         }
-        metrics = []
+        metrics = [{
+            'group': 'CPU',
+            'value': self._get_cpu_usage(stime, utime, ntime, itime, wtime, Itime, Stime, steal),
+            'name': 'CPU#%d usage' % int(cpu_index),
+            'date': datetime.fromtimestamp(int(timestamp)).isoformat(),
+            'instance': self.instance_id,
+        }]
         for name, value in data.items():
             metrics.append({
                 'group': 'CPU',
