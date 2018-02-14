@@ -4,6 +4,7 @@ import re
 import csv
 import json
 from datetime import datetime
+from collections import Counter
 
 import six
 
@@ -119,6 +120,14 @@ class BaseWringer(object):
             raise SystemExit(1)
 
 
+PROCESS_STATES = {
+    'A': 'all',
+    'R': 'running',
+    'D': 'uninterruptible sleep',
+    'S': 'interruptible sleep',
+    'T': 'stopped',
+    'Z': 'zombie',
+}
 class MetricWringer(BaseWringer):
     bench_name = 'metric'
 
@@ -127,12 +136,31 @@ class MetricWringer(BaseWringer):
         Public runner to parse and publish result.
         """
         data = []
+        process_count = Counter(A=0, D=0, R=0, S=0, T=0, Z=0)
         for line in self.input_:
-            if not line.strip():
+            line = line.strip()
+            # Pass empty
+            if not line:
                 continue
+            # Set counter or upload
+            if line == 'SEP' and process_count['A']:
+                for name, value in process_count.items():
+                    data.append({
+                        'group': 'PRG',
+                        'value': value,
+                        'name': '%s processes' % PROCESS_STATES[name],
+                        'date': datetime.fromtimestamp(int(line[1])).isoformat(),
+                        'instance': self.instance_id,
+                    })
+                process_count = Counter(A=0, D=0, R=0, S=0, T=0, Z=0)
             line = line.split()
+            # Skip not implemented
             if not hasattr(self, 'parse_%s' % line[0]):
                 continue
+            # Count process
+            elif line[0] == 'PRG':
+                process_count['A'] += 1
+                process_count[line[8]] += 1
             group, timestamp = line[:3:2]
             parser = getattr(self, 'parse_%s' % group)
             data.extend(parser(line))
@@ -841,8 +869,8 @@ class BaseHiBenchWringer(BaseWringer):
         report_file = open(self.report_filename)
         try:
             with open(self.time_filename) as fd:
-                bench_data['exec_time'] = fd.read()
-        except IOError:
+                bench_data['exec_time'] = int(float(fd.read().strip()))
+        except (IOError, ValueError):
             pass
         is_report = False
         for line in report_file:
