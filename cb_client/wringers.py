@@ -3,6 +3,7 @@ import sys
 import re
 import csv
 import json
+from functools import reduce
 from datetime import datetime
 from collections import Counter
 
@@ -35,6 +36,18 @@ def convert_second(value, src=None, dst='ms'):
     in_sec = value * TIME_SCALE.get(src, 1)
     in_dst_fmt = in_sec / TIME_SCALE[dst]
     return round(in_dst_fmt, 2)
+
+
+def mean(values):
+    return float(sum(values)) / max(len(values), 1)
+
+
+def geo_mean(values):
+    return reduce(lambda x, y: x*y, values) ** (1.0/len(values))
+
+
+def weighted_mean(values):
+    return sum([w/100*s for w, s in values])
 
 
 class BaseWringer(object):
@@ -1076,6 +1089,62 @@ class Geekbench4Wringer(BaseWringer):
                 if raw_result['name'] == 'Memory Latency':
                     data[fieldname] = data[fieldname] / raw_result['work']
                 data[fieldname+'_score'] = raw_result['score']
+        single_crypto_scores = [data['single_aes_score']]
+        single_crypto_score = geo_mean(single_crypto_scores)
+        multi_crypto_scores = [data['multi_aes_score']]
+        multi_crypto_score = geo_mean(multi_crypto_scores)
+        single_int_scores = [data['single_%s_score' % f] for f in [
+            'lzma', 'jpeg', 'canny', 'lua', 'dijkstra', 'sqlite',
+            'html5_parse', 'html5_dom', 'histogram', 'pdf',
+            'llvm', 'camera'
+        ]]
+        single_int_score = geo_mean(single_int_scores)
+        multi_int_scores = [data['multi_%s_score' % f] for f in [
+            'lzma', 'jpeg', 'canny', 'lua', 'dijkstra', 'sqlite',
+            'html5_parse', 'html5_dom', 'histogram', 'pdf',
+            'llvm', 'camera'
+        ]]
+        multi_int_score = geo_mean(multi_int_scores)
+        single_float_scores = [data['single_%s_score' % f] for f in [
+            'sgemm', 'sfft', 'nbody', 'ray', 'rigid', 'hdr', 'gaussian',
+            'speech', 'face'
+        ]]
+        single_float_score = geo_mean(single_float_scores)
+        multi_float_scores = [data['multi_%s_score' % f] for f in [
+            'sgemm', 'sfft', 'nbody', 'ray', 'rigid', 'hdr', 'gaussian',
+            'speech', 'face'
+        ]]
+        multi_float_score = geo_mean(multi_float_scores)
+        single_memory_scores = [data['single_%s_score' % f] for f in [
+            'memory_copy', 'memory_latency', 'memory_bandwidth'
+        ]]
+        single_memory_score = geo_mean(single_memory_scores)
+        multi_memory_scores = [data['multi_%s_score' % f] for f in [
+            'memory_copy', 'memory_latency', 'memory_bandwidth'
+        ]]
+        multi_memory_score = geo_mean(multi_memory_scores)
+        single_score = weighted_mean((
+            (5, single_crypto_score),
+            (45, single_int_score),
+            (30, single_float_score),
+            (20, single_memory_score),
+        ))
+        multi_score = weighted_mean((
+            (5, multi_crypto_score),
+            (45, multi_int_score),
+            (30, multi_float_score),
+            (20, multi_memory_score),
+        ))
+        data.update(single_crypto_score=single_crypto_score,
+                    multi_crypto_score=multi_crypto_score,
+                    single_int_score=single_int_score,
+                    multi_int_score=multi_int_score,
+                    single_float_score=single_float_score,
+                    multi_float_score=multi_float_score,
+                    single_memory_score=single_memory_score,
+                    multi_memory_score=multi_memory_score,
+                    single_score=single_score,
+                    multi_score=multi_score)
         return data
 
 
