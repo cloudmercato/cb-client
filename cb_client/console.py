@@ -66,6 +66,10 @@ LammpsArgumentParser = subparser.add_parser('lammps')
 LammpsArgumentParser.add_argument('--test', type=str)
 LammpsArgumentParser.add_argument('--num-process', type=int)
 
+# V-Ray
+VRayArgumentParser = subparser.add_parser('vray')
+VRayArgumentParser.add_argument('--unit', type=str)
+
 # SysBench parser
 SysbenchMySqlArgumentParser = subparser.add_parser('sysbench_mysql', help='sysbench help')
 SysbenchMySqlArgumentParser.add_argument('-vf', '--volume-flavor-id', help='id of Volume Flavor from Volume Flavor table', type=int, required=True)
@@ -115,6 +119,7 @@ def main():
     Wringer = wringers.WRINGERS.get(parsed_args.bench_name)
     wringer = Wringer(**vars(parsed_args))
     wringer.run()
+
 
 if __name__ == '__main__':
     main()

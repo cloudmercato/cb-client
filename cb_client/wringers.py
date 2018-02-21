@@ -25,6 +25,7 @@ TRACEPATH_TIME_REG = re.compile(r'.*\s([0-9\.]*)ms.*')
 REG_FINANCEBENCH = re.compile(r'^Processing time on (G|C)PU ?\(?(\w*)?\)?: ([\d\.]*) \(ms\)\s*$')
 REG_LAMMPS_PERF = re.compile('Performance:\s*([\d\.]*)\s*([\d\w/]*),\s*([\d\.]*)\s*([\d\w/]*),\s*([\d\.]*)\s*([\d\w/]*)')
 REG_LAMMPS_ROW = re.compile(r'^(\w*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*$')
+REG_VRAY = re.compile(r'Rendering took (\d*):(\d*) minutes.', re.M)
 
 def convert_second(value, src=None, dst='ms'):
     if isinstance(value, six.string_types):
@@ -1362,6 +1363,24 @@ class LammpsWringer(BaseWringer):
         return data
 
 
+class VRayWringer(BaseWringer):
+    bench_name = 'vray'
+
+    def __init__(self, *args, **kwargs):
+        super(VRayWringer, self).__init__(*args, **kwargs)
+        self.unit = kwargs.get('unit')
+
+    def _get_data(self):
+        vray_output = self.input_.read()
+        search = REG_VRAY.search(vray_output)
+        minutes, seconds = [int(i) for i in search.groups()]
+        time_ = minutes * 60 + seconds
+        return {
+          'time': time_,
+          'unit': self.unit,
+        }
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -1382,8 +1401,10 @@ WRINGERS = {
     'spec_cpu2017': SpecCpu2017Wringer,
     'financebench': FinanceBenchWringer,
     'lammps': LammpsWringer,
+    'vray': VRayWringer,
     'metric': MetricWringer,
 }
+
 
 def get_wringer(name):
     if name in WRINGERS:
