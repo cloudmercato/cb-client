@@ -13,6 +13,14 @@ from . import exceptions
 from . import client
 from .settings import get_config
 
+try:
+    import behave
+    BEHAVE_VERSION = behave.__version__
+except ImportError:
+    BEHAVE_VERSION = None
+
+
+PYTHON_VERSION = '%d.%d.%d' % sys.version_info[:3]
 TIME_SCALE = {
   's': 1,
   'ms': 10**-3,
@@ -26,6 +34,11 @@ REG_FINANCEBENCH = re.compile(r'^Processing time on (G|C)PU ?\(?(\w*)?\)?: ([\d\
 REG_LAMMPS_PERF = re.compile('Performance:\s*([\d\.]*)\s*([\d\w/]*),\s*([\d\.]*)\s*([\d\w/]*),\s*([\d\.]*)\s*([\d\w/]*)')
 REG_LAMMPS_ROW = re.compile(r'^(\w*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*$')
 REG_VRAY = re.compile(r'Rendering took (\d*):(\d*) minutes.', re.M)
+REG_VASP = re.compile(r'Took (\d*)m([0-9.]*)s')
+
+class InvalidInput(Exception):
+    pass
+
 
 def convert_second(value, src=None, dst='ms'):
     if isinstance(value, six.string_types):
@@ -1381,6 +1394,32 @@ class VRayWringer(BaseWringer):
         }
 
 
+class VaspTestWringer(BaseWringer):
+    bench_name = 'vasptest'
+
+    def __init__(self, *args, **kwargs):
+        super(VaspTestWringer, self).__init__(*args, **kwargs)
+        self.num_process = kwargs.get('num_process')
+        self.scenario = kwargs.get('scenario')
+
+    def _get_data(self):
+        for line in self.input_:
+            match = REG_VASP.match(line)
+            if match is not None:
+                break
+        else:
+            raise InvalidInput()
+        minutes, seconds = match.groups()
+        time_ = int(minutes) * 60 + float(seconds)
+        return {
+          'time': time_,
+          'num_process': self.num_process,
+          'scenario': self.scenario,
+          'python_version': PYTHON_VERSION,
+          'behave_version': BEHAVE_VERSION,
+        }
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -1402,6 +1441,7 @@ WRINGERS = {
     'financebench': FinanceBenchWringer,
     'lammps': LammpsWringer,
     'vray': VRayWringer,
+    'vasptest': VaspTestWringer,
     'metric': MetricWringer,
 }
 

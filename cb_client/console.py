@@ -70,6 +70,11 @@ LammpsArgumentParser.add_argument('--num-process', type=int)
 VRayArgumentParser = subparser.add_parser('vray')
 VRayArgumentParser.add_argument('--unit', type=str)
 
+# VASP test
+VaspTestArgumentParser = subparser.add_parser('vasptest')
+VaspTestArgumentParser.add_argument('--num-process', type=str)
+VaspTestArgumentParser.add_argument('--scenario', type=str)
+
 # SysBench parser
 SysbenchMySqlArgumentParser = subparser.add_parser('sysbench_mysql', help='sysbench help')
 SysbenchMySqlArgumentParser.add_argument('-vf', '--volume-flavor-id', help='id of Volume Flavor from Volume Flavor table', type=int, required=True)
