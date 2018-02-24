@@ -1401,6 +1401,7 @@ class VaspTestWringer(BaseWringer):
         super(VaspTestWringer, self).__init__(*args, **kwargs)
         self.num_process = kwargs.get('num_process')
         self.scenario = kwargs.get('scenario')
+        self.executable = kwargs.get('executable')
 
     def _get_data(self):
         for line in self.input_:
@@ -1415,6 +1416,7 @@ class VaspTestWringer(BaseWringer):
           'time': time_,
           'num_process': self.num_process,
           'scenario': self.scenario,
+          'executable': self.executable,
           'python_version': PYTHON_VERSION,
           'behave_version': BEHAVE_VERSION,
         }

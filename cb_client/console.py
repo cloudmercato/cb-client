@@ -74,6 +74,7 @@ VRayArgumentParser.add_argument('--unit', type=str)
 VaspTestArgumentParser = subparser.add_parser('vasptest')
 VaspTestArgumentParser.add_argument('--num-process', type=str)
 VaspTestArgumentParser.add_argument('--scenario', type=str)
+VaspTestArgumentParser.add_argument('--executable', type=str)
 
 # SysBench parser
 SysbenchMySqlArgumentParser = subparser.add_parser('sysbench_mysql', help='sysbench help')
