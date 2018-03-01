@@ -15,7 +15,9 @@ class Client(object):
         self.master_url = master_url or self.config.get('master_url')
         self.token = token or self.config.get('token')
         self.session = requests.Session()
-        self.session.headers.update({'Authorization': 'Token ' + self.token})
+        self.session.headers.update({
+            'Authorization': 'Manager-Token ' + self.token,
+        })
         self.session.mount('https://', HTTPAdapter(max_retries=1000))
         self.session.mount('http://', HTTPAdapter(max_retries=1000))
 
@@ -28,16 +30,14 @@ class Client(object):
         return response
 
     def put(self, url, data):
-        headers = {'Authorization': 'Token ' + self.token}
-        response = self.session.put(url, data, headers=headers, verify=False)
+        response = self.session.put(url, data, verify=False)
         # TODO: Define exceptions form response
         if response.status_code != 200:
             raise Exception(response.content)
         return response
 
     def patch(self, url, data):
-        headers = {'Authorization': 'Token ' + self.token}
-        response = self.session.patch(url, data, headers=headers, verify=False)
+        response = self.session.patch(url, data, verify=False)
         # TODO: Define exceptions form response
         if response.status_code != 200:
             raise Exception(response.content)
