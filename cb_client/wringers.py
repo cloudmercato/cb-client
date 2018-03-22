@@ -529,17 +529,17 @@ class FioWringer(BaseWringer):
         fio_result['block_size'] = fio_data['global options']['bs'] if 'bs' in fio_data['global options'] else fio_data['jobs'][0]['job options']['bs']
         fio_result['readwrite'] = self._get_readwrite(fio_data['global options']['rw'])
         fio_result['mode'] = 'rand' if 'rand' in fio_data['global options']['rw'] else 'seq'
-        fio_result['runtime'] = int(fio_data['global options']['runtime'] if 'runtime' in fio_data['global options'] else fio_data['jobs'][0]['job options']['runtime'])/1000
+        fio_result['runtime'] = int(fio_data['global options']['runtime'] if 'runtime' in fio_data['global options'] else int(fio_data['jobs'][0]['job options']['runtime'])/1000)
         fio_result['io_depth'] = fio_data['global options']['iodepth']
 
-        fio_result['read_io'] = int(fio_data['jobs'][0]['read']['io_bytes'])/1048576
+        fio_result['read_io'] = int(fio_data['jobs'][0]['read']['io_bytes']/1048576)
         fio_result['read_iops'] = int(fio_data['jobs'][0]['read']['iops'])
         fio_result['read_bandwidth'] = fio_data['jobs'][0]['read']['bw']
         fio_result['read_bandwidth_max'] = fio_data['jobs'][0]['read']['bw_max']
         fio_result['read_latency'] = float(fio_data['jobs'][0]['read']['clat']['mean'])
         fio_result['read_latency_stdev'] = float(fio_data['jobs'][0]['read']['clat']['stddev'])
 
-        fio_result['write_io'] = int(fio_data['jobs'][0]['write']['io_bytes'])/1048576
+        fio_result['write_io'] = int(fio_data['jobs'][0]['write']['io_bytes']/1048576)
         fio_result['write_iops'] = int(fio_data['jobs'][0]['write']['iops'])
         fio_result['write_bandwidth'] = fio_data['jobs'][0]['write']['bw']
         fio_result['write_bandwidth_max'] = fio_data['jobs'][0]['write']['bw_max']
