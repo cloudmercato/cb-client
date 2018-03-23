@@ -1223,7 +1223,6 @@ class SpecCpu2006Wringer(BaseWringer):
                         metadata=self._get_metadata())
                     if response.status_code >= 300:
                         error = exceptions.ServerError(response.content + str(data))
-                    return response
                 except KeyboardInterrupt:
                     raise SystemExit(1)
             if line[0] == 'Selected Results Table':
@@ -1277,7 +1276,6 @@ class SpecCpu2017Wringer(BaseWringer):
                         metadata=self._get_metadata())
                     if response.status_code >= 300:
                         error = exceptions.ServerError(response.content + str(data))
-                    return response
                 except KeyboardInterrupt:
                     raise SystemExit(1)
             if line[0] == 'Selected Results Table':
