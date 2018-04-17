@@ -1200,33 +1200,68 @@ class Geekbench3Wringer(BaseWringer):
 class SpecCpu2006Wringer(BaseWringer):
     bench_name = 'spec_cpu2006'
 
+    def _guess_c_compiler(self, text):
+        if 'intel' in text.lower():
+            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            return ('icc', version)
+
+    def _guess_fortran_compiler(self, text):
+        if 'intel' in text.lower():
+            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            return ('icc', version)
+
     def run(self):
         """
         Public runner to parse and publish result.
         """
         raw_results = csv.reader(self.input_)
-        data = {}
+        data = []
+        config_data = {}
+        section = None
         error = None
+        data = []
         for line in raw_results:
             if not line:
                 continue
-            if line[0] == 'Benchmark':
-                mode = 'rate' if line[1] == 'Base # Copies' else 'speed'
+            # Stop at "Submit Notes"
+            if section == 'Submit Notes':
+                break
+            # Set mode
+            if line[0].startswith('SPEC CPU2006 '):
+                mode = 'rate' if line[0].endswith(' Rate Result') else 'speed'
+            # Set current section
+            if len(line) == 1 and line[0][0] not in '#- ':
+                section = line[0]
+                continue
+            # Skip sections
+            if section in ('Full Results Table',):
+                continue
+            # Parse result
             if len(line) == 12 and line[0] != 'Benchmark':
                 if not line[2]:
                     continue
-                data = self._get_data(line, mode)
-                try:
-                    response = self.client.post_result(
-                        bench_name=self.bench_name,
-                        data=data,
-                        metadata=self._get_metadata())
-                    if response.status_code >= 300:
-                        error = exceptions.ServerError(response.content + str(data))
-                except KeyboardInterrupt:
-                    raise SystemExit(1)
-            if line[0] == 'Selected Results Table':
-                break
+                result = self._get_data(line, mode)
+                data.append(result)
+            # Get compiler
+            if section == 'SOFTWARE':
+                if line[0] == 'Compiler':
+                    comp, version = self._guess_c_compiler(line[1])
+                    config_data.update(c_compiler=comp, c_compiler_version=version)
+                if 'fortran' in line[1].lower():
+                    comp, version = self._guess_fortran_compiler(line[1])
+                    config_data.update(fortran_compiler=comp, fortran_compiler_version=version)
+        # Send result
+        for result in data:
+            result.update(config_data)
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=result,
+                    metadata=self._get_metadata())
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
         if error is not None:
             raise error
 
@@ -1253,33 +1288,68 @@ class SpecCpu2006Wringer(BaseWringer):
 class SpecCpu2017Wringer(BaseWringer):
     bench_name = 'spec_cpu2017'
 
+    def _guess_c_compiler(self, text):
+        if 'intel' in text.lower():
+            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            return ('icc', version)
+
+    def _guess_fortran_compiler(self, text):
+        if 'intel' in text.lower():
+            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            return ('icc', version)
+
     def run(self):
         """
         Public runner to parse and publish result.
         """
         raw_results = csv.reader(self.input_)
-        data = {}
+        data = []
+        config_data = {}
+        section = None
         error = None
+        data = []
         for line in raw_results:
             if not line:
                 continue
+            # Stop at "Submit Notes"
+            if section == 'Submit Notes':
+                break
+            # Set mode
             if line[0].startswith('SPEC CPU2017 '):
                 mode = 'rate' if line[0].endswith(' Rate Result') else 'speed'
+            # Set current section
+            if len(line) == 1 and line[0][0] not in '#- ':
+                section = line[0]
+                continue
+            # Skip sections
+            if section in ('Full Results Table',):
+                continue
+            # Parse result
             if len(line) == 12 and line[0] != 'Benchmark':
                 if not line[2]:
                     continue
-                data = self._get_data(line, mode)
-                try:
-                    response = self.client.post_result(
-                        bench_name=self.bench_name,
-                        data=data,
-                        metadata=self._get_metadata())
-                    if response.status_code >= 300:
-                        error = exceptions.ServerError(response.content + str(data))
-                except KeyboardInterrupt:
-                    raise SystemExit(1)
-            if line[0] == 'Selected Results Table':
-                break
+                result = self._get_data(line, mode)
+                data.append(result)
+            # Get compiler
+            if section == 'SOFTWARE':
+                if line[0] == 'Compiler':
+                    comp, version = self._guess_c_compiler(line[1])
+                    config_data.update(c_compiler=comp, c_compiler_version=version)
+                if 'fortran' in line[1].lower():
+                    comp, version = self._guess_fortran_compiler(line[1])
+                    config_data.update(fortran_compiler=comp, fortran_compiler_version=version)
+        # Send result
+        for result in data:
+            result.update(config_data)
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=result,
+                    metadata=self._get_metadata())
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
         if error is not None:
             raise error
 
@@ -1309,19 +1379,26 @@ class FinanceBenchWringer(BaseWringer):
         super(FinanceBenchWringer, self).__init__(*args, **kwargs)
         self.app = kwargs.get('app')
         self.mode = kwargs.get('mode')
+        self.compiler = kwargs.get('compiler')
+        self.compiler_version = kwargs.get('compiler_version')
 
     def _get_data(self):
-        data = {'mode': self.mode, 'app': self.app}
+        data = {
+            'mode': self.mode,
+            'app': self.app,
+            'compiler': self.compiler,
+            'compiler_version': self.compiler_version,
+        }
         for line in self.input_:
             match = REG_FINANCEBENCH.match(line)
             if match is None:
                 continue
             pu_type, mode, p_time = match.groups()
             if self.mode == 'CPU' and pu_type == 'C':
-                data['time'] = float(p_time) 
+                data['time'] = float(p_time)
                 break
             elif self.mode != 'CPU' and pu_type != 'C':
-                data['time'] = float(p_time) 
+                data['time'] = float(p_time)
                 break
         return data
 

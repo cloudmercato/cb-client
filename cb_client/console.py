@@ -60,6 +60,8 @@ SpecCpu2017ArgumentParser = subparser.add_parser('spec_cpu2017')
 FinanceBenchArgumentParser = subparser.add_parser('financebench')
 FinanceBenchArgumentParser.add_argument('-app', '--app', type=str)
 FinanceBenchArgumentParser.add_argument('-mode', '--mode', type=str)
+FinanceBenchArgumentParser.add_argument('-compiler', '--compiler', type=str)
+FinanceBenchArgumentParser.add_argument('-compiler-version', '--compiler-version', type=str)
 
 # LAMMPS
 LammpsArgumentParser = subparser.add_parser('lammps')
