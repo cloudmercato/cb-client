@@ -1234,7 +1234,7 @@ class SpecCpu2006Wringer(BaseWringer):
                 section = line[0]
                 continue
             # Skip sections
-            if section in ('Full Results Table',):
+            if section in ('Selected Results Table',):
                 continue
             # Parse result
             if len(line) == 12 and line[0] != 'Benchmark':
@@ -1322,7 +1322,7 @@ class SpecCpu2017Wringer(BaseWringer):
                 section = line[0]
                 continue
             # Skip sections
-            if section in ('Full Results Table',):
+            if section in ('Selected Results Table',):
                 continue
             # Parse result
             if len(line) == 12 and line[0] != 'Benchmark':
