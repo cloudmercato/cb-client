@@ -1204,11 +1204,17 @@ class SpecCpu2006Wringer(BaseWringer):
         if 'intel' in text.lower():
             version = re.match('.*Version ([\d.]*).*', text).groups()[0]
             return ('icc', version)
+        if 'gcc' in text.lower():
+            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            return ('gcc', version)
 
     def _guess_fortran_compiler(self, text):
         if 'intel' in text.lower():
             version = re.match('.*Version ([\d.]*).*', text).groups()[0]
             return ('icc', version)
+        if 'gcc' in text.lower():
+            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            return ('gcc', version)
 
     def run(self):
         """
@@ -1292,11 +1298,17 @@ class SpecCpu2017Wringer(BaseWringer):
         if 'intel' in text.lower():
             version = re.match('.*Version ([\d.]*).*', text).groups()[0]
             return ('icc', version)
+        if 'gcc' in text.lower():
+            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            return ('gcc', version)
 
     def _guess_fortran_compiler(self, text):
         if 'intel' in text.lower():
             version = re.match('.*Version ([\d.]*).*', text).groups()[0]
             return ('icc', version)
+        if 'gcc' in text.lower():
+            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            return ('gcc', version)
 
     def run(self):
         """
