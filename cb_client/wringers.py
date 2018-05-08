@@ -453,9 +453,18 @@ class BaseObjectStorageWringer(BaseWringer):
 
 class AbWringer(BaseObjectStorageWringer):
     """
-    Apache benchmark Wringer
+    Apache Bench Wringer
     """
     bench_name = 'ab'
+
+    def __init__(self, destination_id, destination_type, num_thread,
+                 keep_live, secure, *args, **kwargs):
+        super(AbWringer, self).__init__(*args, **kwargs)
+        self.destination_id = destination_id
+        self.destination_type = destination_type
+        self.num_thread = num_thread
+        self.keep_live = keep_live
+        self.secure = secure
 
     def _get_data(self):
         bench_data = {
@@ -489,6 +498,13 @@ class AbWringer(BaseObjectStorageWringer):
                     bench_data['time_per_request'] = re.findall('\s*([\d.]+)\s*', line)[0]
             elif line.startswith('Transfer rate:'):
                 bench_data['transfer_rate'] = re.findall('\s*([\d.]+)\s*', line)[0]
+        dest_key = 'dest_%s' % self.destination_type
+        bench_data.update({
+            dest_key: self.destination_id,
+            'num_thread': self.num_thread,
+            'keep_alive': self.keep_live,
+            'secure': self.secure,
+        })
         return bench_data
 
 

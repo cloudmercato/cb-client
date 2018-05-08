@@ -44,6 +44,11 @@ SysbenchRamArgumentParser = subparser.add_parser('sysbench_ram')
 
 # Ab parser
 AbArgumentParser = subparser.add_parser('ab', help='ab help')
+AbArgumentParser.add_argument('-n', '--num-thread', help='')
+AbArgumentParser.add_argument('-k', '--keep-live', action='store_true', help='')
+AbArgumentParser.add_argument('-S', '--secure', action='store_true', help='')
+AbArgumentParser.add_argument('-de', '--destination-id', help='')
+AbArgumentParser.add_argument('-De', '--destination-type', help='')
 
 # Bonnie
 BonnieArgumentParser = subparser.add_parser('bonnie')
@@ -104,6 +109,7 @@ TracepathArgumentParser.add_argument('-De', '--destination-type', help='')
 
 IperfArgumentParser = subparser.add_parser('iperf', help='iperf help')
 IperfArgumentParser.add_argument('-de', '--dest-instance_type', help='')
+
 
 # Hibench
 WordcountArgumentParser = subparser.add_parser('wordcount', help='wordcount help')
