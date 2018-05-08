@@ -1257,6 +1257,7 @@ class SpecCpu2006Wringer(BaseWringer):
                     comp, version = self._guess_fortran_compiler(line[1])
                     config_data.update(fortran_compiler=comp, fortran_compiler_version=version)
         # Send result
+        error = None
         for result in data:
             result.update(config_data)
             try:
@@ -1268,6 +1269,8 @@ class SpecCpu2006Wringer(BaseWringer):
                     error = exceptions.ServerError(response.content + str(data))
             except KeyboardInterrupt:
                 raise SystemExit(1)
+            except Exception as err:
+                error = err
         if error is not None:
             raise error
 
@@ -1351,6 +1354,7 @@ class SpecCpu2017Wringer(BaseWringer):
                     comp, version = self._guess_fortran_compiler(line[1])
                     config_data.update(fortran_compiler=comp, fortran_compiler_version=version)
         # Send result
+        error = None
         for result in data:
             result.update(config_data)
             try:
@@ -1362,6 +1366,8 @@ class SpecCpu2017Wringer(BaseWringer):
                     error = exceptions.ServerError(response.content + str(data))
             except KeyboardInterrupt:
                 raise SystemExit(1)
+            except Exception as err:
+                error = err
         if error is not None:
             raise error
 
