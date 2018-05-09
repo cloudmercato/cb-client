@@ -1238,7 +1238,6 @@ class SpecCpu2006Wringer(BaseWringer):
         if 'microsoft' in text.lower():
             version = re.match('.*Version ([\d.]*).*', text).groups()[0]
             return ('microsoft', version)
-        return ('', '')
 
     def run(self):
         """
@@ -1278,8 +1277,14 @@ class SpecCpu2006Wringer(BaseWringer):
                     comp, version = self._guess_c_compiler(line[1])
                     config_data.update(c_compiler=comp, c_compiler_version=version)
                 if 'fortran' in line[1].lower():
-                    comp, version = self._guess_fortran_compiler(line[1])
+                    comp_version = self._guess_fortran_compiler(line[1])
+                    if comp_version is None:
+                        comp, version = config_data['c_compiler'], config_data['c_compiler_version']
+                    else:
+                        comp, version = comp_version
                     config_data.update(fortran_compiler=comp, fortran_compiler_version=version)
+        if not config_data.get('fortran_compiler'):
+            config_data['fortran_compiler'], config_data['fortran_compiler_version'] = config_data['c_compiler'], config_data['c_compiler_version']
         # Send result
         error = None
         for result in data:
@@ -1343,7 +1348,6 @@ class SpecCpu2017Wringer(BaseWringer):
         if 'microsoft' in text.lower():
             version = re.match('.*Version ([\d.]*).*', text).groups()[0]
             return ('microsoft', version)
-        return ('', '')
 
     def run(self):
         """
@@ -1383,8 +1387,14 @@ class SpecCpu2017Wringer(BaseWringer):
                     comp, version = self._guess_c_compiler(line[1])
                     config_data.update(c_compiler=comp, c_compiler_version=version)
                 if 'fortran' in line[1].lower():
-                    comp, version = self._guess_fortran_compiler(line[1])
+                    comp_version = self._guess_fortran_compiler(line[1])
+                    if comp_version is None:
+                        comp, version = config_data['c_compiler'], config_data['c_compiler_version']
+                    else:
+                        comp, version = comp_version
                     config_data.update(fortran_compiler=comp, fortran_compiler_version=version)
+        if not config_data.get('fortran_compiler'):
+            config_data['fortran_compiler'], config_data['fortran_compiler_version'] = config_data['c_compiler'], config_data['c_compiler_version']
         # Send result
         error = None
         for result in data:
