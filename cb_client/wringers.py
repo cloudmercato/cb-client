@@ -1109,7 +1109,11 @@ GEEKBENCH4_FIELDS = {
 class Geekbench4Wringer(BaseWringer):
     bench_name = 'geekbench4'
 
-    def _get_data(self):
+    def __init__(self, format, *args, **kwargs):
+        super(Geekbench4Wringer, self).__init__(*args, **kwargs)
+        self.format = format
+
+    def parse_json(self):
         raw_results = json.load(self.input_)
         data = {}
         for section in raw_results['sections']:
@@ -1121,6 +1125,29 @@ class Geekbench4Wringer(BaseWringer):
                 if raw_result['name'] == 'Memory Latency':
                     data[fieldname] = data[fieldname] / raw_result['work']
                 data[fieldname+'_score'] = raw_result['score']
+        return data
+
+    def parse_csv(self):
+        data = {}
+        raw_results = csv.reader(self.input_)
+        next(raw_results)
+        for line in raw_results:
+            if not line:
+                continue
+            mode = 'single' if line[1] == "1" else 'multi'
+            key, format_ = GEEKBENCH4_FIELDS[line[0]]
+            fieldname = '%s_%s' % (mode, key)
+            data[fieldname] = int(line[7]) / format_
+            if line[0] == 'Memory Latency':
+                data[fieldname] = data[fieldname] / int(line[7])
+            data[fieldname+'_score'] = int(line[4])
+        return data
+
+    def _get_data(self):
+        if self.format == 'csv':
+            data = self.parse_csv()
+        else:
+            data = self.parse_json()
         single_crypto_scores = [data['single_aes_score']]
         single_crypto_score = geo_mean(single_crypto_scores)
         multi_crypto_scores = [data['multi_aes_score']]

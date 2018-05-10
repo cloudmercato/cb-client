@@ -55,6 +55,7 @@ BonnieArgumentParser = subparser.add_parser('bonnie')
 
 # Geekbench
 Geekbench4ArgumentParser = subparser.add_parser('geekbench4')
+Geekbench4ArgumentParser.add_argument('-F', '--format', default='json')
 Geekbench3ArgumentParser = subparser.add_parser('geekbench3')
 
 # SPEC CPU
