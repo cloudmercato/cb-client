@@ -565,48 +565,19 @@ class FioWringer(BaseWringer):
         return fio_result
 
 
-class SysbenchMysqlWringer(BaseWringer):
-    bench_name = 'sysbench_mysql'
+class SysbenchOltpWringer(BaseWringer):
+    bench_name = 'sysbench_oltp'
 
     def __init__(self, *args, **kwargs):
-        super(SysbenchMysqlWringer, self).__init__(*args, **kwargs)
-        self.table_size = kwargs['table_size']
-        self.oltp_test_mode = kwargs['oltp_test_mode']
-        self.volume_flavor_id = kwargs['volume_flavor_id']
-        self.db_ps_mode = kwargs['db_ps_mode']
-        self.oltp_distinct_ranges = kwargs['oltp_distinct_ranges']
-        self.oltp_user_delay_max = kwargs['oltp_user_delay_max']
-        self.oltp_index_updates = kwargs['oltp_index_updates']
-        self.oltp_sum_ranges = kwargs['oltp_sum_ranges']
-        self.read_only = kwargs['read_only']
-        self.oltp_non_index_updates = kwargs['oltp_non_index_updates']
-        self.oltp_range_size = kwargs['oltp_range_size']
-        self.oltp_connect_delay = kwargs['oltp_connect_delay']
-        self.oltp_nontrx_mode = kwargs['oltp_nontrx_mode']
-        self.oltp_point_selects = kwargs['oltp_point_selects']
-        self.oltp_simple_ranges = kwargs['oltp_simple_ranges']
-        self.oltp_order_ranges = kwargs['oltp_order_ranges']
+        super(SysbenchOltpWringer, self).__init__(*args, **kwargs)
+        self.datastore_type = kwargs['datastore_type']
+        self.script = kwargs['script']
 
     def _get_data(self):
-        sysbench_data = {}
-
-        sysbench_data['table_size'] = self.table_size
-        sysbench_data['mode'] = self.oltp_test_mode
-        sysbench_data['volume'] = self.volume_flavor_id
-        sysbench_data['nontrx_mode'] = self.oltp_nontrx_mode
-        sysbench_data['read_only'] = self.read_only
-        sysbench_data['range_size'] = self.oltp_range_size
-        sysbench_data['point_select'] = self.oltp_point_selects
-        sysbench_data['simple_ranges'] = self.oltp_simple_ranges
-        sysbench_data['sum_ranges'] = self.oltp_sum_ranges
-        sysbench_data['order_ranges'] = self.oltp_order_ranges
-        sysbench_data['distinct_ranges'] = self.oltp_distinct_ranges
-        sysbench_data['index_ranges'] = self.oltp_index_updates
-        sysbench_data['non_index_ranges'] = self.oltp_non_index_updates
-        sysbench_data['connect_delay'] = self.oltp_connect_delay
-        sysbench_data['user_delay'] = self.oltp_user_delay_max
-        sysbench_data['ps_mode'] = self.db_ps_mode
-
+        sysbench_data = {
+            'datastore_type': self.datastore_type,
+            'script': self.script,
+        }
         for line in self.input_:
             if 'Number of threads' in line:
                 sysbench_data['num_thread'] = int(re.search('[\d]+', line).group())
@@ -623,16 +594,25 @@ class SysbenchMysqlWringer(BaseWringer):
             elif 'transactions:' in line:
                 sysbench_data['transactions'] = re.search('(\d+)', line).group(1)
                 sysbench_data['transaction_speed'] = re.search('(\d+\.\d*)', line).group()
+            elif 'queries:' in line:
+                sysbench_data['queries'] = re.search('(\d+)', line).group(1)
+                sysbench_data['query_speed'] = re.search('(\d+\.\d*)', line).group()
             elif 'avg:' in line:
-                sysbench_data['avg_response_time'] = re.search('(\d+\.\d*)', line).group()          #time in ms
-        
-        sysbench_data['rw_speed'] = (float(sysbench_data['read_queries']) + float(sysbench_data['write_queries']))/float(sysbench_data['run_time'])
-
+                sysbench_data['lat_avg'] = re.search('([\d\.]+)', line).group()
+            elif 'min:' in line:
+                sysbench_data['lat_min'] = re.search('([\d\.]+)', line).group()
+            elif 'max:' in line:
+                sysbench_data['lat_max'] = re.search('([\d\.]+)', line).group()
+            elif '95th percentile:' in line:
+                sysbench_data['lat_95p'] = re.search('([\d\.]+)', line).group()
+            elif 'sum:' in line:
+                sysbench_data['lat_sum'] = re.search('([\d\.]+)', line).group()
+        print(sysbench_data)
         return sysbench_data
 
     def _get_metadata(self):
-        metadata = super(SysbenchMysqlWringer, self)._get_metadata()
-        metadata['volume_flavor_id'] = self.volume_flavor_id
+        metadata = super(SysbenchOltpWringer, self)._get_metadata()
+        # metadata['volume_flavor_id'] = self.volume_flavor_id
         return metadata
 
 
@@ -1591,7 +1571,7 @@ WRINGERS = {
     'sysbench_ram': SysbenchRamWringer,
     'ab': AbWringer,
     'fio': FioWringer,
-    'sysbench_mysql': SysbenchMysqlWringer,
+    'sysbench_oltp': SysbenchOltpWringer,
     'vdbench': VdbenchWringer,
     'mdtest': MdtestWringer,
     'bonnie': BonnieWringer,
