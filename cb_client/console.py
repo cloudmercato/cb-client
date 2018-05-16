@@ -44,8 +44,9 @@ SysbenchCpuArgumentParser = subparser.add_parser('sysbench_cpu')
 SysbenchRamArgumentParser = subparser.add_parser('sysbench_ram')
 
 SysbenchOltpArgumentParser = subparser.add_parser('sysbench_oltp')
-SysbenchOltpArgumentParser.add_argument('-D', '--datastore-type')
-SysbenchOltpArgumentParser.add_argument('-S', '--script')
+SysbenchOltpArgumentParser.add_argument('-vf', '--volume-flavor', type=int, required=False)
+SysbenchOltpArgumentParser.add_argument('-D', '--datastore-type', required=True)
+SysbenchOltpArgumentParser.add_argument('-S', '--script', required=True)
 
 # Ab parser
 AbArgumentParser = subparser.add_parser('ab', help='ab help')

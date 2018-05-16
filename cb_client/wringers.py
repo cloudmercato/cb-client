@@ -572,9 +572,11 @@ class SysbenchOltpWringer(BaseWringer):
         super(SysbenchOltpWringer, self).__init__(*args, **kwargs)
         self.datastore_type = kwargs['datastore_type']
         self.script = kwargs['script']
+        self.volume_flavor_id = kwargs['volume_flavor'] or None
 
     def _get_data(self):
         sysbench_data = {
+            'volume': self.volume_flavor_id,
             'datastore_type': self.datastore_type,
             'script': self.script,
         }
@@ -607,7 +609,6 @@ class SysbenchOltpWringer(BaseWringer):
                 sysbench_data['lat_95p'] = re.search('([\d\.]+)', line).group()
             elif 'sum:' in line:
                 sysbench_data['lat_sum'] = re.search('([\d\.]+)', line).group()
-        print(sysbench_data)
         return sysbench_data
 
     def _get_metadata(self):
