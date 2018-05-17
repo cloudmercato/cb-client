@@ -115,6 +115,10 @@ DfsioArgumentParser.add_argument('-si', '--size', help='Hibench test size')
 DfsioArgumentParser.add_argument('-r', '--report-dir', help='Report base directory')
 DfsioArgumentParser.add_argument('-ar', '--architecture', help='')
 
+# Phoronix
+PhoronixTestSuiteArgumentParser = subparser.add_parser('phoronix_test_suite', help='pts elp')
+PhoronixTestSuiteArgumentParser.add_argument('-te', '--test', help='test')
+
 
 def main():
     parsed_args = parser.parse_args()

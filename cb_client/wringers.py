@@ -1567,6 +1567,31 @@ class VaspTestWringer(BaseWringer):
         }
 
 
+class PhoronixTestSuiteWringer(BaseWringer):
+    bench_name = 'phoronix_test_suite'
+
+    def __init__(self, *args, **kwargs):
+        super(PhoronixTestSuiteWringer, self).__init__(*args, **kwargs)
+        self.test = kwargs['test']
+        self.bench_name = '%s_%s' % (self.bench_name,
+                                     self.test.replace('pts/', ''))
+
+    def _parse_phpbench(self):
+        data = {}
+        for line in self.input_:
+            if 'Average:' in line:
+                data['average'] = line.split(':')[-1].split()[0].strip()
+            if 'Deviation:' in line:
+                data['deviation'] = line.split(':')[-1].strip()\
+                    .replace('%', '')
+        return data
+
+    def _get_data(self):
+        func = getattr(self, '_parse_%s' % self.test.replace('pts/', ''))
+        data = func()
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -1589,6 +1614,7 @@ WRINGERS = {
     'lammps': LammpsWringer,
     'vray': VRayWringer,
     'vasptest': VaspTestWringer,
+    'phoronix_test_suite': PhoronixTestSuiteWringer,
     'metric': MetricWringer,
 }
 
