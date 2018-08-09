@@ -1198,7 +1198,12 @@ class Geekbench3Wringer(BaseWringer):
 
     def _get_data(self):
         raw_results = json.load(self.input_)
-        data = {}
+        data = {
+            'single_score': raw_results['score'],
+            'multi_score': raw_results['multicore_score'],
+            'runtime': raw_results['runtime'],
+            'version': raw_results['version'],
+        }
         for section in raw_results['sections']:
             section_key = GEEKBENCH3_SECTIONS[section['name']]
             section_single_score_key = 'single_%s_score' % section_key
