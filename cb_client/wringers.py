@@ -69,7 +69,8 @@ def weighted_mean(values):
 class BaseWringer(object):
     def __init__(self, input_=None, master_url=None, token=None,
                  instance_id=None, flavor_id=None, image_id=None,
-                 date=None, tag=None, **kwargs):
+                 date=None, tag=None, project=None, is_standalone=None,
+                 **kwargs):
         """
         :param input_: Output of benchmark command, default is stdin
         :type input_: file
@@ -108,6 +109,8 @@ class BaseWringer(object):
         self.client = client.Client(self.master_url, self.token)
 
         self.tag = tag
+        self.project = project
+        self.is_standalone = is_standalone
 
     def _get_data(self):
         """
@@ -123,7 +126,7 @@ class BaseWringer(object):
         Return benchmark configuration as dict, you can override this method
         to fit with your need.
         """
-        return {
+        data = {
             'test_date': self.test_date,
             'flavor': self.flavor_id,
             'image': self.image_id,
@@ -131,7 +134,11 @@ class BaseWringer(object):
             'datacenter': self.datacenter_id,
             'instance_type': self.instance_type_id,
             'tag': self.tag,
+            'project': self.project,
         }
+        if self.is_standalone is not None:
+            data['is_standalone'] = self.is_standalone
+        return data
 
     def run(self):
         """
@@ -498,6 +505,8 @@ class AbWringer(BaseObjectStorageWringer):
                     bench_data['time_per_request'] = re.findall('\s*([\d.]+)\s*', line)[0]
             elif line.startswith('Transfer rate:'):
                 bench_data['transfer_rate'] = re.findall('\s*([\d.]+)\s*', line)[0]
+            elif line.strip().startswith('95%'):
+                bench_data['percentage_95'] = line.split()[1]
         dest_key = 'dest_%s' % self.destination_type
         bench_data.update({
             dest_key: self.destination_id,

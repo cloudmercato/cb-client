@@ -22,6 +22,8 @@ class ClientArgumentParser(argparse.ArgumentParser):
                           help='Benched storage id')
         self.add_argument('-T', '--tag', required=False,
                           help='Tag to add to result')
+        self.add_argument('-p', '--project', required=False)
+        self.add_argument('-St', '--is-standalone', required=False)
 
 
 parser = ClientArgumentParser()
