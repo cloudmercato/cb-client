@@ -37,6 +37,14 @@ REG_LAMMPS_PERF = re.compile('Performance:\s*([\d\.]*)\s*([\d\w/]*),\s*([\d\.]*)
 REG_LAMMPS_ROW = re.compile(r'^(\w*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*$')
 REG_VRAY = re.compile(r'Rendering took (\d*):(\d*) minutes.', re.M)
 REG_VASP = re.compile(r'Took (\d*)m([0-9.]*)s')
+GITLAB_METRICS = (
+    'db_ping_latency_seconds',
+    'filesystem_access_latency_seconds',
+    'filesystem_write_latency_seconds',
+    'filesystem_read_latency_seconds',
+    'filesystem_circuitbreaker_latency_seconds',
+    'redis_ping_latency_seconds',
+)
 
 class InvalidInput(Exception):
     pass
@@ -382,6 +390,45 @@ class MetricWringer(BaseWringer):
 
     def parse_LVM(self, line):
         return self.parse_disk(line, 'LVM')
+
+
+class PrometheusMetricWringer(BaseWringer):
+    bench_name = 'metric'
+
+    def run(self):
+        """
+        Public runner to parse and publish result.
+        """
+        data = []
+        date_ = datetime.now().isoformat()
+        for line in self.input_:
+            line = line.strip()
+            # Pass empty & comment
+            if not line or line.startswith('#'):
+                continue
+            splitted_line = line.split()
+            if splitted_line[0] not in GITLAB_METRICS or len(splitted_line) != 2:
+                continue
+            name, value = line.split()
+            print(line)
+            data.append({
+                'group': 'APP',
+                'value': value,
+                'name': name,
+                'date': date_,
+                'instance': self.instance_id,
+            })
+        try:
+            url = self.client.make_url('/rest/metric/')
+            for start in range(0, len(data), 250):
+                response = self.client.post(
+                    url=url,
+                    json=data[start:start+250])
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
+            return response
+        except KeyboardInterrupt:
+            raise SystemExit(1)
 
 
 class SysbenchCpuWringer(BaseWringer):
@@ -1630,6 +1677,7 @@ WRINGERS = {
     'vasptest': VaspTestWringer,
     'phoronix_test_suite': PhoronixTestSuiteWringer,
     'metric': MetricWringer,
+    'prometheus': PrometheusMetricWringer,
 }
 
 
