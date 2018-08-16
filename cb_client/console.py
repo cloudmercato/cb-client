@@ -23,7 +23,8 @@ class ClientArgumentParser(argparse.ArgumentParser):
         self.add_argument('-T', '--tag', required=False,
                           help='Tag to add to result')
         self.add_argument('-p', '--project', required=False)
-        self.add_argument('-St', '--is-standalone', required=False)
+        self.add_argument('-St', '--is-not-standalone', action="store_false", required=False)
+        self.add_argument('-se', '--set', required=False)
 
 
 parser = ClientArgumentParser()
@@ -121,6 +122,18 @@ DfsioArgumentParser.add_argument('-ar', '--architecture', help='')
 # Phoronix
 PhoronixTestSuiteArgumentParser = subparser.add_parser('phoronix_test_suite', help='pts elp')
 PhoronixTestSuiteArgumentParser.add_argument('-te', '--test', help='test')
+
+# Python
+PythonReadArgumentParser = subparser.add_parser('python_read', help='')
+PythonReadArgumentParser.add_argument('-Si', '--size', required=True)
+PythonReadArgumentParser.add_argument('-Ch', '--chunk-size', required=True)
+PythonReadArgumentParser.add_argument('-It', '--iterations', required=True)
+PythonReadArgumentParser.add_argument('-Fi', '--filename', required=True)
+
+# CI task
+CiTaskArgumentParser = subparser.add_parser('ci_task', help='')
+CiTaskArgumentParser.add_argument('-Ser', '--service', required=True)
+CiTaskArgumentParser.add_argument('-Tas', '--task', required=True)
 
 
 def main():

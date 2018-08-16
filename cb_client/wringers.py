@@ -78,7 +78,7 @@ class BaseWringer(object):
     def __init__(self, input_=None, master_url=None, token=None,
                  instance_id=None, flavor_id=None, image_id=None,
                  date=None, tag=None, project=None, is_standalone=None,
-                 **kwargs):
+                 test_set=None, **kwargs):
         """
         :param input_: Output of benchmark command, default is stdin
         :type input_: file
@@ -119,6 +119,7 @@ class BaseWringer(object):
         self.tag = tag
         self.project = project
         self.is_standalone = is_standalone
+        self.test_set = test_set
 
     def _get_data(self):
         """
@@ -143,6 +144,7 @@ class BaseWringer(object):
             'instance_type': self.instance_type_id,
             'tag': self.tag,
             'project': self.project,
+            'set': self.test_set,
         }
         if self.is_standalone is not None:
             data['is_standalone'] = self.is_standalone
@@ -1653,6 +1655,51 @@ class PhoronixTestSuiteWringer(BaseWringer):
         return data
 
 
+class PythonReadWringer(BaseWringer):
+    bench_name = 'python_read'
+
+    def __init__(self, *args, **kwargs):
+        super(PythonReadWringer, self).__init__(*args, **kwargs)
+        self.unit = kwargs.get('unit')
+        self.size = kwargs.get('size')
+        self.chunk_size = kwargs.get('chunk_size')
+        self.iterations = kwargs.get('iterations')
+        self.filename = kwargs.get('filename')
+
+    def _get_data(self):
+        time_output = self.input_.read()
+        return {
+            'time': float(time_output),
+            'unit': self.unit,
+            'size': self.size,
+            'chunk_size': self.chunk_size,
+            'iterations': self.iterations,
+            'filename': self.filename,
+        }
+
+
+class CiTaskWringer(BaseWringer):
+    bench_name = 'ci_task'
+
+    def __init__(self, *args, **kwargs):
+        super(CiTaskWringer, self).__init__(*args, **kwargs)
+        self.service = kwargs.get('service')
+        self.task = kwargs.get('task')
+
+    def _get_data(self):
+        for line in self.input_:
+            if line.startswith('Duration: '):
+                duration = int(line.split(':')[1].strip())
+                break
+        else:
+            raise Exception()
+        return {
+            'duration': duration,
+            'service': self.service,
+            'task': self.task,
+        }
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -1676,6 +1723,8 @@ WRINGERS = {
     'vray': VRayWringer,
     'vasptest': VaspTestWringer,
     'phoronix_test_suite': PhoronixTestSuiteWringer,
+    'python_read': PythonReadWringer,
+    'ci_task': CiTaskWringer,
     'metric': MetricWringer,
     'prometheus': PrometheusMetricWringer,
 }
