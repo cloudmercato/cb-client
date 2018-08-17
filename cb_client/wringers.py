@@ -1687,17 +1687,20 @@ class CiTaskWringer(BaseWringer):
         self.task = kwargs.get('task')
 
     def _get_data(self):
-        for line in self.input_:
-            if line.startswith('Duration: '):
-                duration = int(line.split(':')[1].strip())
-                break
-        else:
-            raise Exception()
-        return {
-            'duration': duration,
+        durations = {
+            'Duration': 'duration',
+            'Pending duration': 'pending_duration',
+            'Task duration': 'task_duration',
+        }
+        data = {
             'service': self.service,
             'task': self.task,
         }
+        for line in self.input_:
+            if line.split(':')[0] in durations:
+                key, value = line.split(':')
+                data[durations[key]] = value
+        return data
 
 
 WRINGERS = {
