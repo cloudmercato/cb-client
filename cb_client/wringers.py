@@ -1326,9 +1326,6 @@ class SpecCpu2006Wringer(BaseWringer):
             # Stop at "Submit Notes"
             if section == 'Submit Notes':
                 break
-            # Set mode
-            if line[0].startswith('SPEC CPU2006 '):
-                mode = 'rate' if line[0].endswith(' Rate Result') else 'speed'
             # Set current section
             if len(line) == 1 and line[0][0] not in '#- ':
                 section = line[0]
@@ -1340,7 +1337,7 @@ class SpecCpu2006Wringer(BaseWringer):
             if len(line) == 12 and line[0] != 'Benchmark':
                 if not line[2]:
                     continue
-                result = self._get_data(line, mode)
+                result = self._get_data(line)
                 data.append(result)
             # Get compiler
             if section == 'SOFTWARE':
@@ -1360,6 +1357,7 @@ class SpecCpu2006Wringer(BaseWringer):
         error = None
         for result in data:
             result.update(config_data)
+            # Set mode
             try:
                 response = self.client.post_result(
                     bench_name=self.bench_name,
@@ -1374,24 +1372,17 @@ class SpecCpu2006Wringer(BaseWringer):
         if error is not None:
             raise error
 
-    def _get_data(self, line, mode):
-        if mode == 'rate':
-            return {
-                'test': line[0],
-                'mode': mode,
-                'copies': line[1],
-                'base_run_time': line[2],
-                'base_rate': line[3],
-            }
-        else:
-            return {
-                'test': line[0],
-                'mode': mode,
-                'copies': 1,
-                'base_ref_time': line[1],
-                'base_run_time': line[2],
-                'base_ratio': line[3],
-            }
+    def _get_data(self, line):
+        copies = int(line[1])
+        mode = 'rate' if copies > 1 else 'speed'
+        data = {
+            'test': line[0],
+            'mode': mode,
+            'copies': copies,
+            'base_run_time': line[2],
+            'base_rate': line[3],
+        }
+        return data
 
 
 class SpecCpu2017Wringer(BaseWringer):
