@@ -1292,7 +1292,7 @@ class SpecCpu2006Wringer(BaseWringer):
             version = re.match('.*Version ([\d.]*).*', text).groups()[0]
             return ('icc', version)
         if 'gcc' in text.lower():
-            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            version = re.match('.*(\d\.\d\.\d).*', text).groups()[0]
             return ('gcc', version)
         if 'microsoft' in text.lower():
             version = re.match('.*Version ([\d.]*).*', text).groups()[0]
@@ -1304,7 +1304,7 @@ class SpecCpu2006Wringer(BaseWringer):
             version = re.match('.*Version ([\d.]*).*', text).groups()[0]
             return ('icc', version)
         if 'gcc' in text.lower():
-            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            version = re.match('.*(\d\.\d\.\d).*', text).groups()[0]
             return ('gcc', version)
         if 'microsoft' in text.lower():
             version = re.match('.*Version ([\d.]*).*', text).groups()[0]
