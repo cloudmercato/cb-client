@@ -699,7 +699,8 @@ class VdbenchWringer(BaseWringer):
 
     def __init__(self, *args, **kwargs):
         super(VdbenchWringer, self).__init__(*args, **kwargs)
-        self.vdbench_config = kwargs['vdbench_config']
+        for key, val in kwargs.items():
+            setattr(self, key, val)
 
     def _get_data(self, **kwargs):
         is_rd = False
@@ -711,45 +712,49 @@ class VdbenchWringer(BaseWringer):
                 break
         date, i, ops, lat, cpu_total, cpu_sys, read_pct, read_iops, read_lat, write_iops, write_lat, read_bw, write_bw, bw, bs, mkdir_ops, mkdir_lat, rmdir_ops, rmdir_lat, create_ops, create_lat, open_ops, open_lat, close_ops, close_lat, delete_ops, delete_lat = line.split()
         vdbench_result = {
-          'ops': ops,
-          'lat': lat,
-          'cpu_total': cpu_total,
-          'cpu_sys': cpu_sys,
-          'read_pct': read_pct,
-          'read_iops': read_iops,
-          'read_lat': read_lat,
-          'write_iops': write_iops,
-          'write_lat': write_lat,
-          'read_bw': read_bw,
-          'write_bw': write_bw,
-          'bw': bw,
-          'bs': bs,
-          'mkdir_ops': mkdir_ops,
-          'mkdir_lat': mkdir_lat,
-          'rmdir_ops': rmdir_ops,
-          'rmdir_lat': rmdir_lat,
-          'create_ops': create_ops,
-          'create_lat': create_lat,
-          'open_ops': open_ops,
-          'open_lat': open_lat,
-          'close_ops': close_ops,
-          'close_lat': close_lat,
-          'delete_ops': delete_ops,
-          'delete_lat': delete_lat,
+            'ops': ops,
+            'lat': lat,
+            'cpu_total': cpu_total,
+            'cpu_sys': cpu_sys,
+            'read_pct': read_pct,
+            'read_iops': read_iops,
+            'read_lat': read_lat,
+            'write_iops': write_iops,
+            'write_lat': write_lat,
+            'read_bw': read_bw,
+            'write_bw': write_bw,
+            'bw': bw,
+            'bs': bs,
+            'mkdir_ops': mkdir_ops,
+            'mkdir_lat': mkdir_lat,
+            'rmdir_ops': rmdir_ops,
+            'rmdir_lat': rmdir_lat,
+            'create_ops': create_ops,
+            'create_lat': create_lat,
+            'open_ops': open_ops,
+            'open_lat': open_lat,
+            'close_ops': close_ops,
+            'close_lat': close_lat,
+            'delete_ops': delete_ops,
+            'delete_lat': delete_lat,
         }
-        vdbench_result.update(self.vdbench_config)
-        vdbench_result['operations'] = ','.join([fwd['operation'] for fwd in self.vdbench_config['fwds']])
-        if vdbench_result.get('rdpct') is not None:
-            if int(vdbench_result['rdpct']) == 0:
-                vdbench_result['operations'] == 'write'
-            elif int(vdbench_result['rdpct']) == 100:
-                vdbench_result['operations'] == 'read'
-            else:
-                vdbench_result['operations'] == 'read,write'
-        vdbench_result['width'] = self.vdbench_config['fsd']['width']
-        vdbench_result['depth'] = self.vdbench_config['fsd']['depth']
-        vdbench_result['files'] = self.vdbench_config['fsd']['files']
-        vdbench_result['threads'] = sum([int(fwd['threads']) for fwd in self.vdbench_config['fwds']])
+        if self.fwd_rdpct == 0:
+            vdbench_result['operations'] = 'write'
+        elif self.fwd_rdpct == 100:
+            vdbench_result['operations'] = 'read'
+        else:
+            vdbench_result['operations'] = 'read,write'
+        vdbench_result.update({
+            'width': self.fsd_width,
+            'depth': self.fsd_depth,
+            'files': self.fsd_files,
+            'sizes': self.fsd_size,
+            'directio': self.fsd_directio,
+            'fileio': self.fwd_fileio,
+            'xfersize': self.fwd_xfersize,
+            'threads': self.rd_threads,
+            'elapsed': self.rd_elapsed,
+        })
         return vdbench_result
 
 

@@ -137,10 +137,20 @@ CiTaskArgumentParser.add_argument('-Tas', '--task', required=True)
 
 # Vdbench
 VdbenchArgumentParser = subparser.add_parser('vdbench', help='')
-VebenchArgumentParser.add_argument('-vf', '--volume-flavor-id', type=int, required=False)
-VebenchArgumentParser.add_argument('-vm', '--volume-manager-id', type=int, required=False)
-VebenchArgumentParser.add_argument('-ns', '--network-storage-id', type=int, required=False)
-VebenchArgumentParser.add_argument('-cn', '--vdbench-config', type=int, required=False)
+VdbenchArgumentParser.add_argument('--fsd-depth', type=int, required=True)
+VdbenchArgumentParser.add_argument('--fsd-width', type=int, required=True)
+VdbenchArgumentParser.add_argument('--fsd-files', type=int, required=True)
+VdbenchArgumentParser.add_argument('--fsd-size', type=str, required=True)
+VdbenchArgumentParser.add_argument('--fsd-directio', action="store_true")
+VdbenchArgumentParser.add_argument('--fwd-xfersize', type=str, required=True)
+VdbenchArgumentParser.add_argument('--fwd-fileio', type=str, required=True)
+VdbenchArgumentParser.add_argument('--fwd-rdpct', type=int, required=True)
+VdbenchArgumentParser.add_argument('--rd-elapsed', type=int, required=True)
+VdbenchArgumentParser.add_argument('--rd-threads', type=int, required=True)
+
+VdbenchArgumentParser.add_argument('-vf', '--volume-flavor-id', type=int, required=False)
+VdbenchArgumentParser.add_argument('-vm', '--volume-manager-id', type=int, required=False)
+VdbenchArgumentParser.add_argument('-ns', '--network-storage-id', type=int, required=False)
 
 def main():
     parsed_args = parser.parse_args()
