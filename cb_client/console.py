@@ -135,6 +135,12 @@ CiTaskArgumentParser = subparser.add_parser('ci_task', help='')
 CiTaskArgumentParser.add_argument('-Ser', '--service', required=True)
 CiTaskArgumentParser.add_argument('-Tas', '--task', required=True)
 
+# Vdbench
+VdbenchArgumentParser = subparser.add_parser('vdbench', help='')
+VebenchArgumentParser.add_argument('-vf', '--volume-flavor-id', type=int, required=False)
+VebenchArgumentParser.add_argument('-vm', '--volume-manager-id', type=int, required=False)
+VebenchArgumentParser.add_argument('-ns', '--network-storage-id', type=int, required=False)
+VebenchArgumentParser.add_argument('-cn', '--vdbench-config', type=int, required=False)
 
 def main():
     parsed_args = parser.parse_args()
