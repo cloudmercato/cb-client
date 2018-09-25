@@ -745,6 +745,7 @@ class VdbenchWringer(BaseWringer):
         else:
             vdbench_result['operations'] = 'read,write'
         vdbench_result.update({
+            'volume_flavor': self.volume_flavor_id,
             'width': self.fsd_width,
             'depth': self.fsd_depth,
             'files': self.fsd_files,
