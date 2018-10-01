@@ -705,12 +705,13 @@ class VdbenchWringer(BaseWringer):
     def _get_data(self, **kwargs):
         is_rd = False
         for line in self.input_.readlines():
-            if 'Starting RD' in line:
+            if 'Starting RD=' in line and not 'format_for_' in line:
                 is_rd = True
                 continue
             if is_rd and 'avg_2' in line:
                 break
         date, i, ops, lat, cpu_total, cpu_sys, read_pct, read_iops, read_lat, write_iops, write_lat, read_bw, write_bw, bw, bs, mkdir_ops, mkdir_lat, rmdir_ops, rmdir_lat, create_ops, create_lat, open_ops, open_lat, close_ops, close_lat, delete_ops, delete_lat = line.split()
+        print(line)
         vdbench_result = {
             'ops': ops,
             'lat': lat,
