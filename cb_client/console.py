@@ -24,7 +24,7 @@ class ClientArgumentParser(argparse.ArgumentParser):
                           help='Tag to add to result')
         self.add_argument('-p', '--project', required=False)
         self.add_argument('-St', '--is-not-standalone', action="store_false", required=False)
-        self.add_argument('-se', '--set', required=False)
+        self.add_argument('-se', '--set', dest='test_set', required=False)
 
 
 parser = ClientArgumentParser()
