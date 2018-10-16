@@ -134,6 +134,8 @@ PythonReadArgumentParser.add_argument('-Fi', '--filename', required=True)
 CiTaskArgumentParser = subparser.add_parser('ci_task', help='')
 CiTaskArgumentParser.add_argument('-Ser', '--service', required=True)
 CiTaskArgumentParser.add_argument('-Tas', '--task', required=True)
+CiTaskArgumentParser.add_argument('-Max', '--max-concurrency', required=True)
+CiTaskArgumentParser.add_argument('-Con', '--concurrency', required=True)
 
 # Vdbench
 VdbenchArgumentParser = subparser.add_parser('vdbench', help='')

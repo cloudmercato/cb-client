@@ -1683,16 +1683,20 @@ class CiTaskWringer(BaseWringer):
         super(CiTaskWringer, self).__init__(*args, **kwargs)
         self.service = kwargs.get('service')
         self.task = kwargs.get('task')
+        self.concurrency = kwargs.get('concurrency')
 
     def _get_data(self):
         durations = {
             'Duration': 'duration',
             'Pending duration': 'pending_duration',
             'Task duration': 'task_duration',
+            'Status': 'status',
         }
         data = {
             'service': self.service,
             'task': self.task,
+            'concurrency': self.concurrency,
+            'max_concurrency': self.max_concurrency,
         }
         for line in self.input_:
             if line.split(':')[0] in durations:
