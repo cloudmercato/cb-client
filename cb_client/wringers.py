@@ -117,7 +117,7 @@ class BaseWringer(object):
         self.client = client.Client(self.master_url, self.token)
 
         self.tag = tag
-        self.project = project
+        self.project = project or None
         self.is_standalone = is_standalone
         self.test_set = test_set
 
