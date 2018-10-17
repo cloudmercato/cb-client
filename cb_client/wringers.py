@@ -1684,6 +1684,7 @@ class CiTaskWringer(BaseWringer):
         self.service = kwargs.get('service')
         self.task = kwargs.get('task')
         self.concurrency = kwargs.get('concurrency')
+        self.max_concurrency = kwargs.get('max_concurrency')
 
     def _get_data(self):
         durations = {
@@ -1701,7 +1702,7 @@ class CiTaskWringer(BaseWringer):
         for line in self.input_:
             if line.split(':')[0] in durations:
                 key, value = line.split(':')
-                data[durations[key]] = value
+                data[durations[key]] = value.strip()
         return data
 
 
