@@ -23,7 +23,7 @@ class ClientArgumentParser(argparse.ArgumentParser):
         self.add_argument('-T', '--tag', required=False,
                           help='Tag to add to result')
         self.add_argument('-p', '--project', required=False)
-        self.add_argument('-St', '--is-not-standalone', action="store_false", required=False)
+        self.add_argument('-St', '--is-not-standalone', dest='is_standalone', action="store_false", required=False)
         self.add_argument('-se', '--set', dest='test_set', required=False)
 
 
@@ -139,16 +139,17 @@ CiTaskArgumentParser.add_argument('-Con', '--concurrency', required=True)
 
 # Vdbench
 VdbenchArgumentParser = subparser.add_parser('vdbench', help='')
-VdbenchArgumentParser.add_argument('--fsd-depth', type=int, required=True)
-VdbenchArgumentParser.add_argument('--fsd-width', type=int, required=True)
-VdbenchArgumentParser.add_argument('--fsd-files', type=int, required=True)
-VdbenchArgumentParser.add_argument('--fsd-size', type=str, required=True)
+VdbenchArgumentParser.add_argument('--vdbench-config', type=str, required=False)
+VdbenchArgumentParser.add_argument('--fsd-depth', type=int, required=False)
+VdbenchArgumentParser.add_argument('--fsd-width', type=int, required=False)
+VdbenchArgumentParser.add_argument('--fsd-files', type=int, required=False)
+VdbenchArgumentParser.add_argument('--fsd-size', type=str, required=False)
 VdbenchArgumentParser.add_argument('--fsd-directio', action="store_true")
-VdbenchArgumentParser.add_argument('--fwd-xfersize', type=str, required=True)
-VdbenchArgumentParser.add_argument('--fwd-fileio', type=str, required=True)
-VdbenchArgumentParser.add_argument('--fwd-rdpct', type=int, required=True)
-VdbenchArgumentParser.add_argument('--rd-elapsed', type=int, required=True)
-VdbenchArgumentParser.add_argument('--rd-threads', type=int, required=True)
+VdbenchArgumentParser.add_argument('--fwd-xfersize', type=str, required=False)
+VdbenchArgumentParser.add_argument('--fwd-fileio', type=str, required=False)
+VdbenchArgumentParser.add_argument('--fwd-rdpct', type=int, required=False)
+VdbenchArgumentParser.add_argument('--rd-elapsed', type=int, required=False)
+VdbenchArgumentParser.add_argument('--rd-threads', type=int, required=False)
 
 VdbenchArgumentParser.add_argument('-vf', '--volume-flavor-id', type=int, required=False)
 VdbenchArgumentParser.add_argument('-vm', '--volume-manager-id', type=int, required=False)

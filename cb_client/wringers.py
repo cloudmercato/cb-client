@@ -701,6 +701,24 @@ class VdbenchWringer(BaseWringer):
         super(VdbenchWringer, self).__init__(*args, **kwargs)
         for key, val in kwargs.items():
             setattr(self, key, val)
+        if self.vdbench_config:
+            self._parse_config(self.vdbench_config)
+
+    def _parse_config(self, filename):
+        with open(filename, 'r') as config_file:
+            config = {
+                line.strip().split('=')[0]: dict([
+                    s.split('=')
+                    for s in line.strip().split(',')
+                ])
+                for line in config_file
+            }
+        for prefix, setts in config.items():
+            for key, value in setts.items():
+                fieldname = "%s_%s" % (prefix, key)
+                setattr(self, fieldname, value)
+        self.rd_threads = config['rd'].get('threads', '8')
+        self.fsd_directio = 'directio' in getattr(self, 'fsd_openflags', '')
 
     def _get_data(self, **kwargs):
         is_rd = False
@@ -711,7 +729,6 @@ class VdbenchWringer(BaseWringer):
             if is_rd and 'avg_2' in line:
                 break
         date, i, ops, lat, cpu_total, cpu_sys, read_pct, read_iops, read_lat, write_iops, write_lat, read_bw, write_bw, bw, bs, mkdir_ops, mkdir_lat, rmdir_ops, rmdir_lat, create_ops, create_lat, open_ops, open_lat, close_ops, close_lat, delete_ops, delete_lat = line.split()
-        print(line)
         vdbench_result = {
             'ops': ops,
             'lat': lat,
