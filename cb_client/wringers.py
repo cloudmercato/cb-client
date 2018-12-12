@@ -1117,73 +1117,84 @@ class IperfWringer(BaseNetworkWringer):
 
 
 GEEKBENCH4_FIELDS = {
-  # V3
-  'Twofish': ('twofish', 2**20),
-  'SHA1': ('sha1', 2**20),
-  'SHA2': ('sha2', 2**20),
-  'BZip2 Compress': ('bzip_compress', 2**20),
-  'BZip2 Decompress': ('bzip_decompress', 2**20),
-  'JPEG Compress': ('jpeg_compress', 10**6),
-  'JPEG Decompress': ('jpeg_decompress', 10**6),
-  'PNG Compress': ('png_compress', 10**6),
-  'PNG Decompress': ('png_decompress', 10**6),
-  'Sobel': ('sobel', 10**6),
-  'BlackScholes': ('blackscholes', 10**6),
-  'Mandelbrot': ('mandelbrot', 10**9),
-  'Sharpen Filter': ('sharpen', 10**9),
-  'Blur Filter': ('blur', 10**9),
-  'SGEMM': ('sgemm', 10**9),
-  'DGEMM': ('dgemm', 10**9),
-  'SFFT': ('sfft', 10**9),
-  'DFFT': ('dfft', 10**9),
-  'N-Body': ('nbody', 10**6),
-  'Stream Copy': ('stream_copy', 2**30),
-  'Stream Scale': ('stream_scale', 2**30),
-  'Stream Add': ('stream_add', 2**30),
-  'Stream Triad': ('stream_triad', 2**30),
-  'Ray Trace': ('ray', 10**6),
-  # V4
-  'AES': ('aes', 2**30),
-  'LZMA': ('lzma', 2**20),
-  'JPEG': ('jpeg', 10**6),
-  'Canny': ('canny', 10**6),
-  'Lua': ('lua', 2**20),
-  'Dijkstra': ('dijkstra', 10**6),
-  'SQLite': ('sqlite', 10**3),
-  'HTML5 Parse': ('html5_parse', 2**20),
-  'HTML5 DOM': ('html5_dom', 10**6),
-  'Histogram Equalization': ('histogram', 10**6),
-  'PDF Rendering': ('pdf', 10**6),
-  'LLVM': ('llvm', 1),
-  'Camera': ('camera', 1),
-  'SGEMM': ('sgemm', 10**9),
-  'SFFT': ('sfft', 10**9),
-  'N-Body Physics': ('nbody', 10**6),
-  'Ray Tracing': ('ray', 10**3),
-  'Rigid Body Physics': ('rigid', 1),
-  'HDR': ('hdr', 10**6),
-  'Gaussian Blur': ('gaussian', 10**6),
-  'Speech Recognition': ('speech', 1),
-  'Face Detection': ('face', 10**3),
-  'Memory Copy': ('memory_copy', 2**30),
-  'Memory Latency': ('memory_latency', 10**12),
-  'Memory Bandwidth': ('memory_bandwidth', 2**30),
+    # V3
+    'Twofish': ('twofish', 2**20),
+    'SHA1': ('sha1', 2**20),
+    'SHA2': ('sha2', 2**20),
+    'BZip2 Compress': ('bzip_compress', 2**20),
+    'BZip2 Decompress': ('bzip_decompress', 2**20),
+    'JPEG Compress': ('jpeg_compress', 10**6),
+    'JPEG Decompress': ('jpeg_decompress', 10**6),
+    'PNG Compress': ('png_compress', 10**6),
+    'PNG Decompress': ('png_decompress', 10**6),
+    'Sobel': ('sobel', 10**6),
+    'BlackScholes': ('blackscholes', 10**6),
+    'Mandelbrot': ('mandelbrot', 10**9),
+    'Sharpen Filter': ('sharpen', 10**9),
+    'Blur Filter': ('blur', 10**9),
+    'SGEMM': ('sgemm', 10**9),
+    'DGEMM': ('dgemm', 10**9),
+    'SFFT': ('sfft', 10**9),
+    'DFFT': ('dfft', 10**9),
+    'N-Body': ('nbody', 10**6),
+    'Stream Copy': ('stream_copy', 2**30),
+    'Stream Scale': ('stream_scale', 2**30),
+    'Stream Add': ('streama_add', 2**30),
+    'Stream Triad': ('stream_triad', 2**30),
+    'Ray Trace': ('ray', 10**6),
+    # V4
+    'AES': ('aes', 2**30),
+    'LZMA': ('lzma', 2**20),
+    'JPEG': ('jpeg', 10**6),
+    'Canny': ('canny', 10**6),
+    'Lua': ('lua', 2**20),
+    'Dijkstra': ('dijkstra', 10**6),
+    'SQLite': ('sqlite', 10**3),
+    'HTML5 Parse': ('html5_parse', 2**20),
+    'HTML5 DOM': ('html5_dom', 10**6),
+    'Histogram Equalization': ('histogram', 10**6),
+    'PDF Rendering': ('pdf', 10**6),
+    'LLVM': ('llvm', 1),
+    'Camera': ('camera', 1),
+    'SGEMM': ('sgemm', 10**9),
+    'N-Body Physics': ('nbody', 10**6),
+    'Ray Tracing': ('ray', 10**3),
+    'Rigid Body Physics': ('rigid', 1),
+    'HDR': ('hdr', 10**6),
+    'Gaussian Blur': ('gaussian', 10**6),
+    'Speech Recognition': ('speech', 1),
+    'Face Detection': ('face', 10**3),
+    'Memory Copy': ('memory_copy', 2**30),
+    'Memory Latency': ('memory_latency', 10**12),
+    'Memory Bandwidth': ('memory_bandwidth', 2**30),
+    # V4 OpenCL
+    'RAW': ('raw', 2**30),
+    'Depth of Field': ('depth_field', 2**30),
+    'Particle Physics': ('particle_physics', 1),
 }
 class Geekbench4Wringer(BaseWringer):
     bench_name = 'geekbench4'
 
-    def __init__(self, format, *args, **kwargs):
+    def __init__(self, format, mode, *args, **kwargs):
         super(Geekbench4Wringer, self).__init__(*args, **kwargs)
         self.format = format
+        self.mode = mode
 
     def parse_json(self):
         raw_results = json.load(self.input_)
-        data = {}
+        data = {
+            'version': raw_results['version'],
+            'runtime': raw_results['runtime'],
+            'mode': self.mode,
+        }
         for section in raw_results['sections']:
-            mode = 'single' if section['name'] == "Single-Core" else 'multi'
+            if section['name'] == "Multi-Core":
+                prefix = 'multi'
+            else:
+                prefix = 'single'
             for raw_result in section['workloads']:
                 key, format_ = GEEKBENCH4_FIELDS[raw_result['name']]
-                fieldname = '%s_%s' % (mode, key)
+                fieldname = '%s_%s' % (prefix, key)
                 data[fieldname] = raw_result['workload_rate'] / format_
                 if raw_result['name'] == 'Memory Latency':
                     data[fieldname] = data[fieldname] / raw_result['work']
@@ -1211,62 +1222,63 @@ class Geekbench4Wringer(BaseWringer):
             data = self.parse_csv()
         else:
             data = self.parse_json()
-        single_crypto_scores = [data['single_aes_score']]
-        single_crypto_score = geo_mean(single_crypto_scores)
-        multi_crypto_scores = [data['multi_aes_score']]
-        multi_crypto_score = geo_mean(multi_crypto_scores)
-        single_int_scores = [data['single_%s_score' % f] for f in [
-            'lzma', 'jpeg', 'canny', 'lua', 'dijkstra', 'sqlite',
-            'html5_parse', 'html5_dom', 'histogram', 'pdf',
-            'llvm', 'camera'
-        ]]
-        single_int_score = geo_mean(single_int_scores)
-        multi_int_scores = [data['multi_%s_score' % f] for f in [
-            'lzma', 'jpeg', 'canny', 'lua', 'dijkstra', 'sqlite',
-            'html5_parse', 'html5_dom', 'histogram', 'pdf',
-            'llvm', 'camera'
-        ]]
-        multi_int_score = geo_mean(multi_int_scores)
-        single_float_scores = [data['single_%s_score' % f] for f in [
-            'sgemm', 'sfft', 'nbody', 'ray', 'rigid', 'hdr', 'gaussian',
-            'speech', 'face'
-        ]]
-        single_float_score = geo_mean(single_float_scores)
-        multi_float_scores = [data['multi_%s_score' % f] for f in [
-            'sgemm', 'sfft', 'nbody', 'ray', 'rigid', 'hdr', 'gaussian',
-            'speech', 'face'
-        ]]
-        multi_float_score = geo_mean(multi_float_scores)
-        single_memory_scores = [data['single_%s_score' % f] for f in [
-            'memory_copy', 'memory_latency', 'memory_bandwidth'
-        ]]
-        single_memory_score = geo_mean(single_memory_scores)
-        multi_memory_scores = [data['multi_%s_score' % f] for f in [
-            'memory_copy', 'memory_latency', 'memory_bandwidth'
-        ]]
-        multi_memory_score = geo_mean(multi_memory_scores)
-        single_score = weighted_mean((
-            (5, single_crypto_score),
-            (45, single_int_score),
-            (30, single_float_score),
-            (20, single_memory_score),
-        ))
-        multi_score = weighted_mean((
-            (5, multi_crypto_score),
-            (45, multi_int_score),
-            (30, multi_float_score),
-            (20, multi_memory_score),
-        ))
-        data.update(single_crypto_score=single_crypto_score,
-                    multi_crypto_score=multi_crypto_score,
-                    single_int_score=single_int_score,
-                    multi_int_score=multi_int_score,
-                    single_float_score=single_float_score,
-                    multi_float_score=multi_float_score,
-                    single_memory_score=single_memory_score,
-                    multi_memory_score=multi_memory_score,
-                    single_score=single_score,
-                    multi_score=multi_score)
+        if self.mode == 'standard':
+            single_crypto_scores = [data['single_aes_score']]
+            single_crypto_score = geo_mean(single_crypto_scores)
+            multi_crypto_scores = [data['multi_aes_score']]
+            multi_crypto_score = geo_mean(multi_crypto_scores)
+            single_int_scores = [data['single_%s_score' % f] for f in [
+                'lzma', 'jpeg', 'canny', 'lua', 'dijkstra', 'sqlite',
+                'html5_parse', 'html5_dom', 'histogram', 'pdf',
+                'llvm', 'camera'
+            ]]
+            single_int_score = geo_mean(single_int_scores)
+            multi_int_scores = [data['multi_%s_score' % f] for f in [
+                'lzma', 'jpeg', 'canny', 'lua', 'dijkstra', 'sqlite',
+                'html5_parse', 'html5_dom', 'histogram', 'pdf',
+                'llvm', 'camera'
+            ]]
+            multi_int_score = geo_mean(multi_int_scores)
+            single_float_scores = [data['single_%s_score' % f] for f in [
+                'sgemm', 'sfft', 'nbody', 'ray', 'rigid', 'hdr', 'gaussian',
+                'speech', 'face'
+            ]]
+            single_float_score = geo_mean(single_float_scores)
+            multi_float_scores = [data['multi_%s_score' % f] for f in [
+                'sgemm', 'sfft', 'nbody', 'ray', 'rigid', 'hdr', 'gaussian',
+                'speech', 'face'
+            ]]
+            multi_float_score = geo_mean(multi_float_scores)
+            single_memory_scores = [data['single_%s_score' % f] for f in [
+                'memory_copy', 'memory_latency', 'memory_bandwidth'
+            ]]
+            single_memory_score = geo_mean(single_memory_scores)
+            multi_memory_scores = [data['multi_%s_score' % f] for f in [
+                'memory_copy', 'memory_latency', 'memory_bandwidth'
+            ]]
+            multi_memory_score = geo_mean(multi_memory_scores)
+            single_score = weighted_mean((
+                (5, single_crypto_score),
+                (45, single_int_score),
+                (30, single_float_score),
+                (20, single_memory_score),
+            ))
+            multi_score = weighted_mean((
+                (5, multi_crypto_score),
+                (45, multi_int_score),
+                (30, multi_float_score),
+                (20, multi_memory_score),
+            ))
+            data.update(single_crypto_score=single_crypto_score,
+                        multi_crypto_score=multi_crypto_score,
+                        single_int_score=single_int_score,
+                        multi_int_score=multi_int_score,
+                        single_float_score=single_float_score,
+                        multi_float_score=multi_float_score,
+                        single_memory_score=single_memory_score,
+                        multi_memory_score=multi_memory_score,
+                        single_score=single_score,
+                        multi_score=multi_score)
         return data
 
 

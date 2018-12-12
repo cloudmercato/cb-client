@@ -64,9 +64,11 @@ AbArgumentParser.add_argument('-De', '--destination-type', help='')
 BonnieArgumentParser = subparser.add_parser('bonnie')
 
 # Geekbench
+Geekbench3ArgumentParser = subparser.add_parser('geekbench3')
+
 Geekbench4ArgumentParser = subparser.add_parser('geekbench4')
 Geekbench4ArgumentParser.add_argument('-F', '--format', default='json')
-Geekbench3ArgumentParser = subparser.add_parser('geekbench3')
+Geekbench4ArgumentParser.add_argument('-M', '--mode', default='standard')
 
 # SPEC CPU
 SpecCpu2006ArgumentParser = subparser.add_parser('spec_cpu2006')
