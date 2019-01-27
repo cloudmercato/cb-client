@@ -8,6 +8,10 @@ import json
 from functools import reduce
 from datetime import datetime
 from collections import Counter
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
 
 import six
 
@@ -1735,10 +1739,39 @@ class CiTaskWringer(BaseWringer):
         return data
 
 
+class WrkWringer(BaseObjectStorageWringer):
+    """
+    wrk Wringer
+    """
+    bench_name = 'wrk'
+
+    def __init__(self, destination_id, destination_type, *args, **kwargs):
+        super(WrkWringer, self).__init__(*args, **kwargs)
+        self.destination_id = destination_id
+        self.destination_type = destination_type
+
+    def _get_data(self):
+        input_data = json.load(self.input_)
+        data = input_data.copy()
+        dest_key = 'dest_%s' % self.destination_type
+        url = urlparse(data['url'])
+        data.update({
+            dest_key: self.destination_id,
+            'with_ssl': data['url'].startswith('https://'),
+            'path': url.path,
+            'throughput': data['bytes_per_sec'] / 1024,
+            'transfered': data['bytes'] / 1024,
+            'requests_within': data.pop('requests_within_stdev'),
+            'latency_within': data.pop('latency_within_stdev'),
+        })
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
     'ab': AbWringer,
+    'wrk': WrkWringer,
     'fio': FioWringer,
     'sysbench_oltp': SysbenchOltpWringer,
     'vdbench': VdbenchWringer,

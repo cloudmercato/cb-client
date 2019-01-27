@@ -60,6 +60,11 @@ AbArgumentParser.add_argument('-S', '--secure', action='store_true', help='')
 AbArgumentParser.add_argument('-de', '--destination-id', help='')
 AbArgumentParser.add_argument('-De', '--destination-type', help='')
 
+# wrk
+WrkArgumentParser = subparser.add_parser('wrk', help='wrk help')
+WrkArgumentParser.add_argument('-de', '--destination-id', help='')
+WrkArgumentParser.add_argument('-De', '--destination-type', help='')
+
 # Bonnie
 BonnieArgumentParser = subparser.add_parser('bonnie')
 
