@@ -146,6 +146,7 @@ class BaseWringer(object):
             'provider': self.provider_id,
             'datacenter': self.datacenter_id,
             'instance_type': self.instance_type_id,
+            'instance': self.instance_id,
             'tag': self.tag,
             'project': self.project,
             'set': self.test_set,
