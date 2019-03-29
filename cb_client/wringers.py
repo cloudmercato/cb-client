@@ -534,6 +534,8 @@ class AbWringer(BaseObjectStorageWringer):
         for line in self.input_:
             if not line.strip():
                 continue
+            elif line.startswith('Document Path:'):
+                bench_data['path'] = line.split(':')[1].strip()
             elif line.startswith('Document Length:'):
                 bench_data['file_size'] = re.findall('\s*(\d+)\s*', line)[0]
             elif line.startswith('Concurrency Level:'):
