@@ -1754,7 +1754,8 @@ class WrkWringer(BaseObjectStorageWringer):
         self.destination_type = destination_type
 
     def _get_data(self):
-        input_data = json.load(self.input_)
+        input_data = self.input_.read().replace('-nan', '0')
+        input_data = json.loads(input_data)
         data = input_data.copy()
         dest_key = 'dest_%s' % self.destination_type
         url = urlparse(data['url'])
