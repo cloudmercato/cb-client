@@ -617,15 +617,22 @@ class FioWringer(BaseWringer):
         fio_result['read_iops'] = int(fio_data['jobs'][0]['read']['iops'])
         fio_result['read_bandwidth'] = fio_data['jobs'][0]['read']['bw']
         fio_result['read_bandwidth_max'] = fio_data['jobs'][0]['read']['bw_max']
-        fio_result['read_latency'] = float(fio_data['jobs'][0]['read']['clat']['mean'])
-        fio_result['read_latency_stdev'] = float(fio_data['jobs'][0]['read']['clat']['stddev'])
 
         fio_result['write_io'] = int(fio_data['jobs'][0]['write']['io_bytes']/1048576)
         fio_result['write_iops'] = int(fio_data['jobs'][0]['write']['iops'])
         fio_result['write_bandwidth'] = fio_data['jobs'][0]['write']['bw']
         fio_result['write_bandwidth_max'] = fio_data['jobs'][0]['write']['bw_max']
-        fio_result['write_latency'] = float(fio_data['jobs'][0]['write']['clat']['mean'])
-        fio_result['write_latency_stdev'] = float(fio_data['jobs'][0]['write']['clat']['stddev'])
+        # clat changed to clat_ns in FIO 3
+        if 'clat' in fio_data['jobs'][0]['write']:
+            lat_key = 'clat'
+            lat_factor = 1
+        else:
+            lat_key = 'clat_ns'
+            lat_factor = 1000
+        fio_result['read_latency'] = float(fio_data['jobs'][0]['read'][lat_key]['mean']) / lat_factor
+        fio_result['read_latency_stdev'] = float(fio_data['jobs'][0]['read'][lat_key]['stddev']) / lat_factor
+        fio_result['write_latency'] = float(fio_data['jobs'][0]['write'][lat_key]['mean']) / lat_factor
+        fio_result['write_latency_stdev'] = float(fio_data['jobs'][0]['write'][lat_key]['stddev']) / lat_factor
 
         return fio_result
 

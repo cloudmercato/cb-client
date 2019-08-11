@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import sys
 import argparse
-from . import wringers
+from cb_client import wringers
+from cb_client import runners
 
 
 class ClientArgumentParser(argparse.ArgumentParser):
@@ -162,11 +163,20 @@ VdbenchArgumentParser.add_argument('-vf', '--volume-flavor-id', type=int, requir
 VdbenchArgumentParser.add_argument('-vm', '--volume-manager-id', type=int, required=False)
 VdbenchArgumentParser.add_argument('-ns', '--network-storage-id', type=int, required=False)
 
+RunnerArgumentParser = subparser.add_parser('run', help='help')
+RunnerArgumentParser = RunnerArgumentParser.add_argument('test')
+
+
 def main():
-    parsed_args = parser.parse_args()
-    Wringer = wringers.WRINGERS.get(parsed_args.bench_name)
-    wringer = Wringer(**vars(parsed_args))
-    wringer.run()
+    parsed_args = parser.parse_known_args()[0]
+    if parsed_args.bench_name == 'run':
+        del sys.argv[:2]
+        runner = runners.RUNNERS[parsed_args.test]()
+        runner.run()
+    else:
+        Wringer = wringers.WRINGERS.get(parsed_args.bench_name)
+        wringer = Wringer(**vars(parsed_args))
+        wringer.run()
 
 
 if __name__ == '__main__':
