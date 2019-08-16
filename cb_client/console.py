@@ -145,6 +145,16 @@ CiTaskArgumentParser.add_argument('-Tas', '--task', required=True)
 CiTaskArgumentParser.add_argument('-Max', '--max-concurrency', required=True)
 CiTaskArgumentParser.add_argument('-Con', '--concurrency', required=True)
 
+# Kvazaar
+KvazaarArgumentParser = subparser.add_parser('kvazaar', help='')
+KvazaarArgumentParser.add_argument('--preset', required=True)
+KvazaarArgumentParser.add_argument('--threads', required=True)
+KvazaarArgumentParser.add_argument('--input-file', required=True)
+KvazaarArgumentParser.add_argument('--real-time', required=True)
+KvazaarArgumentParser.add_argument('--user-time', required=True)
+KvazaarArgumentParser.add_argument('--sys-time', required=True)
+KvazaarArgumentParser.add_argument('--output-size', required=True)
+
 # Vdbench
 VdbenchArgumentParser = subparser.add_parser('vdbench', help='')
 VdbenchArgumentParser.add_argument('--vdbench-config', type=str, required=False)

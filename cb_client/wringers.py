@@ -1778,6 +1778,33 @@ class WrkWringer(BaseObjectStorageWringer):
         return data
 
 
+class KvazaarWringer(BaseWringer):
+    bench_name = 'kvazaar'
+
+    def __init__(self, input_file, threads, preset, real_time,
+                 user_time, sys_time, output_size, *args, **kwargs):
+        super(KvazaarWringer, self).__init__(*args, **kwargs)
+        self.input_file = input_file
+        self.threads = threads
+        self.preset = preset
+        self.real_time = real_time
+        self.user_time = user_time
+        self.sys_time = sys_time
+        self.output_size = output_size
+
+    def _get_data(self):
+        data = {
+            'input_file': self.input_file,
+            'threads': self.threads,
+            'preset': self.preset,
+            'real_time': self.real_time,
+            'user_time': self.user_time,
+            'sys_time': self.sys_time,
+            'output_size': self.output_size,
+        }
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -1804,6 +1831,7 @@ WRINGERS = {
     'phoronix_test_suite': PhoronixTestSuiteWringer,
     'python_read': PythonReadWringer,
     'ci_task': CiTaskWringer,
+    'kvazaar': KvazaarWringer,
     'metric': MetricWringer,
     'prometheus': PrometheusMetricWringer,
 }
