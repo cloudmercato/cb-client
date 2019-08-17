@@ -1802,6 +1802,11 @@ class KvazaarWringer(BaseWringer):
             'sys_time': self.sys_time,
             'output_size': self.output_size,
         }
+        for line in self.input_:
+            if 'FPS' not in line:
+                continue
+            _, value = line.split(':')
+            data['fps'] = value.strip()
         return data
 
 
