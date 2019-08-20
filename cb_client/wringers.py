@@ -1096,11 +1096,11 @@ class TracepathWringer(BaseNetworkWringer):
             raise exceptions.ParseError()
         dest_key = 'dest_%s' % self.destination_type
         return {
-          'time': time_,
-          'mtu': mtu,
-          'hops': hops,
-          'back': back,
-          dest_key: self.destination_id,
+            'time': time_,
+            'mtu': mtu,
+            'hops': hops,
+            'back': back,
+            dest_key: self.destination_id,
         }
 
 
