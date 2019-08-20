@@ -36,7 +36,10 @@ TIME_SCALE = {
 TRACEPATH_RESULT_REG = re.compile(r'\s*Resume:\s*pmtu\s*(\d*)\s*hops\s*(\d*)\s*back\s*(\d*)')
 TRACEPATH_TIME_REG = re.compile(r'.*\s([0-9\.]*)ms.*')
 
-REG_FINANCEBENCH = re.compile(r'^Processing time on (G|C)PU ?\(?(\w*)?\)?: ([\d\.]*) \(ms\)\s*$')
+try:
+    REG_FINANCEBENCH = re.compile(r"^Processing time on (G|C)PU ?\(?(\w*)?\)?: ([\d\.]*) \(ms\)\s*$")
+except:
+    REG_FINANCEBENCH = None
 REG_LAMMPS_PERF = re.compile('Performance:\s*([\d\.]*)\s*([\d\w/]*),\s*([\d\.]*)\s*([\d\w/]*),\s*([\d\.]*)\s*([\d\w/]*)')
 REG_LAMMPS_ROW = re.compile(r'^(\w*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*$')
 REG_VRAY = re.compile(r'Rendering took (\d*):(\d*) minutes.', re.M)
@@ -238,7 +241,7 @@ class MetricWringer(BaseWringer):
         """
         CPU zuluvm 1514345405 2017/12/27 03:30:05 3237908 100 2 4363430 10933017 0 628530138 485206 0 884945 0 0 4608 100
         """
-        timestamp, _, _, _, total, cpu_count, stime, utime, ntime, itime, wtime, Itime, Stime, steal, guest, _, _, = line[2:]
+        timestamp, _, _, _, total, cpu_count, stime, utime, ntime, itime, wtime, Itime, Stime, steal, guest, _, _, = line[2:-2]
         data = {
             'stime': stime,
             'utime': utime,
@@ -269,7 +272,7 @@ class MetricWringer(BaseWringer):
         cpu victim 1517408534 2018/01/31 14:22:14 1022853 100 0 63709 515511 0 101620702 11852 0 2612 0 0 2304 100
         cpu victim 1517408534 2018/01/31 14:22:14 1022853 100 1 64801 515500 0 101566068 60189 0 3948 0 0 2304 100
         """
-        timestamp, _, _, _, total, cpu_index, stime, utime, ntime, itime, wtime, Itime, Stime, steal, guest, _, _ = line[2:]
+        timestamp, _, _, _, total, cpu_index, stime, utime, ntime, itime, wtime, Itime, Stime, steal, guest, _, _ = line[2:-2]
         data = {
             'stime': stime,
             'utime': utime,
@@ -313,7 +316,7 @@ class MetricWringer(BaseWringer):
 
     def parse_MEM(self, line):
         """MEM zuluvm 1514345405 2017/12/27 03:30:05 3237908 4096 231469 45087 18739 9304 14255 5"""
-        timestamp, _, _, _, _, page_size, physical, free, cache, buffer_, slab = line[2:]
+        timestamp, _, _, _, _, page_size, physical, free, cache, buffer_, slab = line[2:13]
         data = {
             'physical': (physical, 'Physical pages'),
             'free': (free, 'Free pages'),
@@ -417,7 +420,6 @@ class PrometheusMetricWringer(BaseWringer):
             if splitted_line[0] not in GITLAB_METRICS or len(splitted_line) != 2:
                 continue
             name, value = line.split()
-            print(line)
             data.append({
                 'group': 'APP',
                 'value': value,
