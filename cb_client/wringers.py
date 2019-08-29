@@ -44,6 +44,10 @@ REG_LAMMPS_PERF = re.compile('Performance:\s*([\d\.]*)\s*([\d\w/]*),\s*([\d\.]*)
 REG_LAMMPS_ROW = re.compile(r'^(\w*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*$')
 REG_VRAY = re.compile(r'Rendering took (\d*):(\d*) minutes.', re.M)
 REG_VASP = re.compile(r'Took (\d*)m([0-9.]*)s')
+REG_FFMPEG_OPTS = re.compile("Reading option '-([^']*)'.*argument '([^']*)'")
+REG_FFMPEG_TIME = re.compile("bench: utime=([^s]*)s stime=([^s]*)s rtime=([^s]*)s")
+REG_FFMPEG_BYTES = re.compile("([0-9]*) ?bytes")
+REG_FFMPEG_STATS = re.compile("frame=\s*(\d*)\s*fps=\s*([0-9\.]*)\s*q=([0-9\.-]*)\s*Lsize=\s*(\d*)kB\s*time=[0-9:\.]*\s*bitrate=([\d\.]*)kbits/s\s*speed=\s*([\d\.]*)x")
 GITLAB_METRICS = (
     'db_ping_latency_seconds',
     'filesystem_access_latency_seconds',
@@ -52,6 +56,8 @@ GITLAB_METRICS = (
     'filesystem_circuitbreaker_latency_seconds',
     'redis_ping_latency_seconds',
 )
+FFMPEG_OPTS = ['preset', 'filter_threads', 'filter_complex_threads']
+FFMPEG_OPTS_TRANS = {'i', lambda k, v: ('input_file', v.split('/')[-1])}
 
 class InvalidInput(Exception):
     pass
@@ -1812,6 +1818,59 @@ class KvazaarWringer(BaseWringer):
         return data
 
 
+class FfmpegWringer(BaseWringer):
+    bench_name = 'ffmpeg'
+
+    def __init__(self, output_format, unit, *args, **kwargs):
+        super(FfmpegWringer, self).__init__(*args, **kwargs)
+        self.output_format = output_format
+        self.unit = unit
+
+    def _get_data(self):
+        data = {
+            'output_format': self.output_format,
+            'unit': self.unit,
+        }
+        for line in self.input_:
+            if 'ffmpeg version' in line:
+                data['version'] = line.split()[2]
+            elif 'built with' in line:
+                data['compiler'] = ' '.join(line.split()[2:4])
+            elif line.startswith('Opening an input file:'):
+                data['input_file'] = line.strip().split('/')[-1][:-1]
+            elif line.startswith('Reading option'):
+                if ' output url.' in line:
+                    continue
+                opt, value = REG_FFMPEG_OPTS.search(line).groups()
+                if opt in FFMPEG_OPTS:
+                    if opt in FFMPEG_OPTS_TRANS:
+                        opt, value = FFMPEG_OPTS_TRANS[opt](opt, value)
+                    data[opt] = value
+                continue
+            elif line.startswith('bench: maxrss'):
+                data['maxrss'] = line.split('=')[-1].strip()[:-2]
+            elif line.startswith('bench: utime'):
+                utime, stime, rtime = REG_FFMPEG_TIME.search(line).groups()
+                data.update({
+                    'real_time': rtime,
+                    'user_time': utime,
+                    'sys_time': stime
+                })
+            elif 'Output stream #0:0 (video)' in line:
+                bytes_ = REG_FFMPEG_BYTES.search(line).groups()[0]
+                data['output_size'] = bytes_
+            elif line.startswith('frame=') and 'Lsize' in line:
+                _, fps, q, lsize, bitrate, speed = REG_FFMPEG_STATS.search(line).groups()
+                data.update({
+                    'frame_rate': fps,
+                    'bit_rate': bitrate,
+                    'output_quality': q,
+                    'speed': speed,
+                })
+        print(data)
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -1839,6 +1898,7 @@ WRINGERS = {
     'python_read': PythonReadWringer,
     'ci_task': CiTaskWringer,
     'kvazaar': KvazaarWringer,
+    'ffmpeg': FfmpegWringer,
     'metric': MetricWringer,
     'prometheus': PrometheusMetricWringer,
 }

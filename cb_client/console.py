@@ -176,6 +176,12 @@ VdbenchArgumentParser.add_argument('-ns', '--network-storage-id', type=int, requ
 RunnerArgumentParser = subparser.add_parser('run', help='help')
 RunnerArgumentParser = RunnerArgumentParser.add_argument('test')
 
+# Ffmpeg
+FfmpegArgumentParser = subparser.add_parser('ffmpeg', help='')
+FfmpegArgumentParser.add_argument('--output-format', required=True)
+FfmpegArgumentParser.add_argument('--unit', default='cpu', required=False)
+FfmpegArgumentParser.add_argument('--input_file', required=False)
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]
