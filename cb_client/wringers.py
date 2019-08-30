@@ -126,11 +126,13 @@ class BaseWringer(object):
         self.datacenter_id = self.config.get('datacenter')
         self.instance_type_id = self.config.get('type')
         self.test_date = date or datetime.now().isoformat()
+        self.project = project or self.config.get('project')
+        if str(self.project).lower() in ('null', 'none'):
+            self.project = None
 
         self.client = client.Client(self.master_url, self.token)
 
         self.tag = tag
-        self.project = project or None
         self.is_standalone = is_standalone
         self.test_set = test_set
 

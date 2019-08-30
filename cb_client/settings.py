@@ -24,6 +24,7 @@ DEFAULT_CONFIG = {
     'flavor_id': '',
     'image_id': '',
     'instance_id': '',
+    'project_id': '',
 
     'root_volume': {},
     'extra_volumes': [],
