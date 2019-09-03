@@ -1195,6 +1195,26 @@ GEEKBENCH4_FIELDS = {
     'RAW': ('raw', 2**30),
     'Depth of Field': ('depth_field', 2**30),
     'Particle Physics': ('particle_physics', 1),
+    # V5
+    'AES-XTS': ('aes_xts', 2**30),
+    'Text Compression': ('text_compression', 2**20),
+    'Image Compression': ('image_compression', 2**20),
+    'Navigation': ('navigation', 1),
+    'HTML5': ('html5', 2**20),
+    'SQLite': ('sqlite', 2**10),
+    'PDF Rendering': ('pdf_rendering', 2**20),
+    'Text Rendering': ('text_rendering', 2**20),
+    'Clang': ('clang', 2**20),
+    'Camera': ('camera', 1),
+    'N-Body Physics': ('nbody_physics', 2**20),
+    'Gaussian Blur': ('gaussian_blur', 2**20),
+    'Face Detection': ('face_detection', 1),
+    'Horizon Detection': ('horizon_detection', 2**20),
+    'Image Inpainting': ('image_inpainting', 2**20),
+    'HDR': ('hdr', 2**20),
+    'Ray Tracing': ('ray_tracing', 2**10),
+    'Structure from Motion': ('structure_from_motion', 2**10),
+    'Machine Learning': ('machine_learning', 1),
 }
 class Geekbench4Wringer(BaseWringer):
     bench_name = 'geekbench4'
@@ -1303,6 +1323,106 @@ class Geekbench4Wringer(BaseWringer):
                         multi_memory_score=multi_memory_score,
                         single_score=single_score,
                         multi_score=multi_score)
+        return data
+
+
+class Geekbench5Wringer(BaseWringer):
+    bench_name = 'geekbench5'
+
+    def __init__(self, format, mode, *args, **kwargs):
+        super(Geekbench5Wringer, self).__init__(*args, **kwargs)
+        self.format = format
+        self.mode = mode
+
+    def parse_json(self):
+        raw_results = json.load(self.input_)
+        data = {
+            'version': raw_results['version'],
+            'runtime': raw_results['runtime'],
+            'mode': self.mode,
+        }
+        for section in raw_results['sections']:
+            if section['name'] == "Multi-Core":
+                prefix = 'multi'
+            else:
+                prefix = 'single'
+            for raw_result in section['workloads']:
+                key, format_ = GEEKBENCH4_FIELDS[raw_result['name']]
+                fieldname = '%s_%s' % (prefix, key)
+                data[fieldname] = raw_result['workload_rate'] / format_
+                data[fieldname+'_score'] = raw_result['score']
+        return data
+
+    def parse_csv(self):
+        data = {}
+        raw_results = csv.reader(self.input_)
+        next(raw_results)
+        for line in raw_results:
+            if not line:
+                continue
+            mode = 'single' if line[1] == "1" else 'multi'
+            key, format_ = GEEKBENCH4_FIELDS[line[0]]
+            fieldname = '%s_%s' % (mode, key)
+            data[fieldname] = int(line[7]) / format_
+            data[fieldname+'_score'] = int(line[4])
+        return data
+
+    def _get_data(self):
+        if self.format == 'csv':
+            data = self.parse_csv()
+        else:
+            data = self.parse_json()
+        if self.mode == 'standard':
+            single_crypto_scores = [data['single_aes_xts_score']]
+            single_crypto_score = geo_mean(single_crypto_scores)
+            multi_crypto_scores = [data['multi_aes_xts_score']]
+            multi_crypto_score = geo_mean(multi_crypto_scores)
+            single_int_scores = [data['single_%s_score' % f] for f in [
+                'text_compression', 'image_compression', 'navigation',
+                'sqlite', 'html5', 'pdf_rendering', 'text_rendering',
+                'clang', 'camera',
+            ]]
+            single_int_score = geo_mean(single_int_scores)
+            multi_int_scores = [data['multi_%s_score' % f] for f in [
+                'text_compression', 'image_compression', 'navigation',
+                'sqlite', 'html5', 'pdf_rendering', 'text_rendering',
+                'clang', 'camera',
+            ]]
+            multi_int_score = geo_mean(multi_int_scores)
+            single_float_scores = [data['single_%s_score' % f] for f in [
+                'text_compression', 'nbody_physics', 'rigid',
+                'gaussian_blur', 'face_detection', 'horizon_detection',
+                'image_inpainting', 'hdr', 'ray_tracing', 'structure_from_motion',
+                'speech', 'machine_learning',
+            ]]
+            single_float_score = geo_mean(single_float_scores)
+            multi_float_scores = [data['multi_%s_score' % f] for f in [
+                'text_compression', 'nbody_physics', 'rigid',
+                'gaussian_blur', 'face_detection', 'horizon_detection',
+                'image_inpainting', 'hdr', 'ray_tracing', 'structure_from_motion',
+                'speech', 'machine_learning',
+            ]]
+            multi_float_score = geo_mean(multi_float_scores)
+            single_score = weighted_mean((
+                (5, single_crypto_score),
+                (65, single_int_score),
+                (30, single_float_score),
+            ))
+            multi_score = weighted_mean((
+                (5, multi_crypto_score),
+                (65, multi_int_score),
+                (30, multi_float_score),
+            ))
+            data.update(
+                single_crypto_score=single_crypto_score,
+                multi_crypto_score=multi_crypto_score,
+                single_int_score=single_int_score,
+                multi_int_score=multi_int_score,
+                single_float_score=single_float_score,
+                multi_float_score=multi_float_score,
+                single_score=single_score,
+                multi_score=multi_score
+            )
         return data
 
 
@@ -1888,6 +2008,7 @@ WRINGERS = {
     'dfsio': DfsioWringer,
     'tracepath': TracepathWringer,
     'iperf': IperfWringer,
+    'geekbench5': Geekbench5Wringer,
     'geekbench4': Geekbench4Wringer,
     'geekbench3': Geekbench3Wringer,
     'spec_cpu2006': SpecCpu2006Wringer,
