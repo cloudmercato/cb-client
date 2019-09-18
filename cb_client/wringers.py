@@ -1195,7 +1195,9 @@ GEEKBENCH4_FIELDS = {
     'RAW': ('raw', 2**30),
     'Depth of Field': ('depth_field', 2**30),
     'Particle Physics': ('particle_physics', 1),
-    # V5
+}
+GEEKBENCH5_FIELDS = GEEKBENCH4_FIELDS.copy()
+GEEKBENCH5_FIELDS.update({
     'AES-XTS': ('aes_xts', 2**30),
     'Text Compression': ('text_compression', 2**20),
     'Image Compression': ('image_compression', 2**20),
@@ -1203,10 +1205,10 @@ GEEKBENCH4_FIELDS = {
     'HTML5': ('html5', 2**20),
     'SQLite': ('sqlite', 2**10),
     'PDF Rendering': ('pdf_rendering', 2**20),
+    'N-Body Physics': ('nbody_physics', 2**20),
     'Text Rendering': ('text_rendering', 2**20),
     'Clang': ('clang', 2**20),
     'Camera': ('camera', 1),
-    'N-Body Physics': ('nbody_physics', 2**20),
     'Gaussian Blur': ('gaussian_blur', 2**20),
     'Face Detection': ('face_detection', 1),
     'Horizon Detection': ('horizon_detection', 2**20),
@@ -1215,7 +1217,7 @@ GEEKBENCH4_FIELDS = {
     'Ray Tracing': ('ray_tracing', 2**10),
     'Structure from Motion': ('structure_from_motion', 2**10),
     'Machine Learning': ('machine_learning', 1),
-}
+})
 class Geekbench4Wringer(BaseWringer):
     bench_name = 'geekbench4'
 
@@ -1333,6 +1335,7 @@ class Geekbench5Wringer(BaseWringer):
         super(Geekbench5Wringer, self).__init__(*args, **kwargs)
         self.format = format
         self.mode = mode
+        self._fields = GEEKBENCH5_FIELDS.copy()
 
     def parse_json(self):
         raw_results = json.load(self.input_)
@@ -1347,7 +1350,7 @@ class Geekbench5Wringer(BaseWringer):
             else:
                 prefix = 'single'
             for raw_result in section['workloads']:
-                key, format_ = GEEKBENCH4_FIELDS[raw_result['name']]
+                key, format_ = self._fields[raw_result['name']]
                 fieldname = '%s_%s' % (prefix, key)
                 data[fieldname] = raw_result['workload_rate'] / format_
                 data[fieldname+'_score'] = raw_result['score']
@@ -1361,7 +1364,7 @@ class Geekbench5Wringer(BaseWringer):
             if not line:
                 continue
             mode = 'single' if line[1] == "1" else 'multi'
-            key, format_ = GEEKBENCH4_FIELDS[line[0]]
+            key, format_ = self._fields[line[0]]
             fieldname = '%s_%s' % (mode, key)
             data[fieldname] = int(line[7]) / format_
             data[fieldname+'_score'] = int(line[4])
