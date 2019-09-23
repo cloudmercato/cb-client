@@ -1992,7 +1992,23 @@ class FfmpegWringer(BaseWringer):
                     'output_quality': q,
                     'speed': speed,
                 })
-        print(data)
+        return data
+
+
+class PythonFpbWringer(BaseWringer):
+    bench_name = 'fpb'
+
+    def __init__(self, *args, **kwargs):
+        super(PythonFpbWringer, self).__init__(*args, **kwargs)
+
+    def _get_data(self):
+        data = {'threads': 1}
+        for line in self.input_:
+            if not line.strip():
+                continue
+            key, value = line.split(':', 1)
+            key, value = key.strip(), value.strip()
+            data[key] = value
         return data
 
 
@@ -2025,6 +2041,7 @@ WRINGERS = {
     'ci_task': CiTaskWringer,
     'kvazaar': KvazaarWringer,
     'ffmpeg': FfmpegWringer,
+    'fpb': PythonFpbWringer,
     'metric': MetricWringer,
     'prometheus': PrometheusMetricWringer,
 }

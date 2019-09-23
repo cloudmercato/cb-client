@@ -186,6 +186,9 @@ FfmpegArgumentParser.add_argument('--output-format', required=True)
 FfmpegArgumentParser.add_argument('--unit', default='cpu', required=False)
 FfmpegArgumentParser.add_argument('--input_file', required=False)
 
+# Python FPB
+PythonFpbArgumentParser = subparser.add_parser('fpb', help='')
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]
