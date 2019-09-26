@@ -1196,28 +1196,6 @@ GEEKBENCH4_FIELDS = {
     'Depth of Field': ('depth_field', 2**30),
     'Particle Physics': ('particle_physics', 1),
 }
-GEEKBENCH5_FIELDS = GEEKBENCH4_FIELDS.copy()
-GEEKBENCH5_FIELDS.update({
-    'AES-XTS': ('aes_xts', 2**30),
-    'Text Compression': ('text_compression', 2**20),
-    'Image Compression': ('image_compression', 2**20),
-    'Navigation': ('navigation', 1),
-    'HTML5': ('html5', 2**20),
-    'SQLite': ('sqlite', 2**10),
-    'PDF Rendering': ('pdf_rendering', 2**20),
-    'N-Body Physics': ('nbody_physics', 2**20),
-    'Text Rendering': ('text_rendering', 2**20),
-    'Clang': ('clang', 2**20),
-    'Camera': ('camera', 1),
-    'Gaussian Blur': ('gaussian_blur', 2**20),
-    'Face Detection': ('face_detection', 1),
-    'Horizon Detection': ('horizon_detection', 2**20),
-    'Image Inpainting': ('image_inpainting', 2**20),
-    'HDR': ('hdr', 2**20),
-    'Ray Tracing': ('ray_tracing', 2**10),
-    'Structure from Motion': ('structure_from_motion', 2**10),
-    'Machine Learning': ('machine_learning', 1),
-})
 class Geekbench4Wringer(BaseWringer):
     bench_name = 'geekbench4'
 
@@ -1328,6 +1306,31 @@ class Geekbench4Wringer(BaseWringer):
         return data
 
 
+GEEKBENCH5_FIELDS = GEEKBENCH4_FIELDS.copy()
+GEEKBENCH5_FIELDS.update({
+    'AES-XTS': ('aes_xts', 2**30),
+    'Text Compression': ('text_compression', 2**20),
+    'Image Compression': ('image_compression', 2**20),
+    'Navigation': ('navigation', 1),
+    'HTML5': ('html5', 2**20),
+    'SQLite': ('sqlite', 2**10),
+    'PDF Rendering': ('pdf_rendering', 2**20),
+    'N-Body Physics': ('nbody_physics', 2**20),
+    'Text Rendering': ('text_rendering', 2**20),
+    'Clang': ('clang', 2**20),
+    'Camera': ('camera', 1),
+    'Gaussian Blur': ('gaussian_blur', 2**20),
+    'Face Detection': ('face_detection', 1),
+    'Horizon Detection': ('horizon_detection', 2**20),
+    'Image Inpainting': ('image_inpainting', 2**20),
+    'HDR': ('hdr', 2**20),
+    'Ray Tracing': ('ray_tracing', 2**10),
+    'Structure from Motion': ('structure_from_motion', 2**10),
+    'Machine Learning': ('machine_learning', 1),
+    'Stereo Matching': ('stereo_matching', 10**6),
+    'Depth of Field': ('depth_field', 10**9),
+    'Feature Matching': ('feature_matching', 10**9),
+})
 class Geekbench5Wringer(BaseWringer):
     bench_name = 'geekbench5'
 
