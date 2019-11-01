@@ -593,17 +593,20 @@ class FioWringer(BaseWringer):
         self.volume_flavor_id = kwargs['volume_flavor_id'] or None
         self.volume_manager_id = kwargs['volume_manager_id'] or None
         self.network_storage_id = kwargs['network_storage_id'] or None
+        self.nfs_id = kwargs['nfs'] or None
+        self.nfs_type_id = kwargs['nfs_type'] or None
+        self.nfs_conf_id = kwargs['nfs_conf'] or None
 
     def _get_readwrite(self, rw):
         trans = {
-          'read': 'read',
-          'write': 'write',
-          'readwrite': 'readwrite',
-          'rw': 'readwrite',
-          'randread': 'read',
-          'randwrite': 'write',
-          'randreadwrite': 'readwrite',
-          'randrw': 'readwrite',
+            'read': 'read',
+            'write': 'write',
+            'readwrite': 'readwrite',
+            'rw': 'readwrite',
+            'randread': 'read',
+            'randwrite': 'write',
+            'randreadwrite': 'readwrite',
+            'randrw': 'readwrite',
         }
         return trans[rw]
 
@@ -611,11 +614,15 @@ class FioWringer(BaseWringer):
         fio_data = json.load(self.input_)
         fio_result = {}
 
-        fio_result['num_thread'] = self.num_thread or len(fio_data['jobs'])
-        fio_result['mixed_ratio'] = self.mixed_ratio
         fio_result['volume_flavor'] = self.volume_flavor_id
         fio_result['volume_manager'] = self.volume_manager_id
         fio_result['network_storage'] = self.network_storage_id
+        fio_result['nfs'] = self.nfs_id
+        fio_result['nfs_conf'] = self.nfs_conf_id
+        fio_result['nfs_type'] = self.nfs_type_id
+
+        fio_result['num_thread'] = self.num_thread or len(fio_data['jobs'])
+        fio_result['mixed_ratio'] = self.mixed_ratio
 
         fio_result['block_size'] = fio_data['global options']['bs'] if 'bs' in fio_data['global options'] else fio_data['jobs'][0]['job options']['bs']
         fio_result['readwrite'] = self._get_readwrite(fio_data['global options']['rw'])

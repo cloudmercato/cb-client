@@ -42,6 +42,9 @@ FioArgumentParser.add_argument('-r', '--ratio', help='FIO mixed ratio', default=
 FioArgumentParser.add_argument('-vf', '--volume-flavor-id', type=int, required=False)
 FioArgumentParser.add_argument('-vm', '--volume-manager-id', type=int, required=False)
 FioArgumentParser.add_argument('-ns', '--network-storage-id', type=int, required=False)
+FioArgumentParser.add_argument('-nf', '--nfs', type=int, required=False)
+FioArgumentParser.add_argument('-nft', '--nfs-type', type=int, required=False)
+FioArgumentParser.add_argument('-nfc', '--nfs-conf', type=int, required=False)
 
 # SysBench RAM parser
 SysbenchCpuArgumentParser = subparser.add_parser('sysbench_cpu')
