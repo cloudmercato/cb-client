@@ -2022,6 +2022,75 @@ class PythonFpbWringer(BaseWringer):
         return data
 
 
+class RedisBenchmarkWringer(BaseWringer):
+    bench_name = 'redis_benchmark'
+
+    def __init__(self, clients, requests, size, keepalive, keyspacelen, numreq,
+                 datastore_id, datastore_type_id,
+                 *args, **kwargs):
+        super(RedisBenchmarkWringer, self).__init__(*args, **kwargs)
+        self.clients = clients
+        self.requests = requests
+        self.size = size
+        self.keepalive = keepalive
+        self.keyspacelen = keyspacelen
+        self.numreq = numreq
+        self.datastore_id = datastore_id
+        self.datastore_type_id = datastore_type_id
+
+    def run(self):
+        raw_results = csv.reader(self.input_)
+        data = []
+        config_data = {
+            'datastore': self.datastore_id,
+            'datastore_type': self.datastore_type_id,
+            'clients': self.clients,
+            'requests': self.requests,
+            'size': self.size,
+            'keepalive': self.keepalive,
+            'keyspacelen': self.keyspacelen,
+            'numreq': self.numreq,
+        }
+        for line in raw_results:
+            if not line:
+                continue
+            key = line[0].split()[0]
+            data.append({
+                'test': key,
+                'rate': line[1],
+            })
+        # Send result
+        error = None
+        for result in data:
+            result.update(config_data)
+            # Set mode
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=result,
+                    metadata=self._get_metadata())
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+            except Exception as err:
+                error = err
+        if error is not None:
+            raise error
+
+    def _get_data(self, line):
+        copies = int(line[1])
+        mode = 'rate' if copies > 1 else 'speed'
+        data = {
+            'test': line[0],
+            'mode': mode,
+            'copies': copies,
+            'base_run_time': line[2],
+            'base_rate': line[3],
+        }
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -2054,6 +2123,7 @@ WRINGERS = {
     'fpb': PythonFpbWringer,
     'metric': MetricWringer,
     'prometheus': PrometheusMetricWringer,
+    'redis-benchmark': RedisBenchmarkWringer,
 }
 
 

@@ -192,6 +192,17 @@ FfmpegArgumentParser.add_argument('--input_file', required=False)
 # Python FPB
 PythonFpbArgumentParser = subparser.add_parser('fpb', help='')
 
+# Redis Benchmark
+RedisBenchmarkParser = subparser.add_parser('redis-benchmark', help='')
+RedisBenchmarkParser.add_argument('--clients', type=int, required=True)
+RedisBenchmarkParser.add_argument('--requests', type=int, required=True)
+RedisBenchmarkParser.add_argument('--size', type=int, required=True)
+RedisBenchmarkParser.add_argument('--keepalive', type=int, required=True)
+RedisBenchmarkParser.add_argument('--keyspacelen', type=int, required=True)
+RedisBenchmarkParser.add_argument('--numreq', type=int, required=True)
+RedisBenchmarkParser.add_argument('--datastore-id', type=int, required=True)
+RedisBenchmarkParser.add_argument('--datastore-type-id', type=int, required=True)
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]
