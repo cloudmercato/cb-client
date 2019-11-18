@@ -203,6 +203,14 @@ RedisBenchmarkParser.add_argument('--numreq', type=int, required=True)
 RedisBenchmarkParser.add_argument('--datastore-id', type=int, required=True)
 RedisBenchmarkParser.add_argument('--datastore-type-id', type=int, required=True)
 
+# tcptraceroute
+TcptracerouteParser = subparser.add_parser('tcptraceroute', help='')
+TcptracerouteParser.add_argument('--length', type=int, required=True)
+TcptracerouteParser.add_argument('--target-instance-id', type=int, required=False)
+TcptracerouteParser.add_argument('--target-instance-type', required=False)
+TcptracerouteParser.add_argument('--target-type-id', type=int, required=True)
+TcptracerouteParser.add_argument('--target-type-type', required=True)
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]

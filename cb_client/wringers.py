@@ -2022,6 +2022,33 @@ class PythonFpbWringer(BaseWringer):
         return data
 
 
+class TcptracerouteWringer(BaseWringer):
+    bench_name = 'tcptraceroute'
+
+    def __init__(self, length, target_type_id, target_type_type, target_instance_id=None, target_instance_type=None,
+                 *args, **kwargs):
+        super(TcptracerouteWringer, self).__init__(*args, **kwargs)
+        self.length = length
+        self.target_instance_id = target_instance_id
+        self.target_instance_type = target_instance_type
+        self.target_type_id = target_type_id
+        self.target_type_type = target_type_type
+
+    def _get_data(self):
+        data = {
+            'length': self.length,
+            'target_type_id': self.target_type_id,
+            'target_type_type': self.target_type_type,
+            'target_instance_id': self.target_instance_id,
+            'target_instance_type': self.target_instance_type,
+        }
+        for line in self.input_:
+            if not line.strip():
+                continue
+            data['time'] = line.strip().split()[-2]
+        return data
+
+
 class RedisBenchmarkWringer(BaseWringer):
     bench_name = 'redis_benchmark'
 
@@ -2124,6 +2151,7 @@ WRINGERS = {
     'metric': MetricWringer,
     'prometheus': PrometheusMetricWringer,
     'redis-benchmark': RedisBenchmarkWringer,
+    'tcptraceroute': TcptracerouteWringer,
 }
 
 
