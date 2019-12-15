@@ -2118,6 +2118,43 @@ class RedisBenchmarkWringer(BaseWringer):
         return data
 
 
+STREAM_FUNCTIONS = ('Copy', 'Scale', 'Add', 'Triad')
+class StreamWringer(BaseWringer):
+    bench_name = 'stream'
+
+    def __init__(self, compiler, *args, **kwargs):
+        super(StreamWringer, self).__init__(*args, **kwargs)
+        self.compiler = compiler
+
+    def run(self):
+        data = []
+        for line in self.input_:
+            if not line.strip():
+                continue
+            if line.split(':')[0] in STREAM_FUNCTIONS:
+                function, rate, avg, min_, max_ = line.split()
+                data.append({
+                    'compiler': self.compiler,
+                    'function': function.lower()[:-1],
+                    'rate': rate,
+                    'time_avg': avg,
+                    'time_min': min_,
+                    'time_max': max_,
+                })
+        for result in data:
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=result,
+                    metadata=self._get_metadata())
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+            except Exception as err:
+                error = err
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -2152,6 +2189,7 @@ WRINGERS = {
     'prometheus': PrometheusMetricWringer,
     'redis-benchmark': RedisBenchmarkWringer,
     'tcptraceroute': TcptracerouteWringer,
+    'stream': StreamWringer,
 }
 
 

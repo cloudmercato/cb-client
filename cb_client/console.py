@@ -211,6 +211,10 @@ TcptracerouteParser.add_argument('--target-instance-type', required=False)
 TcptracerouteParser.add_argument('--target-type-id', type=int, required=True)
 TcptracerouteParser.add_argument('--target-type-type', required=True)
 
+# STREAM
+StreamParser = subparser.add_parser('stream', help='')
+StreamParser.add_argument('--compiler', required=True)
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]
