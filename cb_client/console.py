@@ -200,7 +200,7 @@ RedisBenchmarkParser.add_argument('--size', type=int, required=True)
 RedisBenchmarkParser.add_argument('--keepalive', type=int, required=True)
 RedisBenchmarkParser.add_argument('--keyspacelen', type=int, required=True)
 RedisBenchmarkParser.add_argument('--numreq', type=int, required=True)
-RedisBenchmarkParser.add_argument('--datastore-id', type=int, required=True)
+RedisBenchmarkParser.add_argument('--datastore-id', type=int, required=False)
 RedisBenchmarkParser.add_argument('--datastore-type-id', type=int, required=True)
 
 # tcptraceroute

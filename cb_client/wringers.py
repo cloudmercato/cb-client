@@ -2081,11 +2081,14 @@ class RedisBenchmarkWringer(BaseWringer):
         for line in raw_results:
             if not line:
                 continue
-            key = line[0].split()[0]
-            data.append({
-                'test': key,
-                'rate': line[1],
-            })
+            try:
+                key = line[0].split()[0]
+                data.append({
+                    'test': key,
+                    'rate': line[1],
+                })
+            except:
+                print("Cannot parse %s" % line)
         # Send result
         error = None
         for result in data:
