@@ -283,12 +283,12 @@ class MetricWringer(BaseWringer):
 
     def parse_cpu(self, line):
         """
-        cpu zuluvm 1514345405 2017/12/27 03:30:05 3237908 100 0 4363430 10933017 0 628530138 485206 0 884945 0 0 4608 100
-        
+        cpu teststeal 1581105787 2020/02/07 20:03:07 30 100 0 1127 1681 0 36 0 0 0 155 0 1995 100 21239022365 65534227891
         cpu victim 1517408534 2018/01/31 14:22:14 1022853 100 0 63709 515511 0 101620702 11852 0 2612 0 0 2304 100
         cpu victim 1517408534 2018/01/31 14:22:14 1022853 100 1 64801 515500 0 101566068 60189 0 3948 0 0 2304 100
 
-        cpu teststeal 1581105787 2020/02/07 20:03:07 30 100 0 1127 1681 0 36 0 0 0 155 0 1995 100 21239022365 65534227891
+
+        cpu zuluvm 1514345405 2017/12/27 03:30:05 3237908 100 0 4363430 10933017 0 628530138 485206 0 884945 0 0 4608 100
         """
         timestamp, _, _, _, total, cpu_index, stime, utime, ntime, itime, wtime, Itime, Stime, steal, guest, _, _ = line[2:-2]
         data = {
@@ -2174,6 +2174,51 @@ class StreamWringer(BaseWringer):
                 error = err
 
 
+class CpuStealWringer(BaseWringer):
+    bench_name = 'cpu_steal'
+
+    def _get_cpu_usage(self, stime, utime, ntime, itime, wtime, Itime, Stime, steal):
+        use_time = int(stime) + int(utime) + int(ntime) + int(Itime) + int(Stime)
+        wait_time = int(itime) + int(wtime) + int(steal)
+        total_time = use_time + wait_time
+        percent = use_time / total_time * 100
+        return percent
+
+    def _get_cpu_steal_rate(self, stime, utime, ntime, itime, wtime, Itime, Stime, steal):
+        total_time = int(stime) + int(utime) + int(ntime) + int(Itime) + int(Stime) + int(itime) + int(wtime) + int(steal)
+        steal_time = int(steal)
+        percent = steal_time / total_time * 100
+        return percent
+
+    def run(self):
+        data = []
+        if hasattr(self.input_, 'buffer'):
+            self.input_ = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8', errors='ignore')
+        for raw_line in self.input_:
+            raw_line = raw_line.strip()
+            if not raw_line.startswith('cpu'):
+                continue
+            line = raw_line.split()[2:]
+            line = line[:17]
+            timestamp, _, _, _, total, cpu_index, stime, utime, ntime, itime, wtime, Itime, Stime, steal, guest, _, _ = line
+            data.append({
+                'cpu_id': cpu_index,
+                'value': self._get_cpu_steal_rate(stime, utime, ntime, itime, wtime, Itime, Stime, steal),
+            })
+        for result in data:
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=result,
+                    metadata=self._get_metadata())
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+            except Exception as err:
+                error = err
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -2209,6 +2254,7 @@ WRINGERS = {
     'redis-benchmark': RedisBenchmarkWringer,
     'tcptraceroute': TcptracerouteWringer,
     'stream': StreamWringer,
+    'cpu_steal': CpuStealWringer,
 }
 
 

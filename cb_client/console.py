@@ -215,6 +215,9 @@ TcptracerouteParser.add_argument('--target-type-type', required=True)
 StreamParser = subparser.add_parser('stream', help='')
 StreamParser.add_argument('--compiler', required=True)
 
+# CPU steal
+CpuStealParser = subparser.add_parser('cpu_steal', help='')
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]
