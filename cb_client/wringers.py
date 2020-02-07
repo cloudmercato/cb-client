@@ -247,6 +247,12 @@ class MetricWringer(BaseWringer):
         percent = use_time / total_time * 100
         return percent
 
+    def _get_cpu_steal_rate(self, stime, utime, ntime, itime, wtime, Itime, Stime, steal):
+        total_time = int(stime) + int(utime) + int(ntime) + int(Itime) + int(Stime) + int(itime) + int(wtime) + int(steal)
+        steal_time = int(steal)
+        percent = steal_time / total_time * 100
+        return percent
+
     def parse_CPU(self, line):
         """
         CPU zuluvm 1514345405 2017/12/27 03:30:05 3237908 100 2 4363430 10933017 0 628530138 485206 0 884945 0 0 4608 100
@@ -281,6 +287,8 @@ class MetricWringer(BaseWringer):
         
         cpu victim 1517408534 2018/01/31 14:22:14 1022853 100 0 63709 515511 0 101620702 11852 0 2612 0 0 2304 100
         cpu victim 1517408534 2018/01/31 14:22:14 1022853 100 1 64801 515500 0 101566068 60189 0 3948 0 0 2304 100
+
+        cpu teststeal 1581105787 2020/02/07 20:03:07 30 100 0 1127 1681 0 36 0 0 0 155 0 1995 100 21239022365 65534227891
         """
         timestamp, _, _, _, total, cpu_index, stime, utime, ntime, itime, wtime, Itime, Stime, steal, guest, _, _ = line[2:-2]
         data = {
@@ -292,6 +300,12 @@ class MetricWringer(BaseWringer):
             'group': 'CPU',
             'value': self._get_cpu_usage(stime, utime, ntime, itime, wtime, Itime, Stime, steal),
             'name': 'CPU#%d usage' % int(cpu_index),
+            'date': datetime.fromtimestamp(int(timestamp)).isoformat(),
+            'instance': self.instance_id,
+        }, {
+            'group': 'CPU',
+            'value': self._get_cpu_steal_rate(stime, utime, ntime, itime, wtime, Itime, Stime, steal),
+            'name': 'CPU#%d steal rate' % int(cpu_index),
             'date': datetime.fromtimestamp(int(timestamp)).isoformat(),
             'instance': self.instance_id,
         }]
