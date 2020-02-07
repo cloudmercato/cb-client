@@ -5,6 +5,7 @@ import sys
 import re
 import csv
 import json
+import io
 from functools import reduce
 from datetime import datetime
 from collections import Counter
@@ -199,6 +200,7 @@ class MetricWringer(BaseWringer):
         """
         data = []
         process_count = Counter(A=0, D=0, R=0, S=0, T=0, Z=0)
+        self.input_ = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8', errors='ignore')
         for line in self.input_:
             line = line.strip()
             # Pass empty
