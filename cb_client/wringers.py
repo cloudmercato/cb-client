@@ -2217,6 +2217,111 @@ class CpuStealWringer(BaseWringer):
                 raise SystemExit(1)
             except Exception as err:
                 error = err
+ 
+
+class OpensslSpeedWringer(BaseWringer):
+    bench_name = 'openssl_speed'
+
+    def __init__(self, block_size, num_thread, mode, use_evp, version=None,
+                 *args, **kwargs):
+        super(OpensslSpeedWringer, self).__init__(*args, **kwargs)
+        self.block_size = block_size
+        self.num_thread = num_thread
+        self.mode = mode
+        self.use_evp = use_evp
+        self.version = version
+
+    def _parse_lt_2017(self):
+        data = []
+        runtime = 3
+        algo = None
+        for raw_line in self.input_:
+            line = raw_line.strip()
+            if 'Got: +H' in line and algo is None:
+                algo = line.split(':')[3]
+
+            # +F:16:aes-128 cbc:172952373.33:194222549.33:199455744.00:446262613.33:446401194.67
+            if not line.startswith('+F:') or 'from ' in line:
+                continue
+
+            _, _, _, b16, b64, b256, b1024, b8192 = line.split(':')
+            byte_rates = (
+                (16, b16),
+                (64, b64),
+                (256, b256),
+                (1024, b1024),
+                (8192, b8192),
+            )
+            for block_size, byte_rate in byte_rates:
+                byte_rate = float(byte_rate)
+                handled = byte_rate * runtime
+
+                block_rate = byte_rate / block_size
+                handled_blocks = handled / block_size
+                data.append({
+                    'runtime': runtime,
+                    'byte_rate': round(byte_rate/1024, 2),
+                    'byte_handled': round(handled/1024, 2),
+                    'block_rate': block_rate,
+                    'block_handled': int(handled_blocks),
+                    'version': self.version,
+                    'block_size': block_size,
+                    'num_thread': self.num_thread,
+                    'use_evp': self.use_evp,
+                    'mode': self.mode,
+                    'algo': algo,
+                })
+        return data
+
+    def _parse_gte_2017(self):
+        data = []
+        for raw_line in self.input_:
+            line = raw_line.strip()
+            # +F:3:md5:313616442.66
+            if not line.startswith('+F:') or 'from ' in line:
+                continue
+
+            _, runtime, algo, rate = line.split(':')
+            byte_rate = float(rate)
+            runtime = float(runtime)
+            handled = byte_rate * runtime
+
+            block_rate = byte_rate / self.block_size
+            handled_blocks = handled / self.block_size
+            data.append({
+                'runtime': runtime,
+                'byte_rate': round(byte_rate/1024, 2),
+                'byte_handled': round(handled/1024, 2),
+                'block_rate': block_rate,
+                'block_handled': int(handled_blocks),
+                'version': self.version,
+                'block_size': self.block_size,
+                'num_thread': self.num_thread,
+                'use_evp': self.use_evp,
+                'mode': self.mode,
+                'algo': algo,
+            })
+        return data
+
+    def run(self):
+        version_year = self.version.split()[-1]
+        version_year = int(version_year) if version_year.isdigit() else 0
+        if version_year < 2017:
+            data = self._parse_lt_2017()
+        else:
+            data = self._parse_gte_2017()
+
+        for result in data:
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=result,
+                    metadata=self._get_metadata()
+                )
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
 
 
 WRINGERS = {
@@ -2255,6 +2360,7 @@ WRINGERS = {
     'tcptraceroute': TcptracerouteWringer,
     'stream': StreamWringer,
     'cpu_steal': CpuStealWringer,
+    'openssl_speed': OpensslSpeedWringer,
 }
 
 

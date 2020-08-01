@@ -218,6 +218,14 @@ StreamParser.add_argument('--compiler', required=True)
 # CPU steal
 CpuStealParser = subparser.add_parser('cpu_steal', help='')
 
+# OpenSSL speed
+OpensslSpeedParser = subparser.add_parser('openssl_speed', help='')
+OpensslSpeedParser.add_argument('--block-size', required=True, type=int)
+OpensslSpeedParser.add_argument('--num-thread', required=True, type=int)
+OpensslSpeedParser.add_argument('--mode', required=True)
+OpensslSpeedParser.add_argument('--use-evp', action='store_true')
+OpensslSpeedParser.add_argument('--version', required=False)
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]
