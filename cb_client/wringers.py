@@ -2231,7 +2231,7 @@ class OpensslSpeedWringer(BaseWringer):
         self.use_evp = use_evp
         self.version = version
 
-    def _parse_lt_2017(self):
+    def _parse_lte_2017(self):
         data = []
         runtime = 3
         algo = None
@@ -2273,7 +2273,7 @@ class OpensslSpeedWringer(BaseWringer):
                 })
         return data
 
-    def _parse_gte_2017(self):
+    def _parse_gt_2017(self):
         data = []
         for raw_line in self.input_:
             line = raw_line.strip()
@@ -2307,9 +2307,9 @@ class OpensslSpeedWringer(BaseWringer):
         version_year = self.version.split()[-1]
         version_year = int(version_year) if version_year.isdigit() else 0
         if version_year < 2017:
-            data = self._parse_lt_2017()
+            data = self._parse_lte_2017()
         else:
-            data = self._parse_gte_2017()
+            data = self._parse_gt_2017()
 
         for result in data:
             try:
