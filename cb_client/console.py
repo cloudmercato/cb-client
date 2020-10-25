@@ -226,6 +226,12 @@ OpensslSpeedParser.add_argument('--mode', required=True)
 OpensslSpeedParser.add_argument('--use-evp', action='store_true')
 OpensslSpeedParser.add_argument('--version', required=False)
 
+# OS benchmark DL
+OsBenchmarkDownloadParser = subparser.add_parser('os_benchmark_download', help='')
+OsBenchmarkDownloadParser.add_argument('--dest-zone', required=True, type=int)
+OsBenchmarkDownloadParser.add_argument('--object-storage', required=False, type=int)
+OsBenchmarkDownloadParser.add_argument('--storage-class', required=True, type=int)
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]

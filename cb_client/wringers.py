@@ -2322,6 +2322,31 @@ class OpensslSpeedWringer(BaseWringer):
                     error = exceptions.ServerError(response.content + str(data))
             except KeyboardInterrupt:
                 raise SystemExit(1)
+ 
+
+class OsBenchmarkDownloadWringer(BaseWringer):
+    bench_name = 'os_benchmark_download'
+
+    def __init__(self, dest_zone, object_storage, storage_class,
+                 *args, **kwargs):
+        super(OsBenchmarkDownloadWringer, self).__init__(*args, **kwargs)
+        self.storage_class = storage_class
+        self.dest_zone = dest_zone
+        self.object_storage = object_storage
+
+    def _get_data(self):
+        # Parse input file
+        bench_data = {}
+        for line in self.input_:
+            key, value = line.split()
+            bench_data[key.strip()] = value.strip()
+        # Return a dict with API needed infos
+        bench_data.update({
+            'dest_zone': self.dest_zone,
+            'object_storage': self.object_storage,
+            'storage_class': self.storage_class,
+        })
+        return bench_data
 
 
 WRINGERS = {
@@ -2361,6 +2386,7 @@ WRINGERS = {
     'stream': StreamWringer,
     'cpu_steal': CpuStealWringer,
     'openssl_speed': OpensslSpeedWringer,
+    'os_benchmark_download': OsBenchmarkDownloadWringer,
 }
 
 
