@@ -2349,6 +2349,49 @@ class OsBenchmarkDownloadWringer(BaseWringer):
         return bench_data
 
 
+class AiBenchmarkWringer(BaseWringer):
+    bench_name = 'ai_benchmark'
+
+    def run(self):
+        results = []
+        raw_data = json.loads(self.input_.read())
+        base_data = {
+            'cpu_cores': raw_data['test_info']['cpu_cores'],
+            'intra_thread': raw_data['test_info']['intra_threads'],
+            'inter_thread': raw_data['test_info']['inter_threads'],
+            'tf_version': raw_data['test_info']['tf_version'],
+            'py_version': raw_data['test_info']['py_version'].split()[0],
+            'version': raw_data['test_info']['version'],
+            'precision': raw_data['test_info']['precision'],
+            'unit': 'cpu' if raw_data['test_info']['is_cpu_build'] else 'gpu',
+        }
+        for test in raw_data['test_results']:
+            data = base_data.copy()
+            if str(raw_data['test_results'][test]['mean']) == 'nan':
+                continue
+            data['test'] = test
+            data.update(raw_data['test_results'][test])
+            results.append(data)
+        if raw_data['test_info']['full_suite']:
+            for test in ('ai_score', 'inference_score', 'training_score'):
+                mean = raw_data[test]
+                data = base_data.copy()
+                data.update(test=test, mean=mean, std=0)
+                results.append(data)
+
+        for result in results:
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=result,
+                    metadata=self._get_metadata()
+                )
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -2387,6 +2430,7 @@ WRINGERS = {
     'cpu_steal': CpuStealWringer,
     'openssl_speed': OpensslSpeedWringer,
     'os_benchmark_download': OsBenchmarkDownloadWringer,
+    'ai_benchmark': AiBenchmarkWringer,
 }
 
 

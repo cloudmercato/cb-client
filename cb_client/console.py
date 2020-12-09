@@ -232,6 +232,8 @@ OsBenchmarkDownloadParser.add_argument('--dest-zone', required=True, type=int)
 OsBenchmarkDownloadParser.add_argument('--object-storage', required=False, type=int)
 OsBenchmarkDownloadParser.add_argument('--storage-class', required=True, type=int)
 
+# AI Benchamrk
+AiBenchmarkParser = subparser.add_parser('ai_benchmark', help='')
 
 def main():
     parsed_args = parser.parse_known_args()[0]
