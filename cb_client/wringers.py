@@ -711,7 +711,7 @@ class SysbenchOltpWringer(BaseWringer):
             elif 'max:' in line:
                 sysbench_data['lat_max'] = re.search('([\d\.]+)', line).group()
             elif '95th percentile:' in line:
-                sysbench_data['lat_95p'] = re.search(':\s*([\d\.]+)', line).group()
+                sysbench_data['lat_95p'] = line.split(':')[-1].strip()
             elif 'sum:' in line:
                 sysbench_data['lat_sum'] = re.search('([\d\.]+)', line).group()
         return sysbench_data
