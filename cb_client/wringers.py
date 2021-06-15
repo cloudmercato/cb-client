@@ -2245,6 +2245,12 @@ class OpensslSpeedWringer(BaseWringer):
                 continue
 
             _, _, _, b16, b64, b256, b1024, b8192 = line.split(':')
+            line_values = line.split(':')[3:]
+            if len(line_values) == 5:
+                b16, b64, b256, b1024, b8192 = line_values
+            elif len(line_values) == 6:
+                b16, b64, b256, b1024, b8192, b16384 = line_values
+
             byte_rates = (
                 (16, b16),
                 (64, b64),
@@ -2252,6 +2258,10 @@ class OpensslSpeedWringer(BaseWringer):
                 (1024, b1024),
                 (8192, b8192),
             )
+            
+            if len(line_values) == 6:
+                byte_rates += ((16394, b16384), )
+
             for block_size, byte_rate in byte_rates:
                 byte_rate = float(byte_rate)
                 handled = byte_rate * runtime
