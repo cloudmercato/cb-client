@@ -476,9 +476,14 @@ class SysbenchCpuWringer(BaseWringer):
             for _line in [line.strip() for w in WANTEDS if w in line]:
                 key, value = _line.split(':')
                 bench_data[key.strip()] = value.strip()
+        if 'total time' in bench_data:
+            exec_time = int(float(re.sub(r'[^0-9\.]', '', bench_data['total time'])))
+        else:
+            exec_time = int(float(re.sub(r'[^0-9\.]', '', bench_data['time elapsed'])))
+            
         # Return a dict with API needed infos
         return {
-            'exec_time': int(float(re.sub(r'[^0-9\.]', '', bench_data['total time']))),
+            'exec_time': exec_time,
             'num_thread': bench_data['Number of threads'],
             'cpu_max_prime': bench_data['Prime numbers limit'],
             'event_number': bench_data['total number of events'],
@@ -497,6 +502,11 @@ class SysbenchRamWringer(BaseWringer):
         WANTEDS = ('threads:', 'total time', 'total number of events', 'min', 'avg', 'max', 'operation:', 'block size')
         bench_data = {}
         for line in self.input_:
+            if 'total time' in bench_data:
+                exec_time = int(float(re.sub(r'[^0-9\.]', '', bench_data['total time'])))
+            else:
+                exec_time = int(float(re.sub(r'[^0-9\.]', '', bench_data['time elapsed'])))
+
             if 'Operations performed' in line or 'Total operations:' in line:
                 operations, operation_speed = re.findall(r'(\d+).+\(\s*([0-9\.]+)', line)[0]
                 bench_data['operations'] = operations
@@ -511,7 +521,7 @@ class SysbenchRamWringer(BaseWringer):
                     bench_data[key] = value.strip()
         # Return a dict with API needed infos
         return {
-            'exec_time': int(float(re.sub(r'[^0-9\.]', '', bench_data['total time']))),
+            'exec_time': exec_time,
             'num_thread': bench_data['Number of threads'],
             'readwrite': bench_data['operation'],
             'mode': 'seq',
