@@ -469,7 +469,7 @@ class SysbenchCpuWringer(BaseWringer):
 
     def _get_data(self):
         # Parse input file
-        WANTEDS = ('of threads', 'events per second', 'total time', 'total number of events', 'min', 'avg', 'max', 'numbers limit')
+        WANTEDS = ('of threads', 'events per second', 'total time', 'total number of events', 'min', 'avg', 'max', 'numbers limit', 'time elapsed')
         bench_data = {}
         bench_data['version'] = self.input_.readline().split()[1]
         for line in self.input_:
@@ -499,7 +499,7 @@ class SysbenchRamWringer(BaseWringer):
 
     def _get_data(self):
         # Parse input file
-        WANTEDS = ('threads:', 'total time', 'total number of events', 'min', 'avg', 'max', 'operation:', 'block size')
+        WANTEDS = ('threads:', 'total time', 'total number of events', 'min', 'avg', 'max', 'operation:', 'block size', 'time elapsed')
         bench_data = {}
         for line in self.input_:
             if 'total time' in bench_data:
