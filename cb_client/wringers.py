@@ -504,7 +504,7 @@ class SysbenchRamWringer(BaseWringer):
         for line in self.input_:
             if 'total time' in bench_data:
                 exec_time = int(float(re.sub(r'[^0-9\.]', '', bench_data['total time'])))
-            else:
+            if 'time elapsed' in bench_data:
                 exec_time = int(float(re.sub(r'[^0-9\.]', '', bench_data['time elapsed'])))
 
             if 'Operations performed' in line or 'Total operations:' in line:
