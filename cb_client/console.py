@@ -235,6 +235,22 @@ OsBenchmarkDownloadParser.add_argument('--storage-class', required=True, type=in
 # AI Benchamrk
 AiBenchmarkParser = subparser.add_parser('ai_benchmark', help='')
 
+# lmbench
+## mhz
+MhzParser = subparser.add_parser('mhz', help='')
+## tlb
+TlbParser = subparser.add_parser('tlb', help='')
+TlbParser.add_argument('--line-size', required=True, type=int)
+TlbParser.add_argument('--len', required=True, type=int)
+TlbParser.add_argument('--warmup', required=True, type=int)
+TlbParser.add_argument('--repetitions', required=True, type=int)
+## bw_mem
+BwMemParser = subparser.add_parser('bw_mem', help='')
+BwMemParser.add_argument('--parallelism', required=True, type=int)
+BwMemParser.add_argument('--warmup', required=True, type=int)
+BwMemParser.add_argument('--repetitions', required=True, type=int)
+BwMemParser.add_argument('--operation', required=True, type=str)
+
 def main():
     parsed_args = parser.parse_known_args()[0]
     if parsed_args.bench_name == 'run':

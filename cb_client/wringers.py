@@ -2412,6 +2412,71 @@ class AiBenchmarkWringer(BaseWringer):
                 raise SystemExit(1)
 
 
+class MhzWringer(BaseWringer):
+    bench_name = 'mhz'
+
+    def run(self):
+        results = []
+        for result in self.input_.readlines():
+            data = {'rate': float(result)}
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=data,
+                    metadata=self._get_metadata()
+                )
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+
+
+class TlbWringer(BaseWringer):
+    bench_name = 'tlb'
+
+    def run(self):
+        results = []
+        for result in self.input_.readlines():
+            split_res = result.strip().split()
+            data = {
+                'pages': int(split_res[1]),
+                'latency': float(split_res[3]),
+            }
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=data,
+                    metadata=self._get_metadata()
+                )
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+
+
+class BwMemWringer(BaseWringer):
+    bench_name = 'bw_mem'
+
+    def run(self):
+        results = []
+        for result in self.input_.readlines():
+            size, lat = result.strip().split()
+            data = {
+                'size': float(size),
+                'latency': float(lat),
+            }
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=data,
+                    metadata=self._get_metadata()
+                )
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -2451,6 +2516,9 @@ WRINGERS = {
     'openssl_speed': OpensslSpeedWringer,
     'os_benchmark_download': OsBenchmarkDownloadWringer,
     'ai_benchmark': AiBenchmarkWringer,
+    'mhz': MhzWringer,
+    'tlb': TlbWringer,
+    'bw_mem': BwMemWringer,
 }
 
 
