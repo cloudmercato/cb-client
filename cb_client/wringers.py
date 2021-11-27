@@ -1982,23 +1982,27 @@ class KvazaarWringer(BaseWringer):
 class FfmpegWringer(BaseWringer):
     bench_name = 'ffmpeg'
 
-    def __init__(self, output_format, unit, *args, **kwargs):
+    def __init__(self, output_format, unit, preset, input_file, threads, *args, **kwargs):
         super(FfmpegWringer, self).__init__(*args, **kwargs)
         self.output_format = output_format
         self.unit = unit
+        self.input_file = input_file
+        self.preset = preset
+        self.threads = threads
 
     def _get_data(self):
         data = {
             'output_format': self.output_format,
             'unit': self.unit,
+            'preset': self.preset,
+            'input_file': self.input_file,
+            'threads': self.threads,
         }
         for line in self.input_:
             if 'ffmpeg version' in line:
                 data['version'] = line.split()[2]
             elif 'built with' in line:
                 data['compiler'] = ' '.join(line.split()[2:4])
-            elif line.startswith('Opening an input file:'):
-                data['input_file'] = line.strip().split('/')[-1][:-1]
             elif line.startswith('Reading option'):
                 if ' output url.' in line:
                     continue

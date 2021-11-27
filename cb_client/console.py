@@ -187,7 +187,9 @@ RunnerArgumentParser = RunnerArgumentParser.add_argument('test')
 FfmpegArgumentParser = subparser.add_parser('ffmpeg', help='')
 FfmpegArgumentParser.add_argument('--output-format', required=True)
 FfmpegArgumentParser.add_argument('--unit', default='cpu', required=False)
-FfmpegArgumentParser.add_argument('--input_file', required=False)
+FfmpegArgumentParser.add_argument('--threads')
+FfmpegArgumentParser.add_argument('--input-file', required=False)
+FfmpegArgumentParser.add_argument('--preset')
 
 # Python FPB
 PythonFpbArgumentParser = subparser.add_parser('fpb', help='')
