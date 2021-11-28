@@ -186,6 +186,7 @@ RunnerArgumentParser = RunnerArgumentParser.add_argument('test')
 # Ffmpeg
 FfmpegArgumentParser = subparser.add_parser('ffmpeg', help='')
 FfmpegArgumentParser.add_argument('--output-format', required=True)
+FfmpegArgumentParser.add_argument('--output-scale')
 FfmpegArgumentParser.add_argument('--unit', default='cpu', required=False)
 FfmpegArgumentParser.add_argument('--threads')
 FfmpegArgumentParser.add_argument('--input-file', required=False)

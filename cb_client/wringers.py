@@ -1982,9 +1982,10 @@ class KvazaarWringer(BaseWringer):
 class FfmpegWringer(BaseWringer):
     bench_name = 'ffmpeg'
 
-    def __init__(self, output_format, unit, preset, input_file, threads, *args, **kwargs):
+    def __init__(self, output_format, output_scale, unit, preset, input_file, threads, *args, **kwargs):
         super(FfmpegWringer, self).__init__(*args, **kwargs)
         self.output_format = output_format
+        self.output_scale = output_scale
         self.unit = unit
         self.input_file = input_file
         self.preset = preset
@@ -1993,6 +1994,7 @@ class FfmpegWringer(BaseWringer):
     def _get_data(self):
         data = {
             'output_format': self.output_format,
+            'output_scale': self.output_scale,
             'unit': self.unit,
             'preset': self.preset,
             'input_file': self.input_file,
