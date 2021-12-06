@@ -2463,13 +2463,24 @@ class TlbWringer(BaseWringer):
 class BwMemWringer(BaseWringer):
     bench_name = 'bw_mem'
 
+    def __init__(self, parallelism, warmup, repetitions, operation, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.parallelism = parallelism
+        self.warmup = warmup
+        self.repetitions = repetitions
+        self.operation = operation
+
     def run(self):
         results = []
         for result in self.input_.readlines():
             size, lat = result.strip().split()
             data = {
-                'size': float(size),
+                'size': int(float(size)),
                 'latency': float(lat),
+                'parallelism': self.parallelism,
+                'warmup': self.warmup,
+                'repetitions': self.repetitions,
+                'operation': self.operation,
             }
             try:
                 response = self.client.post_result(
