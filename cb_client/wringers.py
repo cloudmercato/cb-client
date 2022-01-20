@@ -2494,6 +2494,20 @@ class BwMemWringer(BaseWringer):
                 raise SystemExit(1)
 
 
+class SudokuMlBenchWringer(BaseWringer):
+    bench_name = 'sudoku_ml_bench'
+
+    def __init__(self, unit, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.unit = unit
+
+    def _get_data(self):
+        data = json.loads(self.input_.read())
+        data['unit'] = self.unit
+        data['model'] = data['model_path']
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -2533,6 +2547,7 @@ WRINGERS = {
     'openssl_speed': OpensslSpeedWringer,
     'os_benchmark_download': OsBenchmarkDownloadWringer,
     'ai_benchmark': AiBenchmarkWringer,
+    'sudoku_ml_bench': SudokuMlBenchWringer,
     'mhz': MhzWringer,
     'tlb': TlbWringer,
     'bw_mem': BwMemWringer,

@@ -237,6 +237,9 @@ OsBenchmarkDownloadParser.add_argument('--storage-class', required=True, type=in
 
 # AI Benchamrk
 AiBenchmarkParser = subparser.add_parser('ai_benchmark', help='')
+# Sudoku ML Benchamrk
+SudokuMlBenchParser = subparser.add_parser('sudoku_ml_bench', help='')
+SudokuMlBenchParser.add_argument('--unit', required=True)
 
 # lmbench
 ## mhz
