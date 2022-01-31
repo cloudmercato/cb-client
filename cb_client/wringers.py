@@ -6,6 +6,7 @@ import re
 import csv
 import json
 import io
+import math
 from functools import reduce
 from datetime import datetime
 from collections import Counter
@@ -2502,7 +2503,24 @@ class SudokuMlBenchWringer(BaseWringer):
         self.unit = unit
 
     def _get_data(self):
+        def parse_range(name):
+            r = data.get(name)
+            if not r:
+                return {}
+            if isinstance(r, str):
+                r = [int(i) for i in r.split(',')]
+            if isinstance(r, int):
+                r = [r-1, r]
+            return {'%s_min' % name: r[0], '%s_max' % name: r[1]}
         data = json.loads(self.input_.read())
+        if not data.get('precision_policy'):
+            data['precision_policy'] = 'default'
+        if math.isnan(data.get('train_start_loss') or 0):
+            data['train_start_loss'] = None
+        if math.isnan(data.get('train_end_loss') or 0):
+            data['train_end_loss'] = None
+        data.update(parse_range('train_removed'))
+        data.update(parse_range('infer_removed'))
         data['unit'] = self.unit
         data['model'] = data['model_path']
         return data
