@@ -2351,12 +2351,10 @@ class OpensslSpeedWringer(BaseWringer):
                 raise SystemExit(1)
  
 
-class OsBenchmarkDownloadWringer(BaseWringer):
-    bench_name = 'os_benchmark_download'
-
+class BaseOsBenchmarkWringer(BaseWringer):
     def __init__(self, dest_zone, object_storage, storage_class,
                  *args, **kwargs):
-        super(OsBenchmarkDownloadWringer, self).__init__(*args, **kwargs)
+        super(BaseOsBenchmarkWringer, self).__init__(*args, **kwargs)
         self.storage_class = storage_class
         self.dest_zone = dest_zone
         self.object_storage = object_storage
@@ -2374,6 +2372,18 @@ class OsBenchmarkDownloadWringer(BaseWringer):
             'storage_class': self.storage_class,
         })
         return bench_data
+ 
+
+class OsBenchmarkDownloadWringer(BaseOsBenchmarkWringer):
+    bench_name = 'os_benchmark_download'
+
+
+class OsBenchmarkUploadWringer(BaseOsBenchmarkWringer):
+    bench_name = 'os_benchmark_upload'
+ 
+
+class OsBenchmarkVideoStreamingWringer(BaseOsBenchmarkWringer):
+    bench_name = 'os_benchmark_video_streaming'
 
 
 class AiBenchmarkWringer(BaseWringer):
@@ -2564,6 +2574,8 @@ WRINGERS = {
     'cpu_steal': CpuStealWringer,
     'openssl_speed': OpensslSpeedWringer,
     'os_benchmark_download': OsBenchmarkDownloadWringer,
+    'os_benchmark_upload': OsBenchmarkUploadWringer,
+    'os_benchmark_video_streaming': OsBenchmarkVideoStreamingWringer,
     'ai_benchmark': AiBenchmarkWringer,
     'sudoku_ml_bench': SudokuMlBenchWringer,
     'mhz': MhzWringer,

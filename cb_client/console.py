@@ -234,6 +234,16 @@ OsBenchmarkDownloadParser = subparser.add_parser('os_benchmark_download', help='
 OsBenchmarkDownloadParser.add_argument('--dest-zone', required=True, type=int)
 OsBenchmarkDownloadParser.add_argument('--object-storage', required=False, type=int)
 OsBenchmarkDownloadParser.add_argument('--storage-class', required=True, type=int)
+# OS benchmark UL
+OsBenchmarkUploadParser = subparser.add_parser('os_benchmark_upload', help='')
+OsBenchmarkUploadParser.add_argument('--dest-zone', required=True, type=int)
+OsBenchmarkUploadParser.add_argument('--object-storage', required=False, type=int)
+OsBenchmarkUploadParser.add_argument('--storage-class', required=True, type=int)
+# OS benchmark VS
+OsBenchmarkVideoStreamingParser = subparser.add_parser('os_benchmark_video_streaming', help='')
+OsBenchmarkVideoStreamingParser.add_argument('--dest-zone', required=True, type=int)
+OsBenchmarkVideoStreamingParser.add_argument('--object-storage', required=False, type=int)
+OsBenchmarkVideoStreamingParser.add_argument('--storage-class', required=True, type=int)
 
 # AI Benchamrk
 AiBenchmarkParser = subparser.add_parser('ai_benchmark', help='')
