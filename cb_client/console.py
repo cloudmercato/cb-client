@@ -244,6 +244,11 @@ OsBenchmarkVideoStreamingParser = subparser.add_parser('os_benchmark_video_strea
 OsBenchmarkVideoStreamingParser.add_argument('--dest-zone', required=True, type=int)
 OsBenchmarkVideoStreamingParser.add_argument('--object-storage', required=False, type=int)
 OsBenchmarkVideoStreamingParser.add_argument('--storage-class', required=True, type=int)
+# OS benchmark Curl
+OsBenchmarkDownloadParser = subparser.add_parser('os_benchmark_curl', help='')
+OsBenchmarkDownloadParser.add_argument('--dest-zone', required=True, type=int)
+OsBenchmarkDownloadParser.add_argument('--object-storage', required=False, type=int)
+OsBenchmarkDownloadParser.add_argument('--storage-class', required=True, type=int)
 
 # AI Benchamrk
 AiBenchmarkParser = subparser.add_parser('ai_benchmark', help='')

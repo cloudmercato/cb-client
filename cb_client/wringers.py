@@ -2384,6 +2384,10 @@ class OsBenchmarkUploadWringer(BaseOsBenchmarkWringer):
 
 class OsBenchmarkVideoStreamingWringer(BaseOsBenchmarkWringer):
     bench_name = 'os_benchmark_video_streaming'
+ 
+
+class OsBenchmarkCurlWringer(BaseOsBenchmarkWringer):
+    bench_name = 'os_benchmark_curl'
 
 
 class AiBenchmarkWringer(BaseWringer):
@@ -2576,6 +2580,7 @@ WRINGERS = {
     'os_benchmark_download': OsBenchmarkDownloadWringer,
     'os_benchmark_upload': OsBenchmarkUploadWringer,
     'os_benchmark_video_streaming': OsBenchmarkVideoStreamingWringer,
+    'os_benchmark_curl': OsBenchmarkCurlWringer,
     'ai_benchmark': AiBenchmarkWringer,
     'sudoku_ml_bench': SudokuMlBenchWringer,
     'mhz': MhzWringer,
