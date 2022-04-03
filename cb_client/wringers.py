@@ -2382,6 +2382,10 @@ class OsBenchmarkUploadWringer(BaseOsBenchmarkWringer):
     bench_name = 'os_benchmark_upload'
  
 
+class OsBenchmarkMultiDownloadWringer(BaseOsBenchmarkWringer):
+    bench_name = 'os_benchmark_multi_download'
+ 
+
 class OsBenchmarkVideoStreamingWringer(BaseOsBenchmarkWringer):
     bench_name = 'os_benchmark_video_streaming'
  
@@ -2579,6 +2583,7 @@ WRINGERS = {
     'openssl_speed': OpensslSpeedWringer,
     'os_benchmark_download': OsBenchmarkDownloadWringer,
     'os_benchmark_upload': OsBenchmarkUploadWringer,
+    'os_benchmark_multi_download': OsBenchmarkMultiDownloadWringer,
     'os_benchmark_video_streaming': OsBenchmarkVideoStreamingWringer,
     'os_benchmark_curl': OsBenchmarkCurlWringer,
     'ai_benchmark': AiBenchmarkWringer,
