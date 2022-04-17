@@ -55,6 +55,10 @@ SysbenchOltpArgumentParser = subparser.add_parser('sysbench_oltp')
 SysbenchOltpArgumentParser.add_argument('-vf', '--volume-flavor', type=int, required=False)
 SysbenchOltpArgumentParser.add_argument('-D', '--datastore-type', required=True)
 SysbenchOltpArgumentParser.add_argument('-S', '--script', required=True)
+SysbenchOltpArgumentParser.add_argument('--tables', required=True)
+SysbenchOltpArgumentParser.add_argument('--table-size', required=True)
+SysbenchOltpArgumentParser.add_argument('--range-size', required=True)
+SysbenchOltpArgumentParser.add_argument('--skip-trx', action='store_true')
 
 # Ab parser
 AbArgumentParser = subparser.add_parser('ab', help='ab help')

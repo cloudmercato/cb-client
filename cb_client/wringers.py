@@ -689,12 +689,20 @@ class SysbenchOltpWringer(BaseWringer):
         self.datastore_type = kwargs['datastore_type']
         self.script = kwargs['script']
         self.volume_flavor_id = kwargs['volume_flavor'] or None
+        self.tables = kwargs['tables']
+        self.table_size = kwargs['table_size']
+        self.range_size = kwargs['range_size']
+        self.skip_trx = kwargs['skip_trx']
 
     def _get_data(self):
         sysbench_data = {
             'volume': self.volume_flavor_id,
             'datastore_type': self.datastore_type,
             'script': self.script,
+            'tables': self.tables,
+            'table_size': self.table_size,
+            'range_size': self.range_size,
+            'skip_trx': self.skip_trx,
         }
         for line in self.input_:
             if 'Number of threads' in line:
