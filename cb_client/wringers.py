@@ -687,6 +687,8 @@ class SysbenchOltpWringer(BaseWringer):
     def __init__(self, *args, **kwargs):
         super(SysbenchOltpWringer, self).__init__(*args, **kwargs)
         self.datastore_type = kwargs['datastore_type']
+        self.volume_type = kwargs['volume_type']
+        self.volume_size = kwargs['volume_size']
         self.script = kwargs['script']
         self.volume_flavor_id = kwargs['volume_flavor'] or None
         self.tables = kwargs['tables']
