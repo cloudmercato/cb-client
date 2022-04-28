@@ -61,6 +61,7 @@ SysbenchOltpArgumentParser.add_argument('--tables', required=True)
 SysbenchOltpArgumentParser.add_argument('--table-size', required=True)
 SysbenchOltpArgumentParser.add_argument('--range-size', required=True)
 SysbenchOltpArgumentParser.add_argument('--skip-trx', action='store_true')
+SysbenchOltpArgumentParser.add_argument('--ssl', action='store_true')
 
 # Ab parser
 AbArgumentParser = subparser.add_parser('ab', help='ab help')

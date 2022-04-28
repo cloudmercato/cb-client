@@ -695,6 +695,7 @@ class SysbenchOltpWringer(BaseWringer):
         self.table_size = kwargs['table_size']
         self.range_size = kwargs['range_size']
         self.skip_trx = kwargs['skip_trx']
+        self.ssl = kwargs['ssl']
 
     def _get_data(self):
         sysbench_data = {
@@ -705,6 +706,7 @@ class SysbenchOltpWringer(BaseWringer):
             'table_size': self.table_size,
             'range_size': self.range_size,
             'skip_trx': self.skip_trx,
+            'ssl': self.ssl,
         }
         for line in self.input_:
             if 'Number of threads' in line:
