@@ -745,6 +745,66 @@ class SysbenchOltpWringer(BaseWringer):
         return metadata
 
 
+class PgbenchWringer(BaseWringer):
+    bench_name = 'pgbench'
+
+    def __init__(self, *args, **kwargs):
+        super(PgbenchWringer, self).__init__(*args, **kwargs)
+        self.datastore = kwargs['datastore']
+        self.datastore_type = kwargs['datastore_type']
+        self.volume_flavor_id = kwargs['volume_flavor'] or None
+        self.volume_type = kwargs['volume_type']
+        self.volume_size = kwargs['volume_size']
+
+        self.script = kwargs['script']
+        self.fillfactor = kwargs['fillfactor']
+        self.rate = kwargs['rate']
+        self.no_vacuum = kwargs['no_vacuum']
+        self.foreignkey = kwargs['foreignkey']
+
+    def _get_data(self):
+        pg_data = {
+            'volume': self.volume_flavor_id,
+            'datastore': self.datastore,
+            'datastore_type': self.datastore_type,
+            'script': self.script,
+            'fillfactor': self.fillfactor,
+            'rate': self.rate,
+            'no_vacuum': self.no_vacuum,
+            'foreignkey': self.foreignkey,
+        }
+        for line in self.input_:
+            if line.startswith('pgbench'):
+                pg_data['version'] = line.strip()
+            elif line.startswith('scaling factor:'):
+                data = line.split(':')[1].strip()
+                pg_data['scalefactor'] = data
+            elif line.startswith('query mode'):
+                data = line.split(':')[1].strip()
+                pg_data['protocol'] = data
+            elif line.startswith('number of clients:'):
+                data = line.split(':')[1].strip()
+                pg_data['client'] = data
+            elif line.startswith('number of threads:'):
+                data = line.split(':')[1].strip()
+                pg_data['jobs'] = data
+            elif line.startswith('duration:'):
+                data = line.split(':')[1].split()[0]
+                pg_data['time'] = data
+            elif line.startswith('number of transactions actually processed:'):
+                data = line.split(':')[1].strip()
+                pg_data['transactions'] = data
+            elif line.startswith('latency average = '):
+                data = line.split('=')[1].split()[0]
+                pg_data['lat_avg'] = data
+            elif line.startswith('tps'):
+                data = line.split('=')[1].split()[0]
+                key = 'tps' if 'including' in line else 'tps_no_con'
+                pg_data[key] = data
+        print(pg_data)
+        return pg_data
+
+
 class DdWringer(BaseWringer):
     bench_name = 'dd'
 
@@ -2603,6 +2663,7 @@ WRINGERS = {
     'mhz': MhzWringer,
     'tlb': TlbWringer,
     'bw_mem': BwMemWringer,
+    'pgbench': PgbenchWringer,
 }
 
 

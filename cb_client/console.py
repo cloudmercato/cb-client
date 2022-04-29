@@ -46,11 +46,11 @@ FioArgumentParser.add_argument('-nf', '--nfs', type=int, required=False)
 FioArgumentParser.add_argument('-nft', '--nfs-type', type=int, required=False)
 FioArgumentParser.add_argument('-nfc', '--nfs-conf', type=int, required=False)
 
-# SysBench RAM parser
+# SysBench CPU
 SysbenchCpuArgumentParser = subparser.add_parser('sysbench_cpu')
-
+# SysBench RAM
 SysbenchRamArgumentParser = subparser.add_parser('sysbench_ram')
-
+# SysBench OLTP
 SysbenchOltpArgumentParser = subparser.add_parser('sysbench_oltp')
 SysbenchOltpArgumentParser.add_argument('-vf', '--volume-flavor', type=int, required=False)
 SysbenchOltpArgumentParser.add_argument('-D', '--datastore-type', required=True)
@@ -62,6 +62,20 @@ SysbenchOltpArgumentParser.add_argument('--table-size', required=True)
 SysbenchOltpArgumentParser.add_argument('--range-size', required=True)
 SysbenchOltpArgumentParser.add_argument('--skip-trx', action='store_true')
 SysbenchOltpArgumentParser.add_argument('--ssl', action='store_true')
+
+# pgbench
+PgbenchArgumentParser = subparser.add_parser('pgbench')
+PgbenchArgumentParser.add_argument('-vf', '--volume-flavor', type=int, required=False)
+PgbenchArgumentParser.add_argument('--datastore', required=False)
+PgbenchArgumentParser.add_argument('-D', '--datastore-type', required=True)
+PgbenchArgumentParser.add_argument('--volume-type', required=False)
+PgbenchArgumentParser.add_argument('--volume-size', required=False)
+
+PgbenchArgumentParser.add_argument('-S', '--script', required=True)
+PgbenchArgumentParser.add_argument('--fillfactor', required=True)
+PgbenchArgumentParser.add_argument('--rate', required=False)
+PgbenchArgumentParser.add_argument('--foreignkey', action='store_true')
+PgbenchArgumentParser.add_argument('--no-vacuum', action='store_true')
 
 # Ab parser
 AbArgumentParser = subparser.add_parser('ab', help='ab help')
