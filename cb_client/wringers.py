@@ -801,8 +801,67 @@ class PgbenchWringer(BaseWringer):
                 data = line.split('=')[1].split()[0]
                 key = 'tps' if 'including' in line else 'tps_no_con'
                 pg_data[key] = data
-        print(pg_data)
         return pg_data
+
+
+class YcsbWringer(BaseWringer):
+    bench_name = 'ycsb'
+
+    def __init__(self, *args, **kwargs):
+        super(YcsbWringer, self).__init__(*args, **kwargs)
+        self.datastore = kwargs['datastore']
+        self.datastore_type = kwargs['datastore_type']
+        self.volume_flavor_id = kwargs['volume_flavor'] or None
+        self.volume_type = kwargs['volume_type']
+        self.volume_size = kwargs['volume_size']
+
+    def _get_data(self):
+        ycsb_data = {
+            'volume': self.volume_flavor_id,
+            'datastore': self.datastore,
+            'datastore_type': self.datastore_type,
+        }
+        ops = ('read', 'cleanup', 'update', 'read_modify_write', 'insert', 'scan')
+        for op in ops:
+            ycsb_data.update({
+                '%s_count' % op: 0,
+                '%s_ok' % op: 0,
+                '%s_error' % op: 0,
+            })
+
+        line1 = next(self.input_).strip()
+        ycsb_data['threads'] = re.findall(r'-threads (\d*)', line1)[0]
+        attrs = dict([
+            opt.split('=', 1)
+            for opt in re.findall('-p ([^ ]*)', line1)
+        ])
+        ycsb_data.update(attrs)
+
+        key_to_id = {
+            'RunTime(ms)': 'run_time',
+            'Throughput(ops/sec)': 'ops',
+            'Total Operations': 'count',
+            'Average': 'avg',
+            'Min': 'min',
+            'Max': 'max',
+            'p99.9': 'p99_9',
+            'p99.99': 'p99_99',
+            'Return=OK': 'ok',
+            'Return=Error': 'error',
+        }
+        for line in self.input_:
+            if line.startswith('version:'):
+                ycsb_data['version'] = line.split(':')[1].strip()
+                continue
+            if not line.startswith('['):
+                continue
+            op, key, val = [i.strip() for i in line.split(',')]
+            op = op[1:-1].lower()
+
+            field_key = '%s_%s' % (op, key_to_id.get(key, key))
+            ycsb_data[field_key] = val
+        print(ycsb_data)
+        return ycsb_data
 
 
 class DdWringer(BaseWringer):
@@ -2664,6 +2723,7 @@ WRINGERS = {
     'tlb': TlbWringer,
     'bw_mem': BwMemWringer,
     'pgbench': PgbenchWringer,
+    'ycsb': YcsbWringer,
 }
 
 

@@ -77,6 +77,14 @@ PgbenchArgumentParser.add_argument('--rate', required=False)
 PgbenchArgumentParser.add_argument('--foreignkey', action='store_true')
 PgbenchArgumentParser.add_argument('--no-vacuum', action='store_true')
 
+# ycsb
+YcsbArgumentParser = subparser.add_parser('ycsb')
+YcsbArgumentParser.add_argument('-vf', '--volume-flavor', type=int, required=False)
+YcsbArgumentParser.add_argument('--datastore', required=False)
+YcsbArgumentParser.add_argument('-D', '--datastore-type', required=True)
+YcsbArgumentParser.add_argument('--volume-type', required=False)
+YcsbArgumentParser.add_argument('--volume-size', required=False)
+
 # Ab parser
 AbArgumentParser = subparser.add_parser('ab', help='ab help')
 AbArgumentParser.add_argument('-n', '--num-thread', help='')
