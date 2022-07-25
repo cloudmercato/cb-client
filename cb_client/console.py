@@ -278,6 +278,11 @@ OsBenchmarkVideoStreamingParser = subparser.add_parser('os_benchmark_video_strea
 OsBenchmarkVideoStreamingParser.add_argument('--dest-zone', required=True, type=int)
 OsBenchmarkVideoStreamingParser.add_argument('--object-storage', required=False, type=int)
 OsBenchmarkVideoStreamingParser.add_argument('--storage-class', required=True, type=int)
+# OS benchmark AB
+OsBenchmarkAbParser = subparser.add_parser('os_benchmark_ab', help='')
+OsBenchmarkAbParser.add_argument('--dest-zone', required=True, type=int)
+OsBenchmarkAbParser.add_argument('--object-storage', required=False, type=int)
+OsBenchmarkAbParser.add_argument('--storage-class', required=True, type=int)
 # OS benchmark Curl
 OsBenchmarkDownloadParser = subparser.add_parser('os_benchmark_curl', help='')
 OsBenchmarkDownloadParser.add_argument('--dest-zone', required=True, type=int)
@@ -305,6 +310,10 @@ BwMemParser.add_argument('--parallelism', required=True, type=int)
 BwMemParser.add_argument('--warmup', required=True, type=int)
 BwMemParser.add_argument('--repetitions', required=True, type=int)
 BwMemParser.add_argument('--operation', required=True, type=str)
+
+# CoreMark
+CoreMarkParser = subparser.add_parser('coremark', help='')
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]

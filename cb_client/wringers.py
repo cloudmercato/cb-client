@@ -2521,6 +2521,10 @@ class OsBenchmarkVideoStreamingWringer(BaseOsBenchmarkWringer):
     bench_name = 'os_benchmark_video_streaming'
  
 
+class OsBenchmarkAbWringer(BaseOsBenchmarkWringer):
+    bench_name = 'os_benchmark_ab'
+ 
+
 class OsBenchmarkCurlWringer(BaseOsBenchmarkWringer):
     bench_name = 'os_benchmark_curl'
 
@@ -2675,6 +2679,45 @@ class SudokuMlBenchWringer(BaseWringer):
         return data
 
 
+class CoreMarkWringer(BaseWringer):
+    bench_name = 'coremark'
+
+    def _get_data(self):
+        # Parse input file
+        WANTEDS = {
+            'CoreMark Size': 'size',
+            'Total ticks': 'total_ticks',
+            'Total time (secs)': 'total_time',
+            'Iterations': 'iterations',
+            'Iterations/Sec': 'rate',
+            'Compiler version': 'compiler_version',
+            'Compiler flags': 'compiler_flag',
+        }
+        bench_data = {}
+        for line in self.input_:
+            if ':' not in line:
+                continue
+            key, value = line.split(':', 1)
+            key = key.strip()
+            value = value.strip()
+            if 'Parallel' in key:
+                mode = key.split()[1]
+                bench_data.update({
+                    'concurrency': value,
+                    'concurrency_mode': mode,
+                })
+            elif key in WANTEDS:
+                bench_data[WANTEDS[key]] = value
+
+        if 'concurrency_mode' not in bench_data:
+            concurrency = bench_data['compiler_flag'].split('-DMULTITHREAD=')[-1].split()[0]
+            bench_data.update({
+                'concurrency_mode': 'fork',
+                'concurrency': concurrency,
+            })
+        return bench_data 
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -2716,6 +2759,7 @@ WRINGERS = {
     'os_benchmark_upload': OsBenchmarkUploadWringer,
     'os_benchmark_multi_download': OsBenchmarkMultiDownloadWringer,
     'os_benchmark_video_streaming': OsBenchmarkVideoStreamingWringer,
+    'os_benchmark_ab': OsBenchmarkAbWringer,
     'os_benchmark_curl': OsBenchmarkCurlWringer,
     'ai_benchmark': AiBenchmarkWringer,
     'sudoku_ml_bench': SudokuMlBenchWringer,
@@ -2724,6 +2768,7 @@ WRINGERS = {
     'bw_mem': BwMemWringer,
     'pgbench': PgbenchWringer,
     'ycsb': YcsbWringer,
+    'coremark': CoreMarkWringer,
 }
 
 
