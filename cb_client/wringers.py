@@ -19,6 +19,7 @@ import six
 
 from . import exceptions
 from . import client
+from . import utils
 from .settings import get_config
 
 try:
@@ -2715,7 +2716,43 @@ class CoreMarkWringer(BaseWringer):
                 'concurrency_mode': 'fork',
                 'concurrency': concurrency,
             })
-        return bench_data 
+        return bench_data
+
+
+class LmSensorsWringer(BaseWringer):
+    bench_name = 'lm_sensors'
+
+    def __init__(self, cpu_usage=None, *args, **kwargs):
+        self.cpu_usage = cpu_usage
+        super(LmSensorsWringer, self).__init__(*args, **kwargs)
+
+    def _get_data(self):
+        lm_data = json.load(self.input_)
+        data = {
+            'cpu_usage': self.cpu_usage,
+            'raw': lm_data,
+        }
+
+        pm_keys = [k for k in lm_data.keys() if k.startswith('power_meter-acpi')]
+        watt_values = [lm_data[k]['power1']['power1_average'] for k in pm_keys]
+        data['watt_count'] = len(watt_values)
+        data['watt_sum'] = sum(watt_values)
+        data['watt'] = data['watt_sum'] / data['watt_count']
+        data['watt_std'] = utils.stddev(watt_values)
+
+        cpu_temp_keys = [k for k in lm_data.keys() if k.startswith('coretemp-isa-00')]
+        cpu_temp_values = [
+            [v for Ck, v in lm_data[k][ck].items() if Ck.endswith('_input')][0]
+            for k in cpu_temp_keys
+            for ck in lm_data[k]
+            if isinstance(lm_data[k][ck], dict)
+        ]
+        data['cpu_temp_count'] = len(cpu_temp_values)
+        data['cpu_temp_avg'] = sum(cpu_temp_values) / data['cpu_temp_count']
+        data['cpu_temp_std'] = utils.stddev(cpu_temp_values)
+
+        print(data)
+        return data
 
 
 WRINGERS = {
@@ -2769,6 +2806,7 @@ WRINGERS = {
     'pgbench': PgbenchWringer,
     'ycsb': YcsbWringer,
     'coremark': CoreMarkWringer,
+    'lm_sensors': LmSensorsWringer,
 }
 
 

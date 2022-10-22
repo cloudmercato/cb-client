@@ -314,6 +314,10 @@ BwMemParser.add_argument('--operation', required=True, type=str)
 # CoreMark
 CoreMarkParser = subparser.add_parser('coremark', help='')
 
+# lm-sensors
+LmSensorsParser = subparser.add_parser('lm_sensors', help='')
+LmSensorsParser.add_argument('--cpu-usage', required=True, type=int)
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]
