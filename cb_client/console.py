@@ -318,6 +318,10 @@ CoreMarkParser = subparser.add_parser('coremark', help='')
 LmSensorsParser = subparser.add_parser('lm_sensors', help='')
 LmSensorsParser.add_argument('--cpu-usage', required=True, type=int)
 
+# ipmi-sensors
+LmSensorsParser = subparser.add_parser('ipmi_sensors', help='')
+LmSensorsParser.add_argument('--user-cpu-usage', required=True, type=int)
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]

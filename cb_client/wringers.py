@@ -2751,8 +2751,73 @@ class LmSensorsWringer(BaseWringer):
         data['cpu_temp_avg'] = sum(cpu_temp_values) / data['cpu_temp_count']
         data['cpu_temp_std'] = utils.stddev(cpu_temp_values)
 
-        print(data)
         return data
+
+
+class IpmiSensorsWringer(BaseWringer):
+    bench_name = 'ipmi_sensors'
+
+    FIELDS = {
+    }
+
+    def __init__(self, user_cpu_usage=None, *args, **kwargs):
+        self.user_cpu_usage = user_cpu_usage
+        super(IpmiSensorsWringer, self).__init__(*args, **kwargs)
+
+    def _get_data(self):
+        lines = self.input_.readlines()
+        ipmi_data = [
+            [v.strip() for v in l.split('|')]
+            for l in lines
+        ]
+        ipmi_data = {
+            l[0].replace(' ', '_').lower(): l[1]
+            for l in ipmi_data
+            if l[1] not in ('na', '0x0')
+        }
+
+        ipmi_data.update({
+            'user_cpu_usage': self.user_cpu_usage,
+            'raw': '\n'.join(lines),
+        })
+
+        if 'cpu1_mem_temp' in ipmi_data:
+            cpu_temps = [
+                float(v) for k, v in ipmi_data.items()
+                if k.startswith('cpu') and k.endswith('_mem_temp')
+            ]
+            ipmi_data['cpu_temp_avg'] = (sum(cpu_temps) / len(cpu_temps))
+            ipmi_data['cpu_temp_std'] = utils.stddev(cpu_temps)
+
+        if 'temp' in ipmi_data:
+            ipmi_data['cpu_temp_avg'] = ipmi_data['temp']
+            ipmi_data['cpu_temp_std'] = 0.0
+
+        if 'fan1_speed' in ipmi_data:
+            fan_rpms = [
+                float(v) for k, v in ipmi_data.items()
+                if k.startswith('fan') and k.endswith('_speed')
+            ]
+            ipmi_data['fan_number'] = len(fan_rpms)
+            ipmi_data['fan_rpm_avg'] = (sum(fan_rpms) / ipmi_data['fan_number'])
+            ipmi_data['fan_rpm_std'] = utils.stddev(fan_rpms)
+
+        if 'fan1' in ipmi_data:
+            fan_rpms = [
+                float(v) for k, v in ipmi_data.items()
+                if k.startswith('fan')
+            ]
+            ipmi_data['fan_number'] = len(fan_rpms)
+            ipmi_data['fan_rpm_avg'] = (sum(fan_rpms) / ipmi_data['fan_number'])
+            ipmi_data['fan_rpm_std'] = utils.stddev(fan_rpms)
+
+        if 'power' in ipmi_data:
+            ipmi_data['power_consumption'] = ipmi_data['power']
+
+        if 'pwr_consumption' in ipmi_data:
+            ipmi_data['power_consumption'] = ipmi_data['pwr_consumption']
+
+        return ipmi_data
 
 
 WRINGERS = {
@@ -2807,6 +2872,7 @@ WRINGERS = {
     'ycsb': YcsbWringer,
     'coremark': CoreMarkWringer,
     'lm_sensors': LmSensorsWringer,
+    'ipmi_sensors': IpmiSensorsWringer,
 }
 
 
