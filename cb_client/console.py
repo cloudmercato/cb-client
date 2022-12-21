@@ -319,8 +319,13 @@ LmSensorsParser = subparser.add_parser('lm_sensors', help='')
 LmSensorsParser.add_argument('--cpu-usage', required=True, type=int)
 
 # ipmi-sensors
-LmSensorsParser = subparser.add_parser('ipmi_sensors', help='')
-LmSensorsParser.add_argument('--user-cpu-usage', required=True, type=int)
+ImpiSensorsParser = subparser.add_parser('ipmi_sensors', help='')
+ImpiSensorsParser.add_argument('--user-cpu-usage', required=True, type=int)
+
+# gotowaf
+GoToWafParser = subparser.add_parser('gotowaf', help='')
+GoToWafParser.add_argument('-de', '--destination-id', help='')
+GoToWafParser.add_argument('-De', '--destination-type', help='')
 
 
 def main():

@@ -2820,6 +2820,64 @@ class IpmiSensorsWringer(BaseWringer):
         return ipmi_data
 
 
+class GoToWafWringer(BaseNetworkWringer):
+    bench_name = 'gotowaf'
+
+    def run(self):
+        error = None
+        config_data = {
+            'destination_id': self.destination_id,
+            'destination_type': self.destination_type,
+        }
+        for line in self.input_:
+            if 'Summary' in line:
+                break
+            if not line.strip():
+                continue
+
+            result = self._get_data(line)
+            if not result:
+                continue
+
+            result.update(config_data)
+            # Set mode
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=result,
+                    metadata=self._get_metadata()
+                )
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(result))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+            except Exception as err:
+                error = err
+        if error is not None:
+            raise error
+
+    def _get_data(self, line):
+        data = {}
+        if line.startswith('| '):
+            if 'TEST SET' in line or 'TYPE' in line or 'DATE' in line or 'GENERIC' in line:
+                return
+            print(line)
+            ts, tc, perc, bloc, bypa, unre, sent, fail = [
+                i.strip() for i in line.split('|')
+            ][1:-1]
+            data = {
+                'test_set': ts,
+                'test_case': tc,
+                'percentage': perc,
+                'blocked': bloc,
+                'bypassed': bypa,
+                'unresolved': unre,
+                'sent': sent,
+                'failed': fail,
+            }
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -2873,6 +2931,7 @@ WRINGERS = {
     'coremark': CoreMarkWringer,
     'lm_sensors': LmSensorsWringer,
     'ipmi_sensors': IpmiSensorsWringer,
+    'gotowaf': GoToWafWringer,
 }
 
 
