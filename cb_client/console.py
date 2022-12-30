@@ -142,9 +142,11 @@ VaspTestArgumentParser.add_argument('--executable', type=str)
 TracepathArgumentParser = subparser.add_parser('tracepath', help='tracepath help')
 TracepathArgumentParser.add_argument('-de', '--destination-id', help='')
 TracepathArgumentParser.add_argument('-De', '--destination-type', help='')
+TracepathArgumentParser.add_argument('--datacenter', required=False, help='')
 
 IperfArgumentParser = subparser.add_parser('iperf', help='iperf help')
 IperfArgumentParser.add_argument('-de', '--dest-instance_type', help='')
+IperfArgumentParser.add_argument('--datacenter', required=False, help='')
 
 
 # Hibench

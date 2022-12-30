@@ -1249,10 +1249,11 @@ class DfsioWringer(BaseWringer):
 
 
 class BaseNetworkWringer(BaseWringer):
-    def __init__(self, destination_id, destination_type, *args, **kwargs):
+    def __init__(self, destination_id, destination_type, datacenter=None, *args, **kwargs):
         super(BaseNetworkWringer, self).__init__(*args, **kwargs)
         self.destination_id = destination_id
         self.destination_type = destination_type
+        self.datacenter = datacenter
 
 
 class TracepathWringer(BaseNetworkWringer):
@@ -1271,13 +1272,16 @@ class TracepathWringer(BaseNetworkWringer):
         else:
             raise exceptions.ParseError()
         dest_key = 'dest_%s' % self.destination_type
-        return {
+        data = {
             'time': time_,
             'mtu': mtu,
             'hops': hops,
             'back': back,
             dest_key: self.destination_id,
         }
+        if self.datacenter:
+            data['dest_datacenter'] = self.datacenter
+        return data
 
 
 class IperfWringer(BaseNetworkWringer):
@@ -1293,7 +1297,7 @@ class IperfWringer(BaseNetworkWringer):
         result = json.load(self.input_)
         mode = 'download' if result['start']['test_start']['reverse'] else 'upload'
         transport = result['start']['test_start']['protocol'].lower()
-        return {
+        data = {
           'time': result['start']['test_start']['duration'],
           'num_thread': result['start']['test_start']['num_streams'],
           'transport': transport,
@@ -1304,6 +1308,9 @@ class IperfWringer(BaseNetworkWringer):
           'server_bandwidth': result['end']['sum_received']['bits_per_second'] / 2**20,
           'dest_instance_type': self.dest_instance_type,
         }
+        if self.datacenter:
+            data['dest_datacenter'] = self.datacenter
+        return data
 
 
 GEEKBENCH4_FIELDS = {
