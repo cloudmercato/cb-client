@@ -2787,7 +2787,10 @@ class IpmiSensorsWringer(BaseWringer):
             'user_cpu_usage': self.user_cpu_usage,
             'raw': '\n'.join(lines),
         })
-
+        if 'cpu_temp' in ipmi_data:
+            ipmi_data['cpu_temp_avg'] = ipmi_data['cpu_temp']
+            ipmi_data['cpu_temp_std'] = 0.0
+            
         if 'cpu1_mem_temp' in ipmi_data:
             cpu_temps = [
                 float(v) for k, v in ipmi_data.items()
@@ -2795,6 +2798,7 @@ class IpmiSensorsWringer(BaseWringer):
             ]
             ipmi_data['cpu_temp_avg'] = (sum(cpu_temps) / len(cpu_temps))
             ipmi_data['cpu_temp_std'] = utils.stddev(cpu_temps)
+            
 
         if 'temp' in ipmi_data:
             ipmi_data['cpu_temp_avg'] = ipmi_data['temp']
@@ -2823,6 +2827,9 @@ class IpmiSensorsWringer(BaseWringer):
 
         if 'pwr_consumption' in ipmi_data:
             ipmi_data['power_consumption'] = ipmi_data['pwr_consumption']
+            
+        if 'power_consumption' not in ipmi_data:
+            ipmi_data['power_consumption'] = -1
 
         return ipmi_data
 
