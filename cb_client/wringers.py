@@ -2875,7 +2875,6 @@ class GoToWafWringer(BaseNetworkWringer):
         if line.startswith('| '):
             if 'TEST SET' in line or 'TYPE' in line or 'DATE' in line or 'GENERIC' in line:
                 return
-            print(line)
             ts, tc, perc, bloc, bypa, unre, sent, fail = [
                 i.strip() for i in line.split('|')
             ][1:-1]
@@ -2890,6 +2889,98 @@ class GoToWafWringer(BaseNetworkWringer):
                 'failed': fail,
             }
         return data
+
+
+class PythonBenchmarkWringer(BaseWringer):
+    bench_name = 'python_benchmark'
+
+    def __init__(self, python_version_minor=None, *args, **kwargs):
+        super(PythonBenchmarkWringer, self).__init__(*args, **kwargs)
+        self.python_version_minor = python_version_minor
+
+    def run(self):
+        error = None
+        result = json.load(self.input_)
+        for bench in result['benchmarks']:
+            if bench['metadata']['name'] in ('2to3',):
+                continue
+            values = [
+                v
+                for r in bench['runs']
+                if 'values' in r
+                for v in r['values']
+            ]
+            warmups = [
+                v[1]
+                for r in bench['runs']
+                if 'values' in r
+                for v in r['warmups']
+            ]
+            durations = [
+                r['metadata']['duration']
+                for r in bench['runs']
+                if 'values' in r
+            ]
+            load_avgs = [
+                r['metadata']['load_avg_1min']
+                for r in bench['runs']
+                if 'values' in r
+                if 'load_avg_1min' in r['metadata']
+            ]
+            if load_avgs:
+                load_avg_1min_avg = sum(load_avgs) / len(load_avgs)
+                load_avg_1min_std = utils.stddev(load_avgs)
+            else:
+                load_avg_1min_avg = load_avg_1min_std = None
+            python_version = bench['metadata'].get('python_version')
+            if self.python_version_minor:
+                python_version_minor = self.python_version_minor
+            elif python_version:
+                python_version_minor = re.sub('(3\.\d*).*', r'\1', python_version)
+            else:
+                python_version_minor = None
+            data = {
+                # System
+                'aslr': result['metadata']['aslr'],
+                'cpu_config': result['metadata']['cpu_config'],
+                'cpu_count': result['metadata']['cpu_count'],
+                'cpu_freq': result['metadata']['cpu_freq'],
+                'cpu_model_name': result['metadata']['cpu_model_name'],
+                'perf_version': result['metadata']['perf_version'],
+                'performance_version': result['metadata']['performance_version'],
+                'runnable_threads': result['metadata'].get('runnable_threads'),
+                # Bench
+                'python_cflags': bench['metadata'].get('python_cflags'),
+                'python_compiler': bench['metadata'].get('python_compiler'),
+                'python_implementation': bench['metadata'].get('python_implementation'),
+                'python_version': python_version,
+                'python_version_minor': python_version_minor,
+                'name': bench['metadata']['name'],
+                # Values
+                'duration_avg': sum(durations) / len(durations),
+                'duration_std': utils.stddev(durations),
+                'load_avg_1min_avg': load_avg_1min_avg,
+                'load_avg_1min_std': load_avg_1min_std,
+                'value_avg': sum(values) / len(values),
+                'value_std': utils.stddev(values),
+                'warmup_avg': sum(warmups) / len(warmups),
+                'warmup_std': utils.stddev(warmups),
+            }
+
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=data,
+                    metadata=self._get_metadata()
+                )
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(result))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+            except Exception as err:
+                error = err
+        if error is not None:
+            raise error
 
 
 WRINGERS = {
@@ -2946,6 +3037,7 @@ WRINGERS = {
     'lm_sensors': LmSensorsWringer,
     'ipmi_sensors': IpmiSensorsWringer,
     'gotowaf': GoToWafWringer,
+    'python_benchmark': PythonBenchmarkWringer,
 }
 
 

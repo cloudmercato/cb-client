@@ -329,6 +329,10 @@ GoToWafParser = subparser.add_parser('gotowaf', help='')
 GoToWafParser.add_argument('-de', '--destination-id', help='')
 GoToWafParser.add_argument('-De', '--destination-type', help='')
 
+# pybench
+PythonBenchmarkParser = subparser.add_parser('python_benchmark', help='')
+PythonBenchmarkParser.add_argument('-py', '--python-version-minor', help='')
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]
