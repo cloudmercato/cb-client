@@ -333,6 +333,9 @@ GoToWafParser.add_argument('-De', '--destination-type', help='')
 PythonBenchmarkParser = subparser.add_parser('python_benchmark', help='')
 PythonBenchmarkParser.add_argument('-py', '--python-version-minor', help='')
 
+# Blender bench
+BlenderBenchmarkParser = subparser.add_parser('blender_benchmark', help='')
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]

@@ -2983,6 +2983,52 @@ class PythonBenchmarkWringer(BaseWringer):
             raise error
 
 
+class BlenderBenchmarkWringer(BaseWringer):
+    bench_name = 'blender_benchmark'
+
+    def __init__(self, *args, **kwargs):
+        super(BlenderBenchmarkWringer, self).__init__(*args, **kwargs)
+
+    def run(self):
+        error = None
+        result = json.load(self.input_)
+        for bench in result:
+            data = {
+                'version': bench['benchmark_launcher']['label'],
+                'blender_version': bench['blender_version']['version'],
+                'scene': bench['scene']['label'],
+                'bitness': bench['system_info']['bitness'],
+                'machine': bench['system_info']['machine'],
+                'system': bench['system_info']['system'],
+                'num_cpu_sockets': bench['system_info']['num_cpu_sockets'],
+                'num_cpu_cores': bench['system_info']['num_cpu_cores'],
+                'num_cpu_threads': bench['system_info']['num_cpu_threads'],
+                'device_type': bench['device_info']['device_type'],
+                'device_peak_memory': bench['stats']['device_peak_memory'],
+                'number_of_samples': bench['stats']['number_of_samples'],
+                'time_for_samples': bench['stats']['time_for_samples'],
+                'samples_per_minute': bench['stats']['samples_per_minute'],
+                'total_render_time': bench['stats']['total_render_time'],
+                'render_time_no_sync': bench['stats']['render_time_no_sync'],
+                'time_limit': bench['stats']['time_limit'],
+            }
+
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=data,
+                    metadata=self._get_metadata()
+                )
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(result))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+            except Exception as err:
+                error = err
+        if error is not None:
+            raise error
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -3038,6 +3084,7 @@ WRINGERS = {
     'ipmi_sensors': IpmiSensorsWringer,
     'gotowaf': GoToWafWringer,
     'python_benchmark': PythonBenchmarkWringer,
+    'blender_benchmark': BlenderBenchmarkWringer,
 }
 
 
