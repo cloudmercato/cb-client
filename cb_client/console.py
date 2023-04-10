@@ -336,6 +336,14 @@ PythonBenchmarkParser.add_argument('-py', '--python-version-minor', help='')
 # Blender bench
 BlenderBenchmarkParser = subparser.add_parser('blender_benchmark', help='')
 
+# Deepsparse bench
+DeepsparseBenchmarkParser = subparser.add_parser('deepsparse_benchmark', help='')
+DeepsparseBenchmarkParser.add_argument('-py', '--python-version', help='')
+DeepsparseBenchmarkParser.add_argument('-sc', '--scenario', help='')
+DeepsparseBenchmarkParser.add_argument('-wt', '--warmup-time', help='')
+DeepsparseBenchmarkParser.add_argument('-tp', '--thread-pinning', help='')
+DeepsparseBenchmarkParser.add_argument('-en', '--engine', help='')
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]

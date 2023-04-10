@@ -3029,6 +3029,63 @@ class BlenderBenchmarkWringer(BaseWringer):
             raise error
 
 
+class DeepsparseBenchmarkWringer(BaseWringer):
+    bench_name = 'deepsparse_benchmark'
+
+    def __init__(self, python_version=None, scenario=None, warmup_time=None, thread_pinning=None, engine=None, *args, **kwargs):
+        self.python_version = python_version
+        self.scenario = scenario
+        self.warmup_time = warmup_time
+        self.thread_pinning = thread_pinning
+        self.engine = engine
+        super(DeepsparseBenchmarkWringer, self).__init__(*args, **kwargs)
+
+    def run(self):
+        error = None
+        result = json.load(self.input_)
+        data = {
+            'version': result['version'],
+            'python_version': self.python_version,
+            'model_path': result['orig_model_path'],
+            'batch_size': result['batch_size'],
+            'input_shapes': result['input_shapes'],
+            'num_cores': result['num_cores'],
+            'scenario': self.scenario or result['scenario'],
+            'scheduler': result['scheduler'],
+            'time': result['seconds_to_run'],
+            'warmup_time': self.warmup_time,
+            'num_streams': result['num_streams'],
+            'thread_pinning': self.thread_pinning,
+            'engine': self.engine,
+            'items_per_sec': result['benchmark_result']['items_per_sec'],
+            'seconds_ran': result['benchmark_result']['seconds_ran'],
+            'iterations': result['benchmark_result']['iterations'],
+            'median': result['benchmark_result']['median'],
+            'mean': result['benchmark_result']['mean'],
+            'std': result['benchmark_result']['std'],
+            'perc25_0': result['benchmark_result']['25.0%'],
+            'perc75_0': result['benchmark_result']['75.0%'],
+            'perc90_0': result['benchmark_result']['90.0%'],
+            'perc95_0': result['benchmark_result']['95.0%'],
+            'perc99_0': result['benchmark_result']['99.0%'],
+            'perc99_9': result['benchmark_result']['99.9%'],
+        }
+
+        try:
+            response = self.client.post_result(
+                bench_name=self.bench_name,
+                data=data,
+                metadata=self._get_metadata()
+            )
+            if response.status_code >= 300:
+                error = exceptions.ServerError(response.content + str(result))
+        except KeyboardInterrupt:
+            raise SystemExit(1)
+        except Exception as err:
+            error = err
+            print(err)
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -3085,6 +3142,7 @@ WRINGERS = {
     'gotowaf': GoToWafWringer,
     'python_benchmark': PythonBenchmarkWringer,
     'blender_benchmark': BlenderBenchmarkWringer,
+    'deepsparse_benchmark': DeepsparseBenchmarkWringer,
 }
 
 
