@@ -1605,6 +1605,115 @@ class Geekbench5Wringer(BaseWringer):
         return data
 
 
+GEEKBENCH6_FIELDS = {
+    # Int
+    'file_compression': 2**20,  # in MB/sec
+    'navigation': 1,  # in routes/sec
+    'html5_browser': 1,  # in pages/sec
+    'pdf_renderer': 2**20,  # in Mpixels/sec
+    'photo_library': 2**10,  # in Klines/sec
+    'clang': 2**0,  # in Klines/sec
+    'text_processing': 1,  # in pages/sec
+    'asset_compression': 2**20,  # in MB/sec
+    # Float
+    'object_detection': 1,  # in images/sec
+    'background_blur': 1,  # in images/sec
+    'horizon_detection': 2**20,  # in Mpixels/sec
+    'object_remover': 2**20,  # in Mpixels/sec
+    'hdr': 2**20,  # in Mpixels/sec
+    'photo_filter': 1,  # in images/sec
+    'ray_tracer': 2**20,  # in Mpixels/sec
+    'structure_from_motion': 2**10,  # in Kpixels/sec
+}
+GB6_INTS = (
+    'file_compression',
+    'navigation',
+    'html5_browser',
+    'pdf_renderer',
+    'photo_library',
+    'clang',
+    'text_processing',
+    'asset_compression',
+)
+GB6_FLOATS = (
+    'object_detection',
+    'background_blur',
+    'horizon_detection',
+    'object_remover',
+    'hdr',
+    'photo_filter',
+    'ray_tracer',
+    'structure_from_motion',
+)
+
+class Geekbench6Wringer(BaseWringer):
+    bench_name = 'geekbench6'
+
+    def __init__(self, mode, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.mode = mode
+        self._fields = GEEKBENCH6_FIELDS.copy()
+
+    def parse_json(self):
+        raw_results = json.load(self.input_)
+        data = {
+            'version': raw_results['version'],
+            'runtime': raw_results['runtime'],
+            'mode': self.mode,
+            'iterations': raw_results['options']['iterations'],
+            'cpu_workers': raw_results['options']['cpu_workers'],
+            'memory_workers': raw_results['options']['memory_workers'],
+            'workload_gap': raw_results['options']['workload_gap'],
+            'single_score': raw_results['score'],
+            'multi_score': raw_results['multicore_score'],
+        }
+        for section in raw_results['sections']:
+            if section['name'] == "Multi-Core":
+                prefix = 'multi'
+            else:
+                prefix = 'single'
+            data.update({
+                "%s_score" % prefix: section['score']
+            })
+            for raw_result in section['workloads']:
+                key = raw_result['name'].lower().replace(' ', '_')
+                format_ = self._fields[key]
+                fieldname = '%s_%s' % (prefix, key)
+                data[fieldname] = raw_result['rate'] / format_
+                data[fieldname+'_score'] = raw_result['score']
+        return data
+
+    def _get_data(self):
+        data = self.parse_json()
+        # Make section scores
+        single_int_scores = [data['single_%s_score' % f] for f in GB6_INTS]
+        single_int_score = geo_mean(single_int_scores)
+        multi_int_scores = [data['multi_%s_score' % f] for f in GB6_INTS]
+        multi_int_score = geo_mean(multi_int_scores)
+        single_float_scores = [data['single_%s_score' % f] for f in GB6_FLOATS]
+        single_float_score = geo_mean(single_float_scores)
+        multi_float_scores = [data['multi_%s_score' % f] for f in GB6_FLOATS]
+        multi_float_score = geo_mean(multi_float_scores)
+        # Make global scores
+        single_score = weighted_mean((
+            (65, single_int_score),
+            (35, single_float_score),
+        ))
+        multi_score = weighted_mean((
+            (65, multi_int_score),
+            (35, multi_float_score),
+        ))
+        data.update(
+            single_int_score=single_int_score,
+            multi_int_score=multi_int_score,
+            single_float_score=single_float_score,
+            multi_float_score=multi_float_score,
+            single_score=single_score,
+            multi_score=multi_score
+        )
+        return data
+
+
 GEEKBENCH3_SECTIONS = {
   'Integer': 'integer',
   'Floating Point': 'float',
@@ -3101,6 +3210,7 @@ WRINGERS = {
     'dfsio': DfsioWringer,
     'tracepath': TracepathWringer,
     'iperf': IperfWringer,
+    'geekbench6': Geekbench6Wringer,
     'geekbench5': Geekbench5Wringer,
     'geekbench4': Geekbench4Wringer,
     'geekbench3': Geekbench3Wringer,
