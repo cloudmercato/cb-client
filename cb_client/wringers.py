@@ -43,6 +43,7 @@ try:
     REG_FINANCEBENCH = re.compile(r"^Processing time on (G|C)PU ?\(?(\w*)?\)?: ([\d\.]*) \(ms\)\s*$")
 except:
     REG_FINANCEBENCH = None
+RE_FLOAT = re.compile("([0-9.]+)")
 REG_LAMMPS_PERF = re.compile('Performance:\s*([\d\.]*)\s*([\d\w/]*),\s*([\d\.]*)\s*([\d\w/]*),\s*([\d\.]*)\s*([\d\w/]*)')
 REG_LAMMPS_ROW = re.compile(r'^(\w*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*\|\s*([\d.]*)\s*$')
 REG_VRAY = re.compile(r'Rendering took (\d*):(\d*) minutes.', re.M)
@@ -3195,6 +3196,34 @@ class DeepsparseBenchmarkWringer(BaseWringer):
             print(err)
 
 
+class OllamaWringer(BaseWringer):
+    bench_name = 'ollama'
+
+    def __init__(self, query, model, unit, version=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.query = query
+        self.model = model
+        self.unit = unit
+        self.version = version
+
+    def _get_data(self):
+        data = {
+            "query": self.query,
+            "model": self.model,
+            "version": self.version,
+            'unit': self.unit,
+        }
+        for line in self.input_:
+            if ':' not in line:
+                continue
+            key, value = line.split(':')
+            key = key.strip().lower().replace(' ', '_')
+            value = RE_FLOAT.search(value).group(0)
+            data[key] = value
+        print(data)
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -3253,6 +3282,7 @@ WRINGERS = {
     'python_benchmark': PythonBenchmarkWringer,
     'blender_benchmark': BlenderBenchmarkWringer,
     'deepsparse_benchmark': DeepsparseBenchmarkWringer,
+    'ollama': OllamaWringer,
 }
 
 

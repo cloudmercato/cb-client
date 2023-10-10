@@ -347,6 +347,13 @@ DeepsparseBenchmarkParser.add_argument('-wt', '--warmup-time', help='')
 DeepsparseBenchmarkParser.add_argument('-tp', '--thread-pinning', help='')
 DeepsparseBenchmarkParser.add_argument('-en', '--engine', help='')
 
+# Ollama
+OllamaParser = subparser.add_parser('ollama', help='')
+OllamaParser.add_argument('--version', help='')
+OllamaParser.add_argument('--unit', help='')
+OllamaParser.add_argument('--query', help='')
+OllamaParser.add_argument('--model', help='')
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]
