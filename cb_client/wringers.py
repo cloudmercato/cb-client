@@ -3207,6 +3207,8 @@ class OllamaWringer(BaseWringer):
         self.version = version
 
     def _get_data(self):
+        re_key = re.compile("([a-z_]+)$")
+
         data = {
             "query": self.query,
             "model": self.model,
@@ -3217,10 +3219,9 @@ class OllamaWringer(BaseWringer):
             if ':' not in line:
                 continue
             key, value = line.split(':')
-            key = key.strip().lower().replace(' ', '_')
+            key = re_key.search(key.strip().lower().replace(' ', '_')).groups()[-1]
             value = RE_FLOAT.search(value).group(0)
             data[key] = value
-        print(data)
         return data
 
 
