@@ -354,6 +354,9 @@ OllamaParser.add_argument('--unit', help='')
 OllamaParser.add_argument('--query', help='')
 OllamaParser.add_argument('--model', help='')
 
+# Ollama
+WhisperBenchmarkParser = subparser.add_parser('whisper_benchmark', help='')
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]

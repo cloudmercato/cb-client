@@ -3225,6 +3225,22 @@ class OllamaWringer(BaseWringer):
         return data
 
 
+class WhisperBenchmarkWringer(BaseWringer):
+    bench_name = 'whisper_benchmark'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _get_data(self):
+        data = {}
+        for line in self.input_:
+            if ':' not in line:
+                continue
+            key, value = [i.strip() for i in line.split(':')]
+            data[key] = value
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -3284,6 +3300,7 @@ WRINGERS = {
     'blender_benchmark': BlenderBenchmarkWringer,
     'deepsparse_benchmark': DeepsparseBenchmarkWringer,
     'ollama': OllamaWringer,
+    'whisper_benchmark': WhisperBenchmarkWringer,
 }
 
 
