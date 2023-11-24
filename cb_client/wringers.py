@@ -3207,7 +3207,7 @@ class OllamaWringer(BaseWringer):
         self.version = version
 
     def _get_data(self):
-        re_key = re.compile("([a-z_]+)$")
+        re_key = re.compile("h?([a-z_]+)$")
 
         data = {
             "query": self.query,
@@ -3216,7 +3216,7 @@ class OllamaWringer(BaseWringer):
             'unit': self.unit,
         }
         for line in self.input_:
-            if ':' not in line:
+            if not line or ':' not in line:
                 continue
             key, value = line.split(':')
             key = re_key.search(key.strip().lower().replace(' ', '_')).groups()[-1]
