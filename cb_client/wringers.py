@@ -3241,6 +3241,24 @@ class WhisperBenchmarkWringer(BaseWringer):
         return data
 
 
+class InvokeAiBenchmarkWringer(BaseWringer):
+    bench_name = 'invokeai_benchmark'
+
+    def __init__(self, unit, *args, **kwargs):
+        self.unit = unit
+        super().__init__(*args, **kwargs)
+
+    def _get_data(self):
+        data = {}
+        for line in self.input_:
+            if ':' not in line:
+                continue
+            key, value = [i.strip() for i in line.split(':', 1)]
+            data[key] = value
+        data['unit'] = self.unit
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -3301,6 +3319,7 @@ WRINGERS = {
     'deepsparse_benchmark': DeepsparseBenchmarkWringer,
     'ollama': OllamaWringer,
     'whisper_benchmark': WhisperBenchmarkWringer,
+    'invokeai_benchmark': InvokeAiBenchmarkWringer,
 }
 
 

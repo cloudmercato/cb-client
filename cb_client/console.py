@@ -354,8 +354,12 @@ OllamaParser.add_argument('--unit', help='')
 OllamaParser.add_argument('--query', help='')
 OllamaParser.add_argument('--model', help='')
 
-# Ollama
+# Whisper
 WhisperBenchmarkParser = subparser.add_parser('whisper_benchmark', help='')
+
+# InvokeAi
+InvokeAiBenchmarkParser = subparser.add_parser('invokeai_benchmark', help='')
+InvokeAiBenchmarkParser.add_argument('--unit', help='')
 
 
 def main():
