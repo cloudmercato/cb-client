@@ -3259,6 +3259,42 @@ class InvokeAiBenchmarkWringer(BaseWringer):
         return data
 
 
+class NvbandwidthWringer(BaseWringer):
+    bench_name = 'nvbandwidth'
+
+    def __init__(self, buffer, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.buffer = buffer
+
+    def _get_data(self):
+        data = {
+            'buffer': self.buffer,
+        }
+        for line in self.input_:
+            if not line.strip():
+                continue
+            if line.split()[0] in ('SUM', 'MIN', 'MAX', 'AVG'):
+                key, tc, value = line.lower().split()
+                data.update({
+                    key: value,
+                    'testcase': tc,
+                })
+                continue
+
+            if ':' not in line:
+                continue
+            key, value = [i.strip() for i in line.split(':', 1)]
+            key = key.replace(' ', '_').lower()
+            data[key] = value
+
+        data.update({
+            'version': data['nvbandwidth_version'],
+            'test_samples': len([k for k in data if k.startswith('sample_')]),
+        })
+        print(data)
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -3320,6 +3356,7 @@ WRINGERS = {
     'ollama': OllamaWringer,
     'whisper_benchmark': WhisperBenchmarkWringer,
     'invokeai_benchmark': InvokeAiBenchmarkWringer,
+    'nvbandwidth': NvbandwidthWringer,
 }
 
 

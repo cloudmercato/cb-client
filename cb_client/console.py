@@ -361,6 +361,10 @@ WhisperBenchmarkParser = subparser.add_parser('whisper_benchmark', help='')
 InvokeAiBenchmarkParser = subparser.add_parser('invokeai_benchmark', help='')
 InvokeAiBenchmarkParser.add_argument('--unit', help='')
 
+# nvbandwidth 
+NvbandwidthParser = subparser.add_parser('nvbandwidth', help='')
+NvbandwidthParser.add_argument('--buffer')
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]
