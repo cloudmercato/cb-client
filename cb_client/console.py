@@ -365,6 +365,9 @@ InvokeAiBenchmarkParser.add_argument('--unit', help='')
 NvbandwidthParser = subparser.add_parser('nvbandwidth', help='')
 NvbandwidthParser.add_argument('--buffer')
 
+# gpuburn 
+GpuBurnParser = subparser.add_parser('gpu_burn', help='')
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]

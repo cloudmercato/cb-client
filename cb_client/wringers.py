@@ -3291,7 +3291,60 @@ class NvbandwidthWringer(BaseWringer):
             'version': data['nvbandwidth_version'],
             'test_samples': len([k for k in data if k.startswith('sample_')]),
         })
-        print(data)
+        return data
+
+
+class GpuBurnWringer(BaseWringer):
+    bench_name = 'gpu_burn'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _get_data(self):
+        data = {
+            'stats': []
+        }
+        conf_re = re.compile(r"Initialized device (\d+) with (\d+) MB of memory \((\d+) MB available, using (\d+) MB of it\), using (\w+)(, using Tensor Cores)?")
+        val_re = re.compile(r"(\d+\.\d+)%.*?proc'd: (\d+) \((\d+) Gflop/s\).*?errors: (\d+).*?temps: (\d+) C", re.DOTALL)
+        for line in self.input_:
+            if not line.strip():
+                continue
+
+            if line.startswith('Burning for'):
+                data['time'] = int(line.split()[2])
+                continue
+
+            conf_match = conf_re.match(line)
+            if conf_match:
+                _, init_mem, avai_mem, used_mem, dtype, tc = conf_match.groups()
+                init_mem, avai_mem, used_mem = int(init_mem), int(avai_mem), int(used_mem)
+                perc = int(round(used_mem / avai_mem * 100, 0))
+                data.update({
+                    'init_mem': init_mem,
+                    'avai_mem': avai_mem,
+                    'used_mem': used_mem,
+                    'perc_mem': perc,
+                    'dtype': dtype,
+                    'tensor_core': bool(tc),
+                })
+                continue
+
+            val_match = val_re.match(line)
+            if val_match:
+                _, _, gflops, errors, temp = val_match.groups()
+                data['stats'].append((int(gflops), int(errors), int(temp)))
+
+        value_names = ('gflop', 'errors', 'temp')
+        for i, value_name in enumerate(value_names):
+            values = [j[i] for j in data['stats']]
+            avg = sum(values) / len(values)
+            data.update({
+                f"{value_name}_max": max(values),
+                f"{value_name}_min": min(values),
+                f"{value_name}_avg": avg,
+                f"{value_name}_stddev": utils.stddev(values),
+            })
+
         return data
 
 
@@ -3357,6 +3410,7 @@ WRINGERS = {
     'whisper_benchmark': WhisperBenchmarkWringer,
     'invokeai_benchmark': InvokeAiBenchmarkWringer,
     'nvbandwidth': NvbandwidthWringer,
+    'gpu_burn': GpuBurnWringer,
 }
 
 
