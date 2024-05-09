@@ -3329,7 +3329,7 @@ class GpuBurnWringer(BaseWringer):
                 })
                 continue
 
-            val_match = val_re.match(line)
+            val_match = val_re.search(line)
             if val_match:
                 _, _, gflops, errors, temp = val_match.groups()
                 data['stats'].append((int(gflops), int(errors), int(temp)))
