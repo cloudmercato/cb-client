@@ -3305,7 +3305,7 @@ class GpuBurnWringer(BaseWringer):
             'stats': []
         }
         conf_re = re.compile(r"Initialized device (\d+) with (\d+) MB of memory \((\d+) MB available, using (\d+) MB of it\), using (\w+)(, using Tensor Cores)?")
-        val_re = re.compile(r"(\d+\.\d+)%.*?proc'd: (\d+) \((\d+) Gflop/s\).*?errors: (\d+).*?temps: (\d+) C", re.DOTALL)
+        val_re = re.compile(r"(\d+\.\d+)%.*?proc'd: (\d+) \((\d+) Gflop/s\).*?errors: (\d+).*?temps: (\d+) C\s+power: ([\d\.]+) W", re.DOTALL)
         for line in self.input_:
             if not line.strip():
                 continue
@@ -3331,10 +3331,10 @@ class GpuBurnWringer(BaseWringer):
 
             val_match = val_re.search(line)
             if val_match:
-                _, _, gflops, errors, temp = val_match.groups()
-                data['stats'].append((int(gflops), int(errors), int(temp)))
+                _, _, gflops, errors, temp, power = val_match.groups()
+                data['stats'].append((int(gflops), int(errors), int(temp), float(power)))
 
-        value_names = ('gflop', 'errors', 'temp')
+        value_names = ('gflop', 'errors', 'temp', 'power')
         for i, value_name in enumerate(value_names):
             values = [j[i] for j in data['stats']]
             avg = sum(values) / len(values)
@@ -3344,7 +3344,6 @@ class GpuBurnWringer(BaseWringer):
                 f"{value_name}_avg": avg,
                 f"{value_name}_stddev": utils.stddev(values),
             })
-
         return data
 
 
