@@ -3347,6 +3347,41 @@ class GpuBurnWringer(BaseWringer):
         return data
 
 
+class NpbWringer(BaseWringer):
+    bench_name = 'npb'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _get_data(self):
+        data = {}
+        for line in self.input_:
+            line = line.strip()
+            if not line:
+                continue
+
+            if ' Benchmark Completed.' in line:
+                value = line.split()[0].lower()
+                data['bench'] = value
+                continue
+            if '=' in line:
+                key, value = [i.strip() for i in line.split('=')]
+                key = key.lower().replace(' ', '_')
+                data[key] = value
+                continue
+
+        data.update({
+            'accuracy': float(data.pop('accuracy_setting_for_epsilon')),
+            'klass': data.pop('class'),
+            'iterations': int(data.pop('iterations')),
+            'time': float(data.pop('time_in_seconds')),
+            'processes': int(data.pop('total_processes')),
+            'mops_total': float(data.pop('mop/s_total')),
+            'mops': float(data.pop('mop/s/process')),
+        })
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -3410,6 +3445,7 @@ WRINGERS = {
     'invokeai_benchmark': InvokeAiBenchmarkWringer,
     'nvbandwidth': NvbandwidthWringer,
     'gpu_burn': GpuBurnWringer,
+    'npb': NpbWringer,
 }
 
 

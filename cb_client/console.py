@@ -368,6 +368,9 @@ NvbandwidthParser.add_argument('--buffer')
 # gpuburn 
 GpuBurnParser = subparser.add_parser('gpu_burn', help='')
 
+# npb 
+NpbParser = subparser.add_parser('npb', help='')
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]
