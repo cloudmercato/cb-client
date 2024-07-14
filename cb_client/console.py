@@ -303,12 +303,31 @@ SudokuMlBenchParser.add_argument('--unit', required=True)
 # lmbench
 ## mhz
 MhzParser = subparser.add_parser('mhz', help='')
+## lat_mem_rd
+LatMemRdParser = subparser.add_parser('lat_mem_rd', help='')
 ## tlb
 TlbParser = subparser.add_parser('tlb', help='')
 TlbParser.add_argument('--line-size', required=True, type=int)
-TlbParser.add_argument('--len', required=True, type=int)
+TlbParser.add_argument('--length', required=True, type=int)
 TlbParser.add_argument('--warmup', required=True, type=int)
 TlbParser.add_argument('--repetitions', required=True, type=int)
+## cache
+CacheParser = subparser.add_parser('cache', help='')
+CacheParser.add_argument('--line-size', required=True, type=int)
+CacheParser.add_argument('--length', required=True, type=int)
+CacheParser.add_argument('--warmup', required=True, type=int)
+CacheParser.add_argument('--repetitions', required=True, type=int)
+## lmbench stream
+LmbenchStreamParser = subparser.add_parser('lmbench_stream', help='')
+LmbenchStreamParser.add_argument('--length', required=True, type=int)
+LmbenchStreamParser.add_argument('--parallelism', required=True, type=int)
+LmbenchStreamParser.add_argument('--warmup', required=True, type=int)
+LmbenchStreamParser.add_argument('--repetitions', required=True, type=int)
+## lat_ops
+LatOpsParser = subparser.add_parser('lat_ops', help='')
+LatOpsParser.add_argument('--parallelism', required=True, type=int)
+LatOpsParser.add_argument('--warmup', required=True, type=int)
+LatOpsParser.add_argument('--repetitions', required=True, type=int)
 ## bw_mem
 BwMemParser = subparser.add_parser('bw_mem', help='')
 BwMemParser.add_argument('--parallelism', required=True, type=int)

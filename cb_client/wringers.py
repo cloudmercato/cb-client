@@ -2712,14 +2712,26 @@ class MhzWringer(BaseWringer):
 class TlbWringer(BaseWringer):
     bench_name = 'tlb'
 
+    def __init__(self, warmup, repetitions, length, line_size, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.warmup = warmup
+        self.repetitions = repetitions
+        self.length = length
+        self.line_size = line_size
+
     def run(self):
         results = []
         for result in self.input_.readlines():
             split_res = result.strip().split()
             data = {
+                'warmup': self.warmup,
+                'repetitions': self.repetitions,
+                'length': self.length,
+                'line_size': self.line_size,
                 'pages': int(split_res[1]),
-                'latency': float(split_res[3]),
             }
+            if 'nanoseconds' in result:
+                data['latency'] = float(split_res[3])
             try:
                 response = self.client.post_result(
                     bench_name=self.bench_name,
@@ -2728,6 +2740,118 @@ class TlbWringer(BaseWringer):
                 )
                 if response.status_code >= 300:
                     error = exceptions.ServerError(response.content + str(data))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+
+
+class CacheWringer(BaseWringer):
+    bench_name = 'cache'
+
+    def __init__(self, warmup, repetitions, length, line_size, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.warmup = warmup
+        self.repetitions = repetitions
+        self.length = length
+        self.line_size = line_size
+
+    def run(self):
+        results = []
+        for result in self.input_.readlines():
+            split_res = result.strip().split()
+            data = {
+                'warmup': self.warmup,
+                'repetitions': self.repetitions,
+                'length': self.length,
+                'line_size': self.line_size,
+                'pages': int(split_res[1]),
+            }
+            if 'nanoseconds' in result:
+                data['latency'] = float(split_res[3])
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=data,
+                    metadata=self._get_metadata()
+                )
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+
+
+class LmbenchStreamWringer(BaseWringer):
+    bench_name = 'lmbench_stream'
+
+    def __init__(self, warmup, repetitions, length, parallelism, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.warmup = warmup
+        self.repetitions = repetitions
+        self.length = length
+        self.parallelism = parallelism
+
+    def run(self):
+        results = {}
+        for result in self.input_.readlines():
+            version, operation, type_, value, _ = result.strip().split()
+            version = 2 if '2' in version else 1
+            type_ = type_[:-1]
+            if operation not in results:
+                results[operation] = {
+                    'warmup': self.warmup,
+                    'repetitions': self.repetitions,
+                    'length': self.length,
+                    'parallelism': self.parallelism,
+                    'version': version,
+                    'test': operation,
+                    type_: value,
+                }
+                continue
+            results[operation].update({
+                type_: value,
+            })
+        for result in results.values():
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=result,
+                    metadata=self._get_metadata()
+                )
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(result))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+
+
+class LatOpsWringer(BaseWringer):
+    bench_name = 'lat_ops'
+
+    def __init__(self, warmup, repetitions, parallelism, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.warmup = warmup
+        self.repetitions = repetitions
+        self.parallelism = parallelism
+
+    def run(self):
+        for result in self.input_.readlines():
+            dtype, operation, latency, _ = result.strip().split()
+            operation = operation[:-1]
+            result = {
+                'dtype': dtype,
+                'warmup': self.warmup,
+                'repetitions': self.repetitions,
+                'parallelism': self.parallelism,
+                'operation': operation,
+                'latency': latency,
+            }
+
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=result,
+                    metadata=self._get_metadata()
+                )
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(result))
             except KeyboardInterrupt:
                 raise SystemExit(1)
 
@@ -3382,6 +3506,36 @@ class NpbWringer(BaseWringer):
         return data
 
 
+class LatMemRdWringer(BaseWringer):
+    bench_name = 'lat_mem_rd'
+
+    def run(self):
+        results = []
+        base_data = {}
+        for result in self.input_.readlines():
+            if result.startswith('"'):
+                key, value = result[1:].replace('=', ' ').split()
+                base_data[key] = value
+                continue
+
+            data = base_data.copy()
+            stride_length, latency = result.split()
+            data.update({
+                'stride_length': stride_length,
+                'latency': latency,
+            })
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=data,
+                    metadata=self._get_metadata()
+                )
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -3431,6 +3585,9 @@ WRINGERS = {
     'mhz': MhzWringer,
     'tlb': TlbWringer,
     'bw_mem': BwMemWringer,
+    'lat_mem_rd': LatMemRdWringer,
+    'lmbench_stream': LmbenchStreamWringer,
+    'lat_ops': LatOpsWringer,
     'pgbench': PgbenchWringer,
     'ycsb': YcsbWringer,
     'coremark': CoreMarkWringer,
