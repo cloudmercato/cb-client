@@ -2712,18 +2712,20 @@ class MhzWringer(BaseWringer):
 class TlbWringer(BaseWringer):
     bench_name = 'tlb'
 
-    def __init__(self, warmup, repetitions, length, line_size, *args, **kwargs):
+    def __init__(self, warmup, repetitions, length, line_size, cold_cache, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.warmup = warmup
         self.repetitions = repetitions
         self.length = length
         self.line_size = line_size
+        self.cold_cache = cold_cache
 
     def run(self):
         results = []
         for result in self.input_.readlines():
             split_res = result.strip().split()
             data = {
+                'cold_cache': self.cold_cache,
                 'warmup': self.warmup,
                 'repetitions': self.repetitions,
                 'length': self.length,
@@ -2747,36 +2749,55 @@ class TlbWringer(BaseWringer):
 class CacheWringer(BaseWringer):
     bench_name = 'cache'
 
-    def __init__(self, warmup, repetitions, length, line_size, *args, **kwargs):
+    def __init__(self, warmup, repetitions, length, line_size, cold_cache, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.warmup = warmup
         self.repetitions = repetitions
         self.length = length
         self.line_size = line_size
+        self.cold_cache = cold_cache
 
     def run(self):
         results = []
+        data = {
+            'cold_cache': self.cold_cache,
+            'warmup': self.warmup,
+            'repetitions': self.repetitions,
+            'length': self.length,
+            'line_size': self.line_size,
+        }
         for result in self.input_.readlines():
-            split_res = result.strip().split()
-            data = {
-                'warmup': self.warmup,
-                'repetitions': self.repetitions,
-                'length': self.length,
-                'line_size': self.line_size,
-                'pages': int(split_res[1]),
-            }
-            if 'nanoseconds' in result:
-                data['latency'] = float(split_res[3])
-            try:
-                response = self.client.post_result(
-                    bench_name=self.bench_name,
-                    data=data,
-                    metadata=self._get_metadata()
-                )
-                if response.status_code >= 300:
-                    error = exceptions.ServerError(response.content + str(data))
-            except KeyboardInterrupt:
-                raise SystemExit(1)
+            if not result.strip():
+                continue
+
+            if result.startswith('Memory'):
+                values = result.split(':')[1].strip()
+                latency, _, parallelism, _ = values.split()
+                data.update({
+                    'mem_latency': latency,
+                    'mem_parallelism': parallelism,
+                })
+            else:
+                key, values = result.split(':', 1)
+                key = key.split()[0].lower()
+                size, _, latency, _, line_size, _, parallelism, _ = values.strip().split()
+                data.update({
+                    f'{key}_size': size,
+                    f'{key}_latency': latency,
+                    f'{key}_line_size': line_size,
+                    f'{key}_parallelism': parallelism,
+                })
+
+        try:
+            response = self.client.post_result(
+                bench_name=self.bench_name,
+                data=data,
+                metadata=self._get_metadata()
+            )
+            if response.status_code >= 300:
+                error = exceptions.ServerError(response.content + str(data))
+        except KeyboardInterrupt:
+            raise SystemExit(1)
 
 
 class LmbenchStreamWringer(BaseWringer):
@@ -3513,6 +3534,8 @@ class LatMemRdWringer(BaseWringer):
         results = []
         base_data = {}
         for result in self.input_.readlines():
+            if not result.strip():
+                continue
             if result.startswith('"'):
                 key, value = result[1:].replace('=', ' ').split()
                 base_data[key] = value
@@ -3603,6 +3626,7 @@ WRINGERS = {
     'nvbandwidth': NvbandwidthWringer,
     'gpu_burn': GpuBurnWringer,
     'npb': NpbWringer,
+    'cache': CacheWringer,
 }
 
 
