@@ -336,6 +336,8 @@ BwMemParser.add_argument('--parallelism', required=True, type=int)
 BwMemParser.add_argument('--warmup', required=True, type=int)
 BwMemParser.add_argument('--repetitions', required=True, type=int)
 BwMemParser.add_argument('--operation', required=True, type=str)
+## yolo-benchmark-predict
+YoloBenchmarkPredict = subparser.add_parser('yolo_benchmark_predict', help='')
 
 # CoreMark
 CoreMarkParser = subparser.add_parser('coremark', help='')

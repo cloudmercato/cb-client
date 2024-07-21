@@ -3559,6 +3559,26 @@ class LatMemRdWringer(BaseWringer):
                 raise SystemExit(1)
 
 
+class YoloBenchmarkPredictWringer(BaseWringer):
+    bench_name = 'yolo_benchmark_predict'
+
+    def _get_data(self):
+        data = {}
+        for line in self.input_:
+            if not line.strip():
+                continue
+            if ' : ' not in line:
+                continue
+            key, value = line.strip().split(' : ')
+            if value in ("True", "False"):
+                value = json.loads(value.lower())
+            if value == 'None':
+                value = None
+            data[key] = value
+        data['device'] = data['device'] or 'auto'
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -3627,6 +3647,7 @@ WRINGERS = {
     'gpu_burn': GpuBurnWringer,
     'npb': NpbWringer,
     'cache': CacheWringer,
+    'yolo_benchmark_predict': YoloBenchmarkPredictWringer,
 }
 
 
