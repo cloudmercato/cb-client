@@ -3370,6 +3370,25 @@ class OllamaWringer(BaseWringer):
         return data
 
 
+class OllamaBenchmarkSpeedWringer(BaseWringer):
+    bench_name = 'ollama_benchmark_speed'
+
+    def __init__(self, unit, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.unit = unit
+
+    def _get_data(self):
+        data = {
+            'unit': self.unit,
+        }
+        for line in self.input_:
+            if not line or ':' not in line or ';' in line:
+                continue
+            key, value = line.split(':')
+            data[key] = value
+        return data
+
+
 class WhisperBenchmarkWringer(BaseWringer):
     bench_name = 'whisper_benchmark'
 
@@ -3648,6 +3667,7 @@ WRINGERS = {
     'npb': NpbWringer,
     'cache': CacheWringer,
     'yolo_benchmark_predict': YoloBenchmarkPredictWringer,
+    'ollama_benchmark_speed': OllamaBenchmarkSpeedWringer,
 }
 
 

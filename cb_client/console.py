@@ -377,6 +377,10 @@ OllamaParser.add_argument('--unit', help='')
 OllamaParser.add_argument('--query', help='')
 OllamaParser.add_argument('--model', help='')
 
+# Ollama Benchmark Speed
+OllamaBenchmarkSpeedParser = subparser.add_parser('ollama_benchmark_speed', help='')
+OllamaBenchmarkSpeedParser.add_argument('--unit', help='')
+
 # Whisper
 WhisperBenchmarkParser = subparser.add_parser('whisper_benchmark', help='')
 
