@@ -3373,13 +3373,19 @@ class OllamaWringer(BaseWringer):
 class OllamaBenchmarkSpeedWringer(BaseWringer):
     bench_name = 'ollama_benchmark_speed'
 
-    def __init__(self, unit, *args, **kwargs):
+    def __init__(self, unit, ollama_num_parallel, ollama_max_loaded_models, ollama_max_queue, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.unit = unit
+        self.ollama_num_parallel = ollama_num_parallel
+        self.ollama_max_loaded_models = ollama_max_loaded_models
+        self.ollama_max_queue = ollama_max_queue
 
     def _get_data(self):
         data = {
             'unit': self.unit,
+            'ollama_num_parallel': self.ollama_num_parallel,
+            'ollama_max_loaded_models': self.ollama_max_loaded_models,
+            'ollama_max_queue': self.ollama_max_queue,
         }
         for line in self.input_:
             if not line or ':' not in line or ';' in line:
