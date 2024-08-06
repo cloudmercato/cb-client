@@ -3363,7 +3363,7 @@ class OllamaWringer(BaseWringer):
         for line in self.input_:
             if not line or ':' not in line:
                 continue
-            key, value = line.split(':')
+            key, value = line.split(':', 1)
             key = re_key.search(key.strip().lower().replace(' ', '_')).groups()[-1]
             value = RE_FLOAT.search(value).group(0)
             data[key] = value
@@ -3388,9 +3388,12 @@ class OllamaBenchmarkSpeedWringer(BaseWringer):
             'ollama_max_queue': self.ollama_max_queue,
         }
         for line in self.input_:
-            if not line or ':' not in line or ';' in line:
+            line = line.strip()
+            if (not line) or ':' not in line or ';' in line:
                 continue
-            key, value = line.split(':')
+            key, value = [i.strip() for i in line.split(':', 1)]
+            if value == 'None':
+                value = None
             data[key] = value
         return data
 
@@ -3406,8 +3409,10 @@ class WhisperBenchmarkWringer(BaseWringer):
         for line in self.input_:
             if ':' not in line:
                 continue
-            key, value = [i.strip() for i in line.split(':')]
-            data[key] = value
+            key, value = [i.strip() for i in line.split(':', 1)]
+            if value == 'None':
+                value = None
+            data[key] = value.strip()
         return data
 
 
