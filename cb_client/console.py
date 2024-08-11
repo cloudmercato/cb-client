@@ -384,6 +384,10 @@ OllamaBenchmarkSpeedParser.add_argument('--ollama_num_parallel', help='')
 OllamaBenchmarkSpeedParser.add_argument('--ollama_max_loaded_models', help='')
 OllamaBenchmarkSpeedParser.add_argument('--ollama_max_queue', help='')
 
+# Ollama Benchmark Judge
+OllamaBenchmarkJudgeParser = subparser.add_parser('ollama_benchmark_judge', help='')
+OllamaBenchmarkJudgeParser.add_argument('--unit', help='')
+
 # Whisper
 WhisperBenchmarkParser = subparser.add_parser('whisper_benchmark', help='')
 
@@ -391,14 +395,14 @@ WhisperBenchmarkParser = subparser.add_parser('whisper_benchmark', help='')
 InvokeAiBenchmarkParser = subparser.add_parser('invokeai_benchmark', help='')
 InvokeAiBenchmarkParser.add_argument('--unit', help='')
 
-# nvbandwidth 
+# nvbandwidth
 NvbandwidthParser = subparser.add_parser('nvbandwidth', help='')
 NvbandwidthParser.add_argument('--buffer')
 
-# gpuburn 
+# gpuburn
 GpuBurnParser = subparser.add_parser('gpu_burn', help='')
 
-# npb 
+# npb
 NpbParser = subparser.add_parser('npb', help='')
 
 
