@@ -3631,6 +3631,94 @@ class YoloBenchmarkPredictWringer(BaseWringer):
         return data
 
 
+class MtrWringer(BaseWringer):
+    bench_name = 'mtr'
+
+    def __init__(
+        self,
+        destination_id,
+        destination_type,
+
+        timeout,
+        interval,
+        gracetime,
+        first_ttl,
+        max_ttl,
+        max_unknown,
+        transport,
+        ip_version,
+        port,
+        bit_pattern,
+        mpls,
+        mark,
+        *args, **kwargs
+    ):
+        super().__init__(*args, **kwargs)
+        self.destination_id = destination_id
+        self.destination_type = destination_type
+
+        self.timeout = timeout
+        self.interval = interval
+        self.gracetime = gracetime
+        self.first_ttl = first_ttl
+        self.max_ttl = max_ttl
+        self.max_unknown = max_unknown
+        self.transport = transport
+        self.ip_version = ip_version
+        self.port = port
+        self.bit_pattern = bit_pattern
+        self.mpls = mpls
+        self.mark = mark
+
+    def _get_data(self):
+        raw_data = json.load(self.input_)['report']
+        last_hub = raw_data['hubs'][-1]
+        data = {
+            f"dest_{self.destination_type}": self.destination_id,
+
+            'timeout': self.timeout,
+            'interval': self.interval,
+            'grace_time': self.gracetime,
+            'first_ttl': self.first_ttl,
+            'max_ttl': self.max_ttl,
+            'max_unknown': self.max_unknown,
+            'transport': self.transport,
+            'ip_version': self.ip_version,
+            'port': self.port,
+            'bit_pattern': self.bit_pattern,
+            'mpls': self.mpls,
+            'mark': self.mark,
+
+            'hubs': json.dumps(raw_data['hubs']),
+
+            'hostname': raw_data['mtr']['dst'],
+            'packet_size': raw_data['mtr']['psize'],
+            'count': raw_data['mtr']['tests'],
+            'tos': raw_data['mtr']['tos'],
+
+            'hops': last_hub['count'],
+            'asn': last_hub['ASN'],
+            'drop': last_hub['Drop'],
+            'time_last': last_hub['Last'],
+            'time_avg': last_hub['Avg'],
+            'time_stdev': last_hub['StDev'],
+            'time_best': last_hub['Best'],
+            'time_worst': last_hub['Wrst'],
+            'time_gmean': last_hub['Gmean'],
+            'jitter': last_hub['Jttr'],
+            'jitter_avg': last_hub['Javg'],
+            'jitter_max': last_hub['Jmax'],
+            'jitter_int': last_hub['Jint'],
+            'loss': last_hub['Loss%'],
+        }
+        host = last_hub['host']
+        ip = None
+        if '(' in host:
+            ip = re.sub(r'.* \(([^\)]+)\)$', r'\1', host)
+        data['ip'] = ip
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -3702,6 +3790,7 @@ WRINGERS = {
     'yolo_benchmark_predict': YoloBenchmarkPredictWringer,
     'ollama_benchmark_speed': OllamaBenchmarkSpeedWringer,
     'ollama_benchmark_judge': OllamaBenchmarkJudgeWringer,
+    'mtr': MtrWringer,
 }
 
 
