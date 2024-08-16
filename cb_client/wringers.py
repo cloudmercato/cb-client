@@ -3694,7 +3694,7 @@ class MtrWringer(BaseWringer):
             'hostname': raw_data['mtr']['dst'],
             'packet_size': raw_data['mtr']['psize'],
             'count': raw_data['mtr']['tests'],
-            'tos': raw_data['mtr']['tos'],
+            'tos': int(raw_data['mtr']['tos'], 0),
 
             'hops': last_hub['count'],
             'asn': last_hub['ASN'],
