@@ -3411,7 +3411,7 @@ class OllamaBenchmarkJudgeWringer(BaseWringer):
         }
         for line in self.input_:
             line = line.strip()
-            if (not line) or ':' not in line or ';' in line:
+            if (not line) or ':' not in line:
                 continue
             key, value = [i.strip() for i in line.split(':', 1)]
             if value == 'None':
