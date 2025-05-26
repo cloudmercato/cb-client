@@ -2483,7 +2483,7 @@ class CpuStealWringer(BaseWringer):
                 raise SystemExit(1)
             except Exception as err:
                 error = err
- 
+
 
 class OpensslSpeedWringer(BaseWringer):
     bench_name = 'openssl_speed'
@@ -2524,7 +2524,7 @@ class OpensslSpeedWringer(BaseWringer):
                 (1024, b1024),
                 (8192, b8192),
             )
-            
+
             if len(line_values) == 6:
                 byte_rates += ((16394, b16384), )
 
@@ -2603,7 +2603,7 @@ class OpensslSpeedWringer(BaseWringer):
 class BaseOsBenchmarkWringer(BaseWringer):
     def __init__(self, dest_zone, object_storage, storage_class,
                  *args, **kwargs):
-        super(BaseOsBenchmarkWringer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.storage_class = storage_class
         self.dest_zone = dest_zone
         self.object_storage = object_storage
@@ -2621,7 +2621,7 @@ class BaseOsBenchmarkWringer(BaseWringer):
             'storage_class': self.storage_class,
         })
         return bench_data
- 
+
 
 class OsBenchmarkDownloadWringer(BaseOsBenchmarkWringer):
     bench_name = 'os_benchmark_download'
@@ -2629,19 +2629,19 @@ class OsBenchmarkDownloadWringer(BaseOsBenchmarkWringer):
 
 class OsBenchmarkUploadWringer(BaseOsBenchmarkWringer):
     bench_name = 'os_benchmark_upload'
- 
+
 
 class OsBenchmarkMultiDownloadWringer(BaseOsBenchmarkWringer):
     bench_name = 'os_benchmark_multi_download'
- 
+
 
 class OsBenchmarkVideoStreamingWringer(BaseOsBenchmarkWringer):
     bench_name = 'os_benchmark_video_streaming'
- 
+
 
 class OsBenchmarkAbWringer(BaseOsBenchmarkWringer):
     bench_name = 'os_benchmark_ab'
- 
+
 
 class OsBenchmarkCurlWringer(BaseOsBenchmarkWringer):
     bench_name = 'os_benchmark_curl'
@@ -3719,6 +3719,71 @@ class MtrWringer(BaseWringer):
         return data
 
 
+class FfmpegBenchmarkTranscodeWringer(BaseWringer):
+    bench_name = 'ffmpeg_benchmark_transcode'
+
+    def __init__(self, input_id, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.input_id = input_id
+
+    def _get_data(self):
+        data = {}
+        for line in self.input_:
+            if not line.strip():
+                continue
+            if ': ' not in line:
+                continue
+            key, value = line.strip().split(': ', 1)
+            if value in ("True", "False"):
+                value = json.loads(value.lower())
+            if value == 'None':
+                value = None
+            data[key] = value
+        data['input'] = self.input_id
+        return data
+
+
+class PyPerformanceWringer(BaseWringer):
+    bench_name = 'pyperformance'
+
+    def __init__(self, rigorous, fast, track_memory, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.rigorous = rigorous
+        self.fast = fast
+        self.track_memory = track_memory
+
+    def run(self):
+        raw_data = json.loads(self.input_.read())
+        data = []
+
+        for name, values in raw_data.items():
+            data.append({
+                # 'name': name,
+                'rigorous': self.rigorous,
+                'fast': self.fast,
+                'track_memory': self.track_memory,
+                **values
+            })
+        # Send result
+        error = None
+        for result in data:
+            # Set mode
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=result,
+                    metadata=self._get_metadata()
+                )
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+            except Exception as err:
+                error = err
+        if error is not None:
+            raise error
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -3791,6 +3856,8 @@ WRINGERS = {
     'ollama_benchmark_speed': OllamaBenchmarkSpeedWringer,
     'ollama_benchmark_judge': OllamaBenchmarkJudgeWringer,
     'mtr': MtrWringer,
+    'ffmpeg_benchmark_transcode': FfmpegBenchmarkTranscodeWringer,
+    'pyperformance': PyPerformanceWringer,
 }
 
 

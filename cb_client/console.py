@@ -421,6 +421,16 @@ GpuBurnParser = subparser.add_parser('gpu_burn', help='')
 # npb
 NpbParser = subparser.add_parser('npb', help='')
 
+# ffmpeg Benchmark transcode
+FfmpegBenchmarkTranscodeParser = subparser.add_parser('ffmpeg_benchmark_transcode', help='')
+FfmpegBenchmarkTranscodeParser.add_argument('--input-id', help='')
+
+# pybenchmarks
+PyPerformanceParser = subparser.add_parser('pyperformance', help='')
+PyPerformanceParser.add_argument('--rigorous', action="store_true")
+PyPerformanceParser.add_argument('--fast', action="store_true")
+PyPerformanceParser.add_argument('--track-memory', action="store_true")
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]
