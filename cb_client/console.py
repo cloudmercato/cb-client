@@ -430,6 +430,7 @@ PyPerformanceParser = subparser.add_parser('pyperformance', help='')
 PyPerformanceParser.add_argument('--rigorous', action="store_true")
 PyPerformanceParser.add_argument('--fast', action="store_true")
 PyPerformanceParser.add_argument('--track-memory', action="store_true")
+PyPerformanceParser.add_argument('--metadata', required=False)
 
 
 def main():

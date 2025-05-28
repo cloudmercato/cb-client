@@ -3746,14 +3746,16 @@ class FfmpegBenchmarkTranscodeWringer(BaseWringer):
 class PyPerformanceWringer(BaseWringer):
     bench_name = 'pyperformance'
 
-    def __init__(self, rigorous, fast, track_memory, *args, **kwargs):
+    def __init__(self, rigorous, fast, track_memory, metadata=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.rigorous = rigorous
         self.fast = fast
         self.track_memory = track_memory
+        self.metadata = metadata
 
     def run(self):
         raw_data = json.loads(self.input_.read())
+        metadata = json.load(open(self.metadata)) if self.metadata else {}
         data = []
 
         for name, values in raw_data.items():
@@ -3762,7 +3764,8 @@ class PyPerformanceWringer(BaseWringer):
                 'rigorous': self.rigorous,
                 'fast': self.fast,
                 'track_memory': self.track_memory,
-                **values
+                **values,
+                **metadata,
             })
         # Send result
         error = None
