@@ -432,6 +432,10 @@ PyPerformanceParser.add_argument('--fast', action="store_true")
 PyPerformanceParser.add_argument('--track-memory', action="store_true")
 PyPerformanceParser.add_argument('--metadata', required=False)
 
+# swingbench
+SwingBenchParser = subparser.add_parser('swingbench', help='')
+SwingBenchParser.add_argument('--benchmark', required=True)
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]

@@ -3787,6 +3787,50 @@ class PyPerformanceWringer(BaseWringer):
             raise error
 
 
+class SwingBenchWringer(BaseWringer):
+    bench_name = 'swingbench'
+
+    def __init__(self, benchmark, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.benchmark = benchmark
+
+    def _get_data(self):
+        data = {}
+        prefix = None
+
+        for line in self.input_:
+            if not line.strip():
+                continue
+            if ',' not in line:
+                continue
+            key, value = [v.strip() for v in line.strip().split(',', 1)]
+
+            if not key:
+                continue
+            # Guess prefix
+            if not value:
+                prefix = {
+                    'Average': 'avg',
+                    '10th': 'p10',
+                    '50th': 'p50',
+                    '90th': 'p90',
+                }[key.split()[0]]
+                continue
+
+            key = key.lower().replace(' ', '_').replace('/', '_')
+            # Make with prefix
+            if value and prefix:
+                key = f"{prefix}_{key}"
+
+            data[key] = value
+
+        data['benchmark_name'] = data['benchmark_name'].replace('"', '')
+        h, m, s = [int(d) for d in data['total_run_time'].split(':')]
+        data['total_run_time_secs'] = 3600*h + 60*m + s
+        data['benchmark'] = self.benchmark
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -3861,6 +3905,7 @@ WRINGERS = {
     'mtr': MtrWringer,
     'ffmpeg_benchmark_transcode': FfmpegBenchmarkTranscodeWringer,
     'pyperformance': PyPerformanceWringer,
+    'swingbench': SwingBenchWringer,
 }
 
 
