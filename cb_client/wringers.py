@@ -37,6 +37,7 @@ TIME_SCALE = {
   'ns': 10**-9
 }
 TRACEPATH_RESULT_REG = re.compile(r'\s*Resume:\s*pmtu\s*(\d*)\s*hops\s*(\d*)\s*back\s*(\d*)')
+TRACEPATH_RESULT_REG2 = re.compile(r'\s*Resume:\s*pmtu\s*(\d*)\s*')
 TRACEPATH_TIME_REG = re.compile(r'.*\s([0-9\.]*)ms.*')
 
 try:
@@ -1270,6 +1271,13 @@ class TracepathWringer(BaseNetworkWringer):
             if match is not None:
                 mtu, hops, back = match.groups()
                 break
+            match = TRACEPATH_RESULT_REG2.match(line)
+            if match is not None:
+                mtu = match.groups()[0]
+                hops = 1
+                back = 1
+                break
+
         else:
             raise exceptions.ParseError()
         dest_key = 'dest_%s' % self.destination_type
