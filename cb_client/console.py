@@ -118,6 +118,7 @@ Geekbench6ArgumentParser.add_argument('-M', '--mode', default='standard')
 # SPEC CPU
 SpecCpu2006ArgumentParser = subparser.add_parser('spec_cpu2006')
 SpecCpu2017ArgumentParser = subparser.add_parser('spec_cpu2017')
+SpecCpu2026ArgumentParser = subparser.add_parser('spec_cpu2026')
 
 # FinanceBench
 FinanceBenchArgumentParser = subparser.add_parser('financebench')

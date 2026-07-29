@@ -1971,6 +1971,117 @@ class SpecCpu2017Wringer(BaseWringer):
             }
 
 
+class SpecCpu2026Wringer(BaseWringer):
+    bench_name = 'spec_cpu2026'
+
+    def _guess_c_compiler(self, text):
+        if 'intel' in text.lower():
+            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            return ('icc', version)
+        if 'gcc' in text.lower():
+            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            return ('gcc', version)
+        if 'microsoft' in text.lower():
+            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            return ('microsoft', version)
+        return ('', '')
+
+    def _guess_fortran_compiler(self, text):
+        if 'intel' in text.lower():
+            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            return ('icc', version)
+        if 'gcc' in text.lower():
+            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            return ('gcc', version)
+        if 'microsoft' in text.lower():
+            version = re.match('.*Version ([\d.]*).*', text).groups()[0]
+            return ('microsoft', version)
+
+    def run(self):
+        """
+        Public runner to parse and publish result.
+        """
+        raw_results = csv.reader(self.input_)
+        data = []
+        config_data = {}
+        section = None
+        error = None
+        data = []
+        for line in raw_results:
+            if not line:
+                continue
+            # Stop at "Submit Notes"
+            if section == 'Submit Notes':
+                break
+            # Set mode
+            if line[0].startswith('SPEC CPU2026 '):
+                mode = 'rate' if line[0].endswith(' Rate Result') else 'speed'
+            # Set current section
+            if len(line) == 1 and line[0][0] not in '#- ':
+                section = line[0]
+                continue
+            # Skip sections
+            if section in ('Selected Results Table',):
+                continue
+            # Parse result
+            if len(line) == 12 and line[0] != 'Benchmark':
+                if not line[2]:
+                    continue
+                result = self._get_data(line, mode)
+                data.append(result)
+            # Get compiler
+            if section == 'SOFTWARE':
+                if line[0] == 'Compiler':
+                    comp, version = self._guess_c_compiler(line[1])
+                    config_data.update(c_compiler=comp, c_compiler_version=version)
+                if 'fortran' in line[1].lower():
+                    comp_version = self._guess_fortran_compiler(line[1])
+                    if comp_version is None:
+                        comp, version = config_data['c_compiler'], config_data['c_compiler_version']
+                    else:
+                        comp, version = comp_version
+                    config_data.update(fortran_compiler=comp, fortran_compiler_version=version)
+        if not config_data.get('fortran_compiler'):
+            config_data['fortran_compiler'], config_data['fortran_compiler_version'] = config_data['c_compiler'], config_data['c_compiler_version']
+        # Send result
+        error = None
+        for result in data:
+            result.update(config_data)
+            try:
+                response = self.client.post_result(
+                    bench_name=self.bench_name,
+                    data=result,
+                    metadata=self._get_metadata())
+                if response.status_code >= 300:
+                    error = exceptions.ServerError(response.content + str(data))
+            except KeyboardInterrupt:
+                raise SystemExit(1)
+            except Exception as err:
+                error = err
+        if error is not None:
+            raise error
+
+    def _get_data(self, line, mode):
+        test = line[0].replace('"', '')\
+            .replace('\\', '')
+        if mode == 'rate':
+            return {
+                'test': test,
+                'mode': mode,
+                'copies': line[1],
+                'base_run_time': line[2],
+                'base_rate': line[3],
+            }
+        else:
+            return {
+                'test': test,
+                'mode': mode,
+                'copies': line[1],
+                'base_run_time': line[2],
+                'base_ratio': line[3],
+            }
+
+
 class FinanceBenchWringer(BaseWringer):
     bench_name = 'financebench'
 
@@ -3860,6 +3971,7 @@ WRINGERS = {
     'geekbench3': Geekbench3Wringer,
     'spec_cpu2006': SpecCpu2006Wringer,
     'spec_cpu2017': SpecCpu2017Wringer,
+    'spec_cpu2026': SpecCpu2026Wringer,
     'financebench': FinanceBenchWringer,
     'lammps': LammpsWringer,
     'vray': VRayWringer,
