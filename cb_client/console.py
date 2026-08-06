@@ -436,6 +436,7 @@ PyPerformanceParser.add_argument('--metadata', required=False)
 # swingbench
 SwingBenchParser = subparser.add_parser('swingbench', help='')
 SwingBenchParser.add_argument('--benchmark', required=True)
+SwingBenchParser.add_argument('-D', '--datastore-type', required=True)
 
 
 def main():

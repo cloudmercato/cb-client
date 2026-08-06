@@ -7,6 +7,7 @@ import csv
 import json
 import io
 import math
+import xml.etree.ElementTree as ET
 from functools import reduce
 from datetime import datetime
 from collections import Counter
@@ -3912,41 +3913,92 @@ class SwingBenchWringer(BaseWringer):
     def __init__(self, benchmark, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.benchmark = benchmark
+        self.datastore_type = kwargs['datastore_type']
 
     def _get_data(self):
+        """Parse le XML de Swingbench et retourne un dictionnaire complètement à plat."""
+        xml_input = self.input_.read()
+        root = ET.fromstring(xml_input.strip())
+
+        # Extrait le namespace (ex: {http://www.dominicgiles.com/swingbench})
+        ns = ""
+        if root.tag.startswith("{"):
+            ns = root.tag.split("}")[0] + "}"
+
         data = {}
-        prefix = None
 
-        for line in self.input_:
-            if not line.strip():
-                continue
-            if ',' not in line:
-                continue
-            key, value = [v.strip() for v in line.strip().split(',', 1)]
+        def clean_key(val):
+            """Standardise la clé : minuscules, espaces/caractères spéciaux en '_'"""
+            return (
+                val.lower()
+                .replace(" ", "_")
+                .replace("/", "_")
+                .replace('"', "")
+                .strip()
+            )
 
-            if not key:
-                continue
-            # Guess prefix
-            if not value:
-                prefix = {
-                    'Average': 'avg',
-                    '10th': 'p10',
-                    '50th': 'p50',
-                    '90th': 'p90',
-                }[key.split()[0]]
-                continue
+        # 1. Section Overview
+        overview = root.find(f"{ns}Overview")
+        if overview is not None:
+            for child in overview:
+                tag_name = child.tag.replace(ns, "")
+                key = f"overview_{clean_key(tag_name)}"
+                data[key] = child.text.strip() if child.text else ""
 
-            key = key.lower().replace(' ', '_').replace('/', '_')
-            # Make with prefix
-            if value and prefix:
-                key = f"{prefix}_{key}"
+        # 2. Section Configuration
+        config = root.find(f"{ns}Configuration")
+        if config is not None:
+            for child in config:
+                tag_name = child.tag.replace(ns, "")
+                key = f"config_{clean_key(tag_name)}"
+                data[key] = child.text.strip() if child.text else ""
 
-            data[key] = value
+        # 3. Section DMLResults
+        dml = root.find(f"{ns}DMLResults")
+        if dml is not None:
+            for child in dml:
+                tag_name = child.tag.replace(ns, "")
+                key = f"dml_{clean_key(tag_name)}"
+                data[key] = child.text.strip() if child.text else ""
 
-        data['benchmark_name'] = data['benchmark_name'].replace('"', '')
-        h, m, s = [int(d) for d in data['total_run_time'].split(':')]
-        data['total_run_time_secs'] = 3600*h + 60*m + s
-        data['benchmark'] = self.benchmark
+        # 4. Section TransactionResults
+        tx_results = root.find(f"{ns}TransactionResults")
+        if tx_results is not None:
+            for result in tx_results.findall(f"{ns}Result"):
+                tx_id = clean_key(result.attrib.get("id", "tx"))
+                for child in result:
+                    tag_name = child.tag.replace(ns, "")
+                    # Format : tx_<nom_transaction>_<metrique>
+                    key = f"tx_{tx_id}_{clean_key(tag_name)}"
+                    data[key] = child.text.strip() if child.text else ""
+
+        # 5. Section BenchmarkMetrics (Série temporelle TPS)
+        tps_el = root.find(f".//{ns}TPSReadings")
+        if tps_el is not None and tps_el.text:
+            raw_values = [v.strip() for v in tps_el.text.split(",") if v.strip()]
+            for i in range(0, len(raw_values) - 1, 2):
+                timestamp = raw_values[i]
+                tps_val = raw_values[i + 1]
+                data[f"tps_series_{timestamp}"] = tps_val
+
+        h, m, s = [int(d) for d in data['overview_totalruntime'].split(':')]
+        data.update({
+            'total_run_time_secs': 3600*h + 60*m + s,
+            'benchmark': self.benchmark,
+            'datastore_type': self.datastore_type,
+            'benchmark_name': data['overview_benchmarkname'].replace('"', ''),
+            'connect_string': data['config_connectstring'],
+            'no_of_users': data['config_numberofusers'],
+            'minimum_inter_tx_think_time': data['config_maximuminterthinktime'],
+            'maximum_inter_tx_think_time': data['config_minimuminterthinktime'],
+            'maximum_intra_tx_think_time': data['config_maximumintrathinktime'],
+
+            'total_run_time': data['overview_totalruntime'],
+            'average_tx_sec': data['overview_averagetransactionspersecond'],
+            'maximum_tx_min': data['overview_maximumtransactionrate'],
+            'total_completed_transactions': data['overview_totalcompletedtransactions'],
+        })
+
         return data
 
 
