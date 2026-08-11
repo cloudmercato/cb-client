@@ -4002,6 +4002,34 @@ class SwingBenchWringer(BaseWringer):
         return data
 
 
+class HammerdbWringer(BaseWringer):
+    bench_name = 'hammerdb'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.datastore_type = kwargs['datastore_type']
+        self.count_ware = kwargs['count_ware']
+
+    def _get_data(self):
+        data = {
+            'datastore_type': self.datastore_type,
+            'count_ware': self.count_ware,
+        }
+        for line in self.input_:
+            # Vuser 1:TEST RESULT : System achieved 59464 NOPM from 125822 Oracle TPM
+            if 'TEST RESULT' in line:
+                values = line.split()
+                data.update({
+                    'nopm': values[6],
+                    'tpm': values[9],
+                })
+            # Vuser 1:8 Active Virtual Users configured
+            if 'Active Virtual Users configured' in line:
+                data['vu'] = int(line.split(':')[-1].split()[0])
+
+        print(data)
+        return data
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -4078,6 +4106,7 @@ WRINGERS = {
     'ffmpeg_benchmark_transcode': FfmpegBenchmarkTranscodeWringer,
     'pyperformance': PyPerformanceWringer,
     'swingbench': SwingBenchWringer,
+    'hammerdb': HammerdbWringer,
 }
 
 

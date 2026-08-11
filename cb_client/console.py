@@ -438,6 +438,11 @@ SwingBenchParser = subparser.add_parser('swingbench', help='')
 SwingBenchParser.add_argument('--benchmark', required=True)
 SwingBenchParser.add_argument('-D', '--datastore-type', required=True)
 
+# hammerdb
+HammerdbParser = subparser.add_parser('hammerdb', help='')
+HammerdbParser.add_argument('-D', '--datastore-type', required=True)
+HammerdbParser.add_argument('--count_ware', required=True)
+
 
 def main():
     parsed_args = parser.parse_known_args()[0]
