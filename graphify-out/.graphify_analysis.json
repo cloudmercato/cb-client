@@ -1,0 +1,629 @@
+{
+  "communities": {
+    "0": [
+      "behave",
+      "cb_client_client",
+      "cb_client_client_client_init",
+      "cb_client_client_rationale_26",
+      "cb_client_settings",
+      "cb_client_settings_get_config",
+      "cb_client_utils",
+      "cb_client_utils_stddev",
+      "cb_client_wringers",
+      "cb_client_wringers_basehibenchwringer",
+      "cb_client_wringers_basehibenchwringer_get_data",
+      "cb_client_wringers_basehibenchwringer_init",
+      "cb_client_wringers_basehibenchwringer_report_filename",
+      "cb_client_wringers_basehibenchwringer_time_filename",
+      "cb_client_wringers_baseosbenchmarkwringer",
+      "cb_client_wringers_baseosbenchmarkwringer_get_data",
+      "cb_client_wringers_baseosbenchmarkwringer_init",
+      "cb_client_wringers_bonniewringer",
+      "cb_client_wringers_bonniewringer_get_data",
+      "cb_client_wringers_bonniewringer_init",
+      "cb_client_wringers_convert_second",
+      "cb_client_wringers_coremarkwringer",
+      "cb_client_wringers_coremarkwringer_get_data",
+      "cb_client_wringers_mean",
+      "cb_client_wringers_osbenchmarkabwringer",
+      "cb_client_wringers_osbenchmarkcurlwringer",
+      "cb_client_wringers_osbenchmarkdownloadwringer",
+      "cb_client_wringers_osbenchmarkmultidownloadwringer",
+      "cb_client_wringers_osbenchmarkuploadwringer",
+      "cb_client_wringers_osbenchmarkvideostreamingwringer",
+      "cb_client_wringers_terasortwringer",
+      "cb_client_wringers_wordcountwringer",
+      "collections",
+      "csv",
+      "datetime",
+      "functools",
+      "json",
+      "math",
+      "os",
+      "re",
+      "requests",
+      "requests_adapters",
+      "six",
+      "urllib_parse",
+      "urlparse",
+      "xml_etree_elementtree"
+    ],
+    "1": [
+      "argparse",
+      "cb_client_console",
+      "cb_client_console_clientargumentparser",
+      "cb_client_console_clientargumentparser_init",
+      "cb_client_console_main",
+      "cb_client_init",
+      "cb_client_runners",
+      "cb_client_runners_baserunner",
+      "cb_client_runners_baserunner_get_cmd",
+      "cb_client_runners_baserunner_get_wringer",
+      "cb_client_runners_baserunner_get_wringer_kwargs",
+      "cb_client_runners_baserunner_parse_args",
+      "cb_client_runners_baserunner_run",
+      "cb_client_runners_baserunner_run_cmd",
+      "cb_client_runners_baserunner_setup",
+      "cb_client_runners_baserunner_tear_down",
+      "cb_client_runners_fiorunner",
+      "cb_client_runners_fiorunner_get_cmd",
+      "cb_client_runners_fiorunner_get_wringer_kwargs",
+      "cb_client_runners_fiorunner_parse_args",
+      "cb_client_runners_fiorunner_tear_down",
+      "cb_client_runners_geekbench4runner",
+      "cb_client_runners_geekbench4runner_get_cmd",
+      "cb_client_runners_geekbench4runner_get_wringer_kwargs",
+      "cb_client_runners_geekbench4runner_parse_args",
+      "cb_client_runners_geekbench4runner_result_file",
+      "cb_client_runners_geekbench4runner_setup",
+      "cb_client_runners_geekbench4runner_tear_down",
+      "cb_client_runners_main",
+      "cb_client_runners_sysbenchcpurunner",
+      "cb_client_runners_sysbenchcpurunner_get_cmd",
+      "cb_client_runners_sysbenchcpurunner_parse_args",
+      "cb_client_runners_sysbenchramrunner",
+      "cb_client_runners_sysbenchramrunner_get_cmd",
+      "cb_client_runners_sysbenchramrunner_parse_args",
+      "io",
+      "logging",
+      "setup",
+      "setup_read_file",
+      "setuptools",
+      "subprocess",
+      "sys",
+      "tempfile"
+    ],
+    "2": [
+      "cb_client_wringers_metricwringer_run",
+      "cb_client_wringers_prometheusmetricwringer",
+      "cb_client_wringers_prometheusmetricwringer_run",
+      "cb_client_wringers_rationale_176",
+      "cb_client_wringers_speccpu2006wringer",
+      "cb_client_wringers_speccpu2006wringer_get_data",
+      "cb_client_wringers_speccpu2006wringer_guess_c_compiler",
+      "cb_client_wringers_speccpu2006wringer_guess_fortran_compiler",
+      "cb_client_wringers_speccpu2006wringer_run",
+      "cb_client_wringers_speccpu2017wringer",
+      "cb_client_wringers_speccpu2017wringer_get_data",
+      "cb_client_wringers_speccpu2017wringer_guess_c_compiler",
+      "cb_client_wringers_speccpu2017wringer_guess_fortran_compiler",
+      "cb_client_wringers_speccpu2017wringer_run",
+      "cb_client_wringers_speccpu2026wringer",
+      "cb_client_wringers_speccpu2026wringer_get_data",
+      "cb_client_wringers_speccpu2026wringer_guess_c_compiler",
+      "cb_client_wringers_speccpu2026wringer_guess_fortran_compiler",
+      "cb_client_wringers_speccpu2026wringer_run"
+    ],
+    "3": [
+      "cb_client_wringers_geekbench4wringer",
+      "cb_client_wringers_geekbench4wringer_get_data",
+      "cb_client_wringers_geekbench4wringer_init",
+      "cb_client_wringers_geekbench4wringer_parse_csv",
+      "cb_client_wringers_geekbench4wringer_parse_json",
+      "cb_client_wringers_geekbench5wringer",
+      "cb_client_wringers_geekbench5wringer_get_data",
+      "cb_client_wringers_geekbench5wringer_init",
+      "cb_client_wringers_geekbench5wringer_parse_csv",
+      "cb_client_wringers_geekbench5wringer_parse_json",
+      "cb_client_wringers_geekbench6wringer",
+      "cb_client_wringers_geekbench6wringer_get_data",
+      "cb_client_wringers_geekbench6wringer_init",
+      "cb_client_wringers_geekbench6wringer_parse_json",
+      "cb_client_wringers_geo_mean",
+      "cb_client_wringers_weighted_mean"
+    ],
+    "4": [
+      "cb_client_wringers_metricwringer",
+      "cb_client_wringers_metricwringer_get_cpu_steal_rate",
+      "cb_client_wringers_metricwringer_get_cpu_usage",
+      "cb_client_wringers_metricwringer_parse_cpl",
+      "cb_client_wringers_metricwringer_parse_cpu_0a89c3",
+      "cb_client_wringers_metricwringer_parse_cpu_beb3c4",
+      "cb_client_wringers_metricwringer_parse_disk",
+      "cb_client_wringers_metricwringer_parse_dsk",
+      "cb_client_wringers_metricwringer_parse_lvm",
+      "cb_client_wringers_metricwringer_parse_mdd",
+      "cb_client_wringers_metricwringer_parse_mem",
+      "cb_client_wringers_metricwringer_parse_net",
+      "cb_client_wringers_rationale_328",
+      "cb_client_wringers_rationale_347",
+      "cb_client_wringers_rationale_366",
+      "cb_client_wringers_rationale_390"
+    ],
+    "5": [
+      "cb_client_wringers_aibenchmarkwringer",
+      "cb_client_wringers_aibenchmarkwringer_run",
+      "cb_client_wringers_basewringer_get_metadata",
+      "cb_client_wringers_deepsparsebenchmarkwringer",
+      "cb_client_wringers_deepsparsebenchmarkwringer_init",
+      "cb_client_wringers_deepsparsebenchmarkwringer_run",
+      "cb_client_wringers_latmemrdwringer",
+      "cb_client_wringers_latmemrdwringer_run",
+      "cb_client_wringers_mhzwringer",
+      "cb_client_wringers_mhzwringer_run",
+      "cb_client_wringers_rationale_155"
+    ],
+    "6": [
+      "cb_client_wringers_basewringer_init",
+      "cb_client_wringers_ffmpegbenchmarktranscodewringer",
+      "cb_client_wringers_ffmpegbenchmarktranscodewringer_get_data",
+      "cb_client_wringers_ffmpegbenchmarktranscodewringer_init",
+      "cb_client_wringers_ollamawringer",
+      "cb_client_wringers_ollamawringer_get_data",
+      "cb_client_wringers_ollamawringer_init",
+      "cb_client_wringers_rationale_101",
+      "cb_client_wringers_whisperbenchmarkwringer",
+      "cb_client_wringers_whisperbenchmarkwringer_get_data",
+      "cb_client_wringers_whisperbenchmarkwringer_init"
+    ],
+    "7": [
+      "cb_client_client_client",
+      "cb_client_client_client_create_scenario",
+      "cb_client_client_client_create_transaction",
+      "cb_client_client_client_make_url",
+      "cb_client_client_client_patch",
+      "cb_client_client_client_patch_resource",
+      "cb_client_client_client_post",
+      "cb_client_client_client_post_result",
+      "cb_client_client_client_put",
+      "cb_client_client_py_object"
+    ],
+    "8": [
+      "cb_client_wringers_abwringer",
+      "cb_client_wringers_abwringer_get_data",
+      "cb_client_wringers_abwringer_init",
+      "cb_client_wringers_baseobjectstoragewringer",
+      "cb_client_wringers_baseobjectstoragewringer_get_metadata",
+      "cb_client_wringers_baseobjectstoragewringer_init",
+      "cb_client_wringers_rationale_543",
+      "cb_client_wringers_wrkwringer",
+      "cb_client_wringers_wrkwringer_get_data",
+      "cb_client_wringers_wrkwringer_init"
+    ],
+    "9": [
+      "cb_client_wringers_basenetworkwringer",
+      "cb_client_wringers_basenetworkwringer_init",
+      "cb_client_wringers_gotowafwringer",
+      "cb_client_wringers_gotowafwringer_get_data",
+      "cb_client_wringers_gotowafwringer_run",
+      "cb_client_wringers_iperfwringer",
+      "cb_client_wringers_iperfwringer_get_data",
+      "cb_client_wringers_iperfwringer_init",
+      "cb_client_wringers_tracepathwringer",
+      "cb_client_wringers_tracepathwringer_get_data"
+    ],
+    "10": [
+      "cb_client_wringers_basewringer",
+      "cb_client_wringers_geekbench3wringer",
+      "cb_client_wringers_geekbench3wringer_get_data",
+      "cb_client_wringers_py_object",
+      "cb_client_wringers_sysbenchcpuwringer",
+      "cb_client_wringers_sysbenchcpuwringer_get_data",
+      "cb_client_wringers_sysbenchramwringer",
+      "cb_client_wringers_sysbenchramwringer_get_data",
+      "cb_client_wringers_yolobenchmarkpredictwringer",
+      "cb_client_wringers_yolobenchmarkpredictwringer_get_data"
+    ],
+    "11": [
+      "cb_client_wringers_basewringer_get_data",
+      "cb_client_wringers_basewringer_run",
+      "cb_client_wringers_dfsiowringer",
+      "cb_client_wringers_dfsiowringer_get_data",
+      "cb_client_wringers_dfsiowringer_init",
+      "cb_client_wringers_dfsiowringer_report_filename",
+      "cb_client_wringers_dfsiowringer_run",
+      "cb_client_wringers_dfsiowringer_time_filename",
+      "cb_client_wringers_rationale_146"
+    ],
+    "12": [
+      "cb_client_exceptions",
+      "cb_client_exceptions_cbclienterror",
+      "cb_client_exceptions_parseerror",
+      "cb_client_exceptions_py_exception",
+      "cb_client_exceptions_servererror",
+      "cb_client_exceptions_wringernotfound",
+      "cb_client_wringers_get_wringer"
+    ],
+    "13": [
+      "cb_client_wringers_invalidinput",
+      "cb_client_wringers_py_exception",
+      "cb_client_wringers_vasptestwringer",
+      "cb_client_wringers_vasptestwringer_get_data",
+      "cb_client_wringers_vasptestwringer_init"
+    ],
+    "14": [
+      "cb_client_wringers_opensslspeedwringer",
+      "cb_client_wringers_opensslspeedwringer_init",
+      "cb_client_wringers_opensslspeedwringer_parse_gt_2017",
+      "cb_client_wringers_opensslspeedwringer_parse_lte_2017",
+      "cb_client_wringers_opensslspeedwringer_run"
+    ],
+    "15": [
+      "cb_client_wringers_rationale_3919",
+      "cb_client_wringers_swingbenchwringer",
+      "cb_client_wringers_swingbenchwringer_get_data",
+      "cb_client_wringers_swingbenchwringer_get_data_clean_key",
+      "cb_client_wringers_swingbenchwringer_init"
+    ],
+    "16": [
+      "cb_client_wringers_cpustealwringer",
+      "cb_client_wringers_cpustealwringer_get_cpu_steal_rate",
+      "cb_client_wringers_cpustealwringer_get_cpu_usage",
+      "cb_client_wringers_cpustealwringer_run"
+    ],
+    "17": [
+      "cb_client_wringers_fiowringer",
+      "cb_client_wringers_fiowringer_get_data",
+      "cb_client_wringers_fiowringer_get_readwrite",
+      "cb_client_wringers_fiowringer_init"
+    ],
+    "18": [
+      "cb_client_wringers_lammpswringer",
+      "cb_client_wringers_lammpswringer_get_data",
+      "cb_client_wringers_lammpswringer_init",
+      "cb_client_wringers_lammpswringer_parse_row"
+    ],
+    "19": [
+      "cb_client_wringers_phoronixtestsuitewringer",
+      "cb_client_wringers_phoronixtestsuitewringer_get_data",
+      "cb_client_wringers_phoronixtestsuitewringer_init",
+      "cb_client_wringers_phoronixtestsuitewringer_parse_phpbench"
+    ],
+    "20": [
+      "cb_client_wringers_redisbenchmarkwringer",
+      "cb_client_wringers_redisbenchmarkwringer_get_data",
+      "cb_client_wringers_redisbenchmarkwringer_init",
+      "cb_client_wringers_redisbenchmarkwringer_run"
+    ],
+    "21": [
+      "cb_client_wringers_sudokumlbenchwringer",
+      "cb_client_wringers_sudokumlbenchwringer_get_data",
+      "cb_client_wringers_sudokumlbenchwringer_get_data_parse_range",
+      "cb_client_wringers_sudokumlbenchwringer_init"
+    ],
+    "22": [
+      "cb_client_wringers_sysbencholtpwringer",
+      "cb_client_wringers_sysbencholtpwringer_get_data",
+      "cb_client_wringers_sysbencholtpwringer_get_metadata",
+      "cb_client_wringers_sysbencholtpwringer_init"
+    ],
+    "23": [
+      "cb_client_wringers_vdbenchwringer",
+      "cb_client_wringers_vdbenchwringer_get_data",
+      "cb_client_wringers_vdbenchwringer_init",
+      "cb_client_wringers_vdbenchwringer_parse_config"
+    ],
+    "24": [
+      "cb_client_wringers_blenderbenchmarkwringer",
+      "cb_client_wringers_blenderbenchmarkwringer_init",
+      "cb_client_wringers_blenderbenchmarkwringer_run"
+    ],
+    "25": [
+      "cb_client_wringers_bwmemwringer",
+      "cb_client_wringers_bwmemwringer_init",
+      "cb_client_wringers_bwmemwringer_run"
+    ],
+    "26": [
+      "cb_client_wringers_cachewringer",
+      "cb_client_wringers_cachewringer_init",
+      "cb_client_wringers_cachewringer_run"
+    ],
+    "27": [
+      "cb_client_wringers_citaskwringer",
+      "cb_client_wringers_citaskwringer_get_data",
+      "cb_client_wringers_citaskwringer_init"
+    ],
+    "28": [
+      "cb_client_wringers_ddwringer",
+      "cb_client_wringers_ddwringer_get_data",
+      "cb_client_wringers_ddwringer_init"
+    ],
+    "29": [
+      "cb_client_wringers_ffmpegwringer",
+      "cb_client_wringers_ffmpegwringer_get_data",
+      "cb_client_wringers_ffmpegwringer_init"
+    ],
+    "30": [
+      "cb_client_wringers_financebenchwringer",
+      "cb_client_wringers_financebenchwringer_get_data",
+      "cb_client_wringers_financebenchwringer_init"
+    ],
+    "31": [
+      "cb_client_wringers_gpuburnwringer",
+      "cb_client_wringers_gpuburnwringer_get_data",
+      "cb_client_wringers_gpuburnwringer_init"
+    ],
+    "32": [
+      "cb_client_wringers_hammerdbwringer",
+      "cb_client_wringers_hammerdbwringer_get_data",
+      "cb_client_wringers_hammerdbwringer_init"
+    ],
+    "33": [
+      "cb_client_wringers_invokeaibenchmarkwringer",
+      "cb_client_wringers_invokeaibenchmarkwringer_get_data",
+      "cb_client_wringers_invokeaibenchmarkwringer_init"
+    ],
+    "34": [
+      "cb_client_wringers_ipmisensorswringer",
+      "cb_client_wringers_ipmisensorswringer_get_data",
+      "cb_client_wringers_ipmisensorswringer_init"
+    ],
+    "35": [
+      "cb_client_wringers_kvazaarwringer",
+      "cb_client_wringers_kvazaarwringer_get_data",
+      "cb_client_wringers_kvazaarwringer_init"
+    ],
+    "36": [
+      "cb_client_wringers_latopswringer",
+      "cb_client_wringers_latopswringer_init",
+      "cb_client_wringers_latopswringer_run"
+    ],
+    "37": [
+      "cb_client_wringers_lmbenchstreamwringer",
+      "cb_client_wringers_lmbenchstreamwringer_init",
+      "cb_client_wringers_lmbenchstreamwringer_run"
+    ],
+    "38": [
+      "cb_client_wringers_lmsensorswringer",
+      "cb_client_wringers_lmsensorswringer_get_data",
+      "cb_client_wringers_lmsensorswringer_init"
+    ],
+    "39": [
+      "cb_client_wringers_mdtestwringer",
+      "cb_client_wringers_mdtestwringer_get_data",
+      "cb_client_wringers_mdtestwringer_init"
+    ],
+    "40": [
+      "cb_client_wringers_mtrwringer",
+      "cb_client_wringers_mtrwringer_get_data",
+      "cb_client_wringers_mtrwringer_init"
+    ],
+    "41": [
+      "cb_client_wringers_npbwringer",
+      "cb_client_wringers_npbwringer_get_data",
+      "cb_client_wringers_npbwringer_init"
+    ],
+    "42": [
+      "cb_client_wringers_nvbandwidthwringer",
+      "cb_client_wringers_nvbandwidthwringer_get_data",
+      "cb_client_wringers_nvbandwidthwringer_init"
+    ],
+    "43": [
+      "cb_client_wringers_ollamabenchmarkjudgewringer",
+      "cb_client_wringers_ollamabenchmarkjudgewringer_get_data",
+      "cb_client_wringers_ollamabenchmarkjudgewringer_init"
+    ],
+    "44": [
+      "cb_client_wringers_ollamabenchmarkspeedwringer",
+      "cb_client_wringers_ollamabenchmarkspeedwringer_get_data",
+      "cb_client_wringers_ollamabenchmarkspeedwringer_init"
+    ],
+    "45": [
+      "cb_client_wringers_pgbenchwringer",
+      "cb_client_wringers_pgbenchwringer_get_data",
+      "cb_client_wringers_pgbenchwringer_init"
+    ],
+    "46": [
+      "cb_client_wringers_pyperformancewringer",
+      "cb_client_wringers_pyperformancewringer_init",
+      "cb_client_wringers_pyperformancewringer_run"
+    ],
+    "47": [
+      "cb_client_wringers_pythonbenchmarkwringer",
+      "cb_client_wringers_pythonbenchmarkwringer_init",
+      "cb_client_wringers_pythonbenchmarkwringer_run"
+    ],
+    "48": [
+      "cb_client_wringers_pythonfpbwringer",
+      "cb_client_wringers_pythonfpbwringer_get_data",
+      "cb_client_wringers_pythonfpbwringer_init"
+    ],
+    "49": [
+      "cb_client_wringers_pythonreadwringer",
+      "cb_client_wringers_pythonreadwringer_get_data",
+      "cb_client_wringers_pythonreadwringer_init"
+    ],
+    "50": [
+      "cb_client_wringers_streamwringer",
+      "cb_client_wringers_streamwringer_init",
+      "cb_client_wringers_streamwringer_run"
+    ],
+    "51": [
+      "cb_client_wringers_tcptraceroutewringer",
+      "cb_client_wringers_tcptraceroutewringer_get_data",
+      "cb_client_wringers_tcptraceroutewringer_init"
+    ],
+    "52": [
+      "cb_client_wringers_tlbwringer",
+      "cb_client_wringers_tlbwringer_init",
+      "cb_client_wringers_tlbwringer_run"
+    ],
+    "53": [
+      "cb_client_wringers_vraywringer",
+      "cb_client_wringers_vraywringer_get_data",
+      "cb_client_wringers_vraywringer_init"
+    ],
+    "54": [
+      "cb_client_wringers_ycsbwringer",
+      "cb_client_wringers_ycsbwringer_get_data",
+      "cb_client_wringers_ycsbwringer_init"
+    ],
+    "55": [
+      "cb_client_wringers_rationale_262"
+    ],
+    "56": [
+      "cb_client_wringers_rationale_290"
+    ]
+  },
+  "cohesion": {
+    "0": 0.05990338164251208,
+    "1": 0.06423034330011074,
+    "2": 0.15789473684210525,
+    "3": 0.18333333333333332,
+    "4": 0.175,
+    "5": 0.18181818181818182,
+    "6": 0.18181818181818182,
+    "7": 0.28888888888888886,
+    "8": 0.24444444444444444,
+    "9": 0.24444444444444444,
+    "10": 0.2,
+    "11": 0.2222222222222222,
+    "12": 0.42857142857142855,
+    "13": 0.4,
+    "14": 0.6,
+    "15": 0.4,
+    "16": 0.6666666666666666,
+    "17": 0.6666666666666666,
+    "18": 0.6666666666666666,
+    "19": 0.5,
+    "20": 0.5,
+    "21": 0.5,
+    "22": 0.5,
+    "23": 0.6666666666666666,
+    "24": 0.6666666666666666,
+    "25": 0.6666666666666666,
+    "26": 0.6666666666666666,
+    "27": 0.6666666666666666,
+    "28": 0.6666666666666666,
+    "29": 0.6666666666666666,
+    "30": 0.6666666666666666,
+    "31": 0.6666666666666666,
+    "32": 0.6666666666666666,
+    "33": 0.6666666666666666,
+    "34": 0.6666666666666666,
+    "35": 0.6666666666666666,
+    "36": 0.6666666666666666,
+    "37": 0.6666666666666666,
+    "38": 0.6666666666666666,
+    "39": 0.6666666666666666,
+    "40": 0.6666666666666666,
+    "41": 0.6666666666666666,
+    "42": 0.6666666666666666,
+    "43": 0.6666666666666666,
+    "44": 0.6666666666666666,
+    "45": 0.6666666666666666,
+    "46": 0.6666666666666666,
+    "47": 0.6666666666666666,
+    "48": 0.6666666666666666,
+    "49": 0.6666666666666666,
+    "50": 0.6666666666666666,
+    "51": 0.6666666666666666,
+    "52": 0.6666666666666666,
+    "53": 0.6666666666666666,
+    "54": 0.6666666666666666,
+    "55": 1.0,
+    "56": 1.0
+  },
+  "gods": [
+    {
+      "id": "cb_client_wringers_basewringer",
+      "label": "BaseWringer",
+      "degree": 74
+    },
+    {
+      "id": "cb_client_wringers_metricwringer",
+      "label": "MetricWringer",
+      "degree": 14
+    },
+    {
+      "id": "cb_client_runners_baserunner",
+      "label": "BaseRunner",
+      "degree": 13
+    },
+    {
+      "id": "cb_client_client_client",
+      "label": "Client",
+      "degree": 11
+    },
+    {
+      "id": "cb_client_wringers_baseosbenchmarkwringer",
+      "label": "BaseOsBenchmarkWringer",
+      "degree": 10
+    },
+    {
+      "id": "cb_client_wringers_basehibenchwringer",
+      "label": "BaseHiBenchWringer",
+      "degree": 8
+    },
+    {
+      "id": "cb_client_runners_geekbench4runner",
+      "label": "Geekbench4Runner",
+      "degree": 8
+    },
+    {
+      "id": "cb_client_wringers_dfsiowringer",
+      "label": "DfsioWringer",
+      "degree": 7
+    },
+    {
+      "id": "cb_client_wringers_baseobjectstoragewringer",
+      "label": "BaseObjectStorageWringer",
+      "degree": 7
+    },
+    {
+      "id": "cb_client_runners_fiorunner",
+      "label": "FioRunner",
+      "degree": 6
+    }
+  ],
+  "surprises": [
+    {
+      "source": "get_wringer()",
+      "target": "WringerNotFound",
+      "source_files": [
+        "cb_client/wringers.py",
+        "cb_client/exceptions.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `BaseWringer` connect `BaseWringer` to `wringers.py`, `Public runner to parse and publish result.`, `Geekbench4Wringer`, `MetricWringer`, `._get_metadata`, `.__init__`, `BaseObjectStorageWringer`, `BaseNetworkWringer`, `DfsioWringer`, `VaspTestWringer`, `OpensslSpeedWringer`, `SwingBenchWringer`, `CpuStealWringer`, `FioWringer`, `LammpsWringer`, `PhoronixTestSuiteWringer`, `RedisBenchmarkWringer`, `SudokuMlBenchWringer`, `SysbenchOltpWringer`, `VdbenchWringer`, `BlenderBenchmarkWringer`, `BwMemWringer`, `CacheWringer`, `CiTaskWringer`, `DdWringer`, `FfmpegWringer`, `FinanceBenchWringer`, `GpuBurnWringer`, `HammerdbWringer`, `InvokeAiBenchmarkWringer`, `IpmiSensorsWringer`, `KvazaarWringer`, `LatOpsWringer`, `LmbenchStreamWringer`, `LmSensorsWringer`, `MdtestWringer`, `MtrWringer`, `NpbWringer`, `NvbandwidthWringer`, `OllamaBenchmarkJudgeWringer`, `OllamaBenchmarkSpeedWringer`, `PgbenchWringer`, `PyPerformanceWringer`, `PythonBenchmarkWringer`, `PythonFpbWringer`, `PythonReadWringer`, `StreamWringer`, `TcptracerouteWringer`, `TlbWringer`, `VRayWringer`, `YcsbWringer`?",
+      "why": "High betweenness centrality (0.252) - this node is a cross-community bridge."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `wringers.py` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.05990338164251208 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `MetricWringer` connect `MetricWringer` to `wringers.py`, `BaseWringer`, `Public runner to parse and publish result.`?",
+      "why": "High betweenness centrality (0.086) - this node is a cross-community bridge."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `runners.py` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.06423034330011074 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `Client` connect `Client` to `wringers.py`?",
+      "why": "High betweenness centrality (0.049) - this node is a cross-community bridge."
+    }
+  ]
+}
