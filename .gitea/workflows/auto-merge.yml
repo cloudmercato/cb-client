@@ -1,0 +1,82 @@
+---
+name: Auto-merge PRs
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch: {}
+
+# Cron-merger pattern (see gitea-api skill references/automerge.md):
+# every 5 minutes, merge open non-draft PRs via the API with a
+# head_commit_id stale-head guard. NO checkout on purpose: PR code must
+# never execute in a secrets-bearing context. Direct API merge is
+# fork-safe (permission is checked on the BASE repo, not the head repo,
+# unlike merge_when_checks_succeed scheduling which never merges fork
+# PRs scheduled by non-fork-owners). If the base branch ever gains
+# required status checks, they are honored (merge only when green).
+# Style is fixed to `rebase`: this repo disallows merge commits and its
+# history is linear; a single scheduler means no style race.
+
+jobs:
+  auto-merge:
+    name: Merge open PRs when green
+    runs-on: ubuntu-22.04
+    container: catthehacker/ubuntu:act-latest
+    timeout-minutes: 10
+    if: github.repository == 'cloud-mercato/cb-client'
+
+    steps:
+      - name: Merge open PRs
+        env:
+          GITEA_TOKEN: ${{ secrets.GIT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          API="${{ github.server_url }}/api/v1"
+          REPO="${{ github.repository }}"
+          AUTH="Authorization: token ${GITEA_TOKEN}"
+          curl -sf -H "$AUTH" "$API/repos/$REPO/branch_protections" > prot.json
+          curl -sf -H "$AUTH" "$API/repos/$REPO/pulls?state=open&limit=50" > prs.json
+          N=$(jq 'length' prs.json)
+          echo "Open PRs: $N"
+          rc=0
+          for i in $(seq 0 $((N - 1))); do
+            IDX=$(jq -r ".[$i].number" prs.json)
+            TITLE=$(jq -r ".[$i].title" prs.json)
+            DRAFT=$(jq -r ".[$i].draft" prs.json)
+            BASE=$(jq -r ".[$i].base.ref" prs.json)
+            HEADSHA=$(jq -r ".[$i].head.sha" prs.json)
+            MERGEABLE=$(jq -r ".[$i].mergeable" prs.json)
+            echo "--- PR #$IDX \"$TITLE\" -> $BASE @$HEADSHA"
+            if [ "$DRAFT" = "true" ]; then echo "skip: draft"; continue; fi
+            case "$TITLE" in WIP*|Draft*) echo "skip: WIP"; continue ;; esac
+            if [ "$MERGEABLE" != "true" ]; then echo "skip: not mergeable (conflict or computing)"; continue; fi
+
+            # Required contexts of the base branch (empty = unprotected base,
+            # merge as soon as mergeable). Gitea uses "status", not "state".
+            CONTEXTS=$(jq -r --arg b "$BASE" \
+              '[.[] | select(.branch_name == $b) | .status_check_contexts[]?] | join("\n")' prot.json)
+            if [ -n "$CONTEXTS" ]; then
+              curl -sf -H "$AUTH" "$API/repos/$REPO/commits/$HEADSHA/status" > status.json
+              OK=1
+              while IFS= read -r ctx; do
+                [ -z "$ctx" ] && continue
+                STATE=$(jq -r --arg c "$ctx" \
+                  '(.statuses // []) | map(select(.context == $c)) | .[0].status // "missing"' status.json)
+                if [ "$STATE" != "success" ]; then echo "wait: required check \"$ctx\" = $STATE"; OK=0; fi
+              done <<< "$CONTEXTS"
+              if [ "$OK" != "1" ]; then continue; fi
+            fi
+
+            CODE=$(curl -s -o merge.json -w '%{http_code}' -X POST \
+              "$API/repos/$REPO/pulls/$IDX/merge" \
+              -H "$AUTH" -H "Content-Type: application/json" \
+              -d "{\"Do\":\"rebase\",\"head_commit_id\":\"$HEADSHA\"}")
+            BODY=$(cat merge.json)
+            echo "HTTP $CODE: $BODY"
+            case "$CODE" in
+              200|201) echo "PR #$IDX merged (rebase)";;
+              405) echo "PR #$IDX not mergeable yet (HTTP 405); retry next tick";;
+              *) echo "::error::PR #$IDX merge failed (HTTP $CODE)"; rc=1;;
+            esac
+          done
+          exit $rc
