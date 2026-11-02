@@ -2485,6 +2485,13 @@ class RedisBenchmarkWringer(BaseWringer):
                 continue
             try:
                 key = line[0].split()[0]
+                # redis-benchmark --csv starts with a header line
+                # ("test","rps",...) — it is not a benchmark row, and
+                # posting it fails validation on the rate field
+                # ("A valid number is required.") which fails the whole
+                # play AFTER all real results landed.
+                if key == 'test':
+                    continue
                 data.append({
                     'test': key,
                     'rate': line[1],
