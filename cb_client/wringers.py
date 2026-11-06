@@ -4037,6 +4037,45 @@ class HammerdbWringer(BaseWringer):
         print(data)
         return data
 
+
+class LotofbenchWringer(BaseWringer):
+    bench_name = 'lotofbench'
+
+    def _get_data(self):
+        try:
+            raw_results = json.load(self.input_)
+        except ValueError:
+            raise InvalidInput("Input is not valid JSON")
+
+        if raw_results.get('benchmark') != 'lotofbench':
+            raise InvalidInput("Input is not a LotofBench JSON document")
+
+        data = {
+            'schema': raw_results['schema'],
+            'version': raw_results['version'],
+            'seed': raw_results['seed'],
+            'runs': raw_results['runs'],
+            'single_score': raw_results['composite']['single'],
+            'multi_score': raw_results['composite']['multi'],
+            'single_integer_score': raw_results['sections']['integer']['single'],
+            'multi_integer_score': raw_results['sections']['integer']['multi'],
+            'single_floating_point_score': raw_results['sections']['floating-point']['single'],
+            'multi_floating_point_score': raw_results['sections']['floating-point']['multi'],
+        }
+        for workload in raw_results['workloads']:
+            key = workload['name'].lower().replace('-', '_').replace(' ', '_')
+            for prefix in ('single', 'multi'):
+                result = workload[prefix]
+                data['%s_%s_score' % (prefix, key)] = result['score']
+                data['%s_%s_threads' % (prefix, key)] = result['threads']
+                for field, value in result.items():
+                    if not field.startswith('throughput_'):
+                        continue
+                    unit = field[len('throughput_'):]
+                    data['%s_%s_%s' % (prefix, key, unit)] = value
+        return data
+
+
 WRINGERS = {
     'sysbench_cpu': SysbenchCpuWringer,
     'sysbench_ram': SysbenchRamWringer,
@@ -4090,6 +4129,7 @@ WRINGERS = {
     'lat_mem_rd': LatMemRdWringer,
     'lmbench_stream': LmbenchStreamWringer,
     'lat_ops': LatOpsWringer,
+    'lotofbench': LotofbenchWringer,
     'pgbench': PgbenchWringer,
     'ycsb': YcsbWringer,
     'coremark': CoreMarkWringer,

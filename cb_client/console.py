@@ -115,6 +115,9 @@ Geekbench5ArgumentParser.add_argument('-M', '--mode', default='standard')
 Geekbench6ArgumentParser = subparser.add_parser('geekbench6')
 Geekbench6ArgumentParser.add_argument('-M', '--mode', default='standard')
 
+# LotofBench
+LotofbenchArgumentParser = subparser.add_parser('lotofbench', help='lotofbench help')
+
 # SPEC CPU
 SpecCpu2006ArgumentParser = subparser.add_parser('spec_cpu2006')
 SpecCpu2017ArgumentParser = subparser.add_parser('spec_cpu2017')
