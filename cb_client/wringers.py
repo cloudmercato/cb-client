@@ -4045,10 +4045,10 @@ class LotofbenchWringer(BaseWringer):
         try:
             raw_results = json.load(self.input_)
         except ValueError:
-            raise InvalidInput("Input is not valid JSON")
+            raise exceptions.ParseError("Input is not valid JSON")
 
         if raw_results.get('benchmark') != 'lotofbench':
-            raise InvalidInput("Input is not a LotofBench JSON document")
+            raise exceptions.ParseError("Input is not a LotofBench JSON document")
 
         data = {
             'schema': raw_results['schema'],
@@ -4068,11 +4068,12 @@ class LotofbenchWringer(BaseWringer):
                 result = workload[prefix]
                 data['%s_%s_score' % (prefix, key)] = result['score']
                 data['%s_%s_threads' % (prefix, key)] = result['threads']
+                # One throughput_<unit> key per side; the model field carries
+                # the bare segment name, the unit lives in its help_text.
                 for field, value in result.items():
-                    if not field.startswith('throughput_'):
-                        continue
-                    unit = field[len('throughput_'):]
-                    data['%s_%s_%s' % (prefix, key, unit)] = value
+                    if field.startswith('throughput_'):
+                        data['%s_%s' % (prefix, key)] = value
+                        break
         return data
 
 
